@@ -6,5 +6,5 @@ RUN apk add --no-cache \
   bash \
   ;
 
-ADD ./docker-entrypoint.sh /
-ENTRYPOINT ["/docker-entrypoint.sh"]
+ADD ./tt.sh /
+ENTRYPOINT ["/tt.sh"]
