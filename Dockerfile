@@ -6,5 +6,5 @@ RUN apk add --no-cache \
   bash \
   ;
 
-ADD ./tt.sh /
-ENTRYPOINT ["/tt.sh"]
+ADD ./tt /
+ENTRYPOINT ["/tt"]
