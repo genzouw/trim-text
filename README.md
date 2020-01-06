@@ -1,5 +1,10 @@
 # trim-text
 
+[![Docker Pulls](https://img.shields.io/docker/pulls/genzouw/trim-text.svg?style=for-the-badge)](https://hub.docker.com/r/genzouw/trim-text/)
+[![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/genzouw/trim-text.svg?style=for-the-badge)](https://hub.docker.com/r/genzouw/trim-text/)
+
+[![dockeri.co](https://dockeri.co/image/genzouw/trim-text)](https://hub.docker.com/r/genzouw/trim-text)
+
 ## Description
 
 This Docker image is intended to provide a UI that integrates command line text cut operations.
