@@ -59,13 +59,6 @@ You have the following options:
 * `-l` : Number of characters to trim from **left**
 * `-r` : Number of characters to trim from **right**
 
-## Relase Note
-
-|date      |version|note          |
-|---       |---    |---           |
-|2019-10-08|1.0.0    |first release.|
-
-
 ## License
 
 This software is released under the MIT License, see LICENSE.
