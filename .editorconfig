@@ -13,3 +13,15 @@ trim_trailing_whitespace = false
 
 [Makefile]
 indent_style = tab
+
+[*.go]
+indent_size = 4
+
+[*.php]
+indent_size = 4
+
+[*.py]
+indent_size = 4
+
+[*.java]
+indent_size = 4
