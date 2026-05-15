@@ -1,0 +1,80 @@
+name: Security
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    # 毎週月曜 09:00 JST (= 00:00 UTC) に定期スキャンを実行する
+    - cron: "0 0 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: Gitleaks (secrets scan)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          # commit 履歴を含めてスキャンするため fetch-depth: 0
+          fetch-depth: 0
+
+      - name: Run gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          # public repo + 個人アカウントなら無償ライセンスで動作する。
+          # Organization 配下に移管した場合は GITLEAKS_LICENSE Secret の設定が必要。
+          GITLEAKS_ENABLE_UPLOAD_ARTIFACT: "true"
+          GITLEAKS_ENABLE_SUMMARY: "true"
+
+  trivy-fs:
+    name: Trivy (filesystem vulnerability scan)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Run Trivy filesystem scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          scan-type: fs
+          scan-ref: "."
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"
+
+  trivy-image:
+    name: Trivy (Docker image vulnerability scan)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    # 現状 Dockerfile のベースが古い alpine のままで HIGH/CRITICAL の検知が多数あり、
+    # 初期導入時は PR をブロックさせないために non-blocking (continue-on-error) とする。
+    # ベースイメージを最新の alpine に更新した後で本フラグを外し、ブロッキングへ戻すこと。
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Build Docker image
+        run: docker build -t trim-text:ci .
+
+      - name: Run Trivy image scan
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: trim-text:ci
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: "1"

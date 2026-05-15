@@ -33,8 +33,7 @@ done
 
 shift $((OPTIND - 1))
 
-cat \
-  | sed "s/^.\{${TRIM_LEFT:-0}\}//; s/.\{${TRIM_RIGHT:-0}\}\$//;" \
-  | tail -n +$((${TRIM_TOP:-0} + 1)) \
-  | head -n -${TRIM_BOTTOM:-0} \
-  ;
+cat |
+  sed "s/^.\{${TRIM_LEFT:-0}\}//; s/.\{${TRIM_RIGHT:-0}\}\$//;" |
+  tail -n +$((${TRIM_TOP:-0} + 1)) |
+  head -n -"${TRIM_BOTTOM:-0}"
