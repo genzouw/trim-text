@@ -38,6 +38,8 @@ jobs:
           set -eu
           # 供給網攻撃対策として公式リリースの checksums.txt を取得し、
           # ダウンロードした tar.gz の SHA256 整合性を検証する。
+          # checksums.txt にはオリジナル名 (gitleaks_<VER>_linux_x64.tar.gz) が
+          # 記載されているため、ハッシュのみを抜き出してローカル保存名と照合する。
           curl --fail --silent --show-error --location \
             --retry 3 --retry-all-errors --retry-delay 2 \
             --connect-timeout 10 --max-time 120 \
@@ -48,7 +50,12 @@ jobs:
             --connect-timeout 10 --max-time 120 \
             -o gitleaks_checksums.txt \
             "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
-          grep " gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz\$" gitleaks_checksums.txt | sha256sum -c -
+          expected_sha=$(awk -v target="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" '$2 == target {print $1}' gitleaks_checksums.txt)
+          if [ -z "${expected_sha}" ]; then
+            echo "::error::expected SHA256 not found in gitleaks checksums.txt"
+            exit 1
+          fi
+          echo "${expected_sha}  gitleaks.tar.gz" | sha256sum -c -
           tar xzf gitleaks.tar.gz gitleaks
 
       - name: Run gitleaks
@@ -71,6 +78,8 @@ jobs:
           set -eu
           # 供給網攻撃対策として公式リリースの checksums.txt を取得し、
           # ダウンロードした tar.gz の SHA256 整合性を検証する。
+          # checksums.txt にはオリジナル名 (trivy_<VER>_Linux-64bit.tar.gz) が
+          # 記載されているため、ハッシュのみを抜き出してローカル保存名と照合する。
           curl --fail --silent --show-error --location \
             --retry 3 --retry-all-errors --retry-delay 2 \
             --connect-timeout 10 --max-time 120 \
@@ -81,7 +90,12 @@ jobs:
             --connect-timeout 10 --max-time 120 \
             -o trivy_checksums.txt \
             "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_checksums.txt"
-          grep " trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz\$" trivy_checksums.txt | sha256sum -c -
+          expected_sha=$(awk -v target="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" '$2 == target {print $1}' trivy_checksums.txt)
+          if [ -z "${expected_sha}" ]; then
+            echo "::error::expected SHA256 not found in trivy checksums.txt"
+            exit 1
+          fi
+          echo "${expected_sha}  trivy.tar.gz" | sha256sum -c -
           tar xzf trivy.tar.gz trivy
           ./trivy --version
 
@@ -110,6 +124,8 @@ jobs:
           set -eu
           # 供給網攻撃対策として公式リリースの checksums.txt を取得し、
           # ダウンロードした tar.gz の SHA256 整合性を検証する。
+          # checksums.txt にはオリジナル名 (trivy_<VER>_Linux-64bit.tar.gz) が
+          # 記載されているため、ハッシュのみを抜き出してローカル保存名と照合する。
           curl --fail --silent --show-error --location \
             --retry 3 --retry-all-errors --retry-delay 2 \
             --connect-timeout 10 --max-time 120 \
@@ -120,7 +136,12 @@ jobs:
             --connect-timeout 10 --max-time 120 \
             -o trivy_checksums.txt \
             "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_checksums.txt"
-          grep " trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz\$" trivy_checksums.txt | sha256sum -c -
+          expected_sha=$(awk -v target="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" '$2 == target {print $1}' trivy_checksums.txt)
+          if [ -z "${expected_sha}" ]; then
+            echo "::error::expected SHA256 not found in trivy checksums.txt"
+            exit 1
+          fi
+          echo "${expected_sha}  trivy.tar.gz" | sha256sum -c -
           tar xzf trivy.tar.gz trivy
           ./trivy --version
 
