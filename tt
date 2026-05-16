@@ -54,5 +54,5 @@ shift $((OPTIND - 1))
 # 先頭 NR-N 行のみ出力する）。
 cat |
   sed "s/^.\{${TRIM_LEFT:-0}\}//; s/.\{${TRIM_RIGHT:-0}\}\$//;" |
-  tail -n "+$((${TRIM_TOP:-0} + 1))" |
+  tail -n "+$((10#${TRIM_TOP:-0} + 1))" |
   awk -v n="${TRIM_BOTTOM:-0}" '{ buf[NR] = $0 } END { for (i = 1; i <= NR - n; i++) print buf[i] }'
