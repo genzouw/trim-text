@@ -1,0 +1,45 @@
+name: Docker Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: docker build (smoke test)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Build image
+        # docker は ubuntu-latest にプリインストール済み。
+        run: docker build -t trim-text:ci .
+
+      - name: Smoke test (trim 1 char from each side)
+        run: |
+          set -eu
+          actual=$(printf '1****\n*2***\n**3**\n***4*\n****5\n' \
+            | docker run -i --rm trim-text:ci -t1 -b1 -l1 -r1)
+          expected=$(printf '2**\n*3*\n**4')
+          if [ "${actual}" != "${expected}" ]; then
+            echo "::error::Smoke test failed"
+            echo "expected:"
+            echo "${expected}"
+            echo "actual:"
+            echo "${actual}"
+            exit 1
+          fi
+          echo "Smoke test passed"

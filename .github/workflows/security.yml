@@ -1,0 +1,162 @@
+name: Security
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  schedule:
+    # 毎週月曜 09:00 JST (= 00:00 UTC) に定期スキャンを実行する
+    - cron: "0 0 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  gitleaks:
+    name: Gitleaks (secrets scan)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      GITLEAKS_VERSION: 8.21.2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # commit 履歴を含めてスキャンするため fetch-depth: 0
+          fetch-depth: 0
+
+      - name: Install gitleaks
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -eu
+          # 供給網攻撃対策として公式リリースの checksums.txt を取得し、
+          # ダウンロードした tar.gz の SHA256 整合性を検証する。
+          # checksums.txt にはオリジナル名 (gitleaks_<VER>_linux_x64.tar.gz) が
+          # 記載されているため、ハッシュのみを抜き出してローカル保存名と照合する。
+          curl --fail --silent --show-error --location \
+            --retry 3 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 10 --max-time 120 \
+            -o gitleaks.tar.gz \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl --fail --silent --show-error --location \
+            --retry 3 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 10 --max-time 120 \
+            -o gitleaks_checksums.txt \
+            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+          expected_sha=$(awk -v target="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" '$2 == target {print $1}' gitleaks_checksums.txt)
+          if [ -z "${expected_sha}" ]; then
+            echo "::error::expected SHA256 not found in gitleaks checksums.txt"
+            exit 1
+          fi
+          echo "${expected_sha}  gitleaks.tar.gz" | sha256sum -c -
+          tar xzf gitleaks.tar.gz gitleaks
+
+      - name: Run gitleaks
+        run: |
+          "${RUNNER_TEMP}/gitleaks" detect --no-banner --redact --verbose --source .
+
+  trivy-fs:
+    name: Trivy (filesystem vulnerability scan)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      TRIVY_VERSION: 0.70.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install Trivy
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -eu
+          # 供給網攻撃対策として公式リリースの checksums.txt を取得し、
+          # ダウンロードした tar.gz の SHA256 整合性を検証する。
+          # checksums.txt にはオリジナル名 (trivy_<VER>_Linux-64bit.tar.gz) が
+          # 記載されているため、ハッシュのみを抜き出してローカル保存名と照合する。
+          curl --fail --silent --show-error --location \
+            --retry 3 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 10 --max-time 120 \
+            -o trivy.tar.gz \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl --fail --silent --show-error --location \
+            --retry 3 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 10 --max-time 120 \
+            -o trivy_checksums.txt \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_checksums.txt"
+          expected_sha=$(awk -v target="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" '$2 == target {print $1}' trivy_checksums.txt)
+          if [ -z "${expected_sha}" ]; then
+            echo "::error::expected SHA256 not found in trivy checksums.txt"
+            exit 1
+          fi
+          echo "${expected_sha}  trivy.tar.gz" | sha256sum -c -
+          tar xzf trivy.tar.gz trivy
+          ./trivy --version
+
+      - name: Run Trivy filesystem scan
+        run: |
+          "${RUNNER_TEMP}/trivy" fs \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --exit-code 1 \
+            --no-progress \
+            .
+
+  trivy-image:
+    name: Trivy (Docker image vulnerability scan)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      TRIVY_VERSION: 0.70.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Install Trivy
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -eu
+          # 供給網攻撃対策として公式リリースの checksums.txt を取得し、
+          # ダウンロードした tar.gz の SHA256 整合性を検証する。
+          # checksums.txt にはオリジナル名 (trivy_<VER>_Linux-64bit.tar.gz) が
+          # 記載されているため、ハッシュのみを抜き出してローカル保存名と照合する。
+          curl --fail --silent --show-error --location \
+            --retry 3 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 10 --max-time 120 \
+            -o trivy.tar.gz \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
+          curl --fail --silent --show-error --location \
+            --retry 3 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 10 --max-time 120 \
+            -o trivy_checksums.txt \
+            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_checksums.txt"
+          expected_sha=$(awk -v target="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" '$2 == target {print $1}' trivy_checksums.txt)
+          if [ -z "${expected_sha}" ]; then
+            echo "::error::expected SHA256 not found in trivy checksums.txt"
+            exit 1
+          fi
+          echo "${expected_sha}  trivy.tar.gz" | sha256sum -c -
+          tar xzf trivy.tar.gz trivy
+          ./trivy --version
+
+      - name: Build Docker image
+        run: docker build -t trim-text:ci .
+
+      - name: Run Trivy image scan
+        # 現状 Dockerfile のベースが古い alpine のままで HIGH/CRITICAL の検知が多数あり、
+        # 初期導入時は PR をブロックさせないために --exit-code 0 で常に成功扱いとする
+        # (検知結果はログに残る)。ベースイメージを最新化したタイミングで --exit-code 1 に戻すこと。
+        # 追跡 Issue: #3
+        run: |
+          "${RUNNER_TEMP}/trivy" image \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --exit-code 0 \
+            --no-progress \
+            trim-text:ci
