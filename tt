@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -o errexit   # エラーが発生した場合はシェルを終了
 set -o nounset   # 未定義の変数を利用禁止
+set -o pipefail  # パイプライン途中のコマンド失敗も検知
 set -o noclobber # リダイレクトによる上書禁止
 
 opts='t:b:l:r:'
@@ -11,19 +12,34 @@ usage() {
   exit 1
 }
 
+# 非負整数（10進数）であることを検証する。sed 等のコマンド文字列へ展開する
+# 数値引数のサニタイズを行い、コマンドインジェクションを防止する。
+validate_non_negative_integer() {
+  local name="${1}"
+  local value="${2}"
+  if ! [[ "${value}" =~ ^[0-9]+$ ]]; then
+    echo "error: ${name} must be a non-negative integer (got: ${value})" >&2
+    exit 1
+  fi
+}
+
 while getopts ":${opts}" opt; do
   case "${opt}" in
     t)
       TRIM_TOP="${OPTARG}"
+      validate_non_negative_integer "-t" "${TRIM_TOP}"
       ;;
     b)
       TRIM_BOTTOM="${OPTARG}"
+      validate_non_negative_integer "-b" "${TRIM_BOTTOM}"
       ;;
     l)
       TRIM_LEFT="${OPTARG}"
+      validate_non_negative_integer "-l" "${TRIM_LEFT}"
       ;;
     r)
       TRIM_RIGHT="${OPTARG}"
+      validate_non_negative_integer "-r" "${TRIM_RIGHT}"
       ;;
     : | \?)
       usage
@@ -33,7 +49,10 @@ done
 
 shift $((OPTIND - 1))
 
+# `head -n -N` は GNU 拡張で BSD 系 (macOS) では動作しないため、awk で
+# 末尾 N 行をスキップする実装に置き換える（標準入力をすべて読み込んだ後に
+# 先頭 NR-N 行のみ出力する）。
 cat |
   sed "s/^.\{${TRIM_LEFT:-0}\}//; s/.\{${TRIM_RIGHT:-0}\}\$//;" |
-  tail -n +$((${TRIM_TOP:-0} + 1)) |
-  head -n -"${TRIM_BOTTOM:-0}"
+  tail -n "+$((${TRIM_TOP:-0} + 1))" |
+  awk -v n="${TRIM_BOTTOM:-0}" '{ buf[NR] = $0 } END { for (i = 1; i <= NR - n; i++) print buf[i] }'
