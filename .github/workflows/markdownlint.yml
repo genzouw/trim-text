@@ -4,15 +4,15 @@ on:
   push:
     branches: [main]
     paths:
-      - '**/*.md'
-      - '.markdownlint-cli2.jsonc'
-      - '.github/workflows/markdownlint.yml'
+      - "**/*.md"
+      - ".markdownlint-cli2.jsonc"
+      - ".github/workflows/markdownlint.yml"
   pull_request:
     branches: [main]
     paths:
-      - '**/*.md'
-      - '.markdownlint-cli2.jsonc'
-      - '.github/workflows/markdownlint.yml'
+      - "**/*.md"
+      - ".markdownlint-cli2.jsonc"
+      - ".github/workflows/markdownlint.yml"
 
 concurrency:
   group: markdownlint-${{ github.ref }}
@@ -29,12 +29,12 @@ jobs:
     # 整備完了後に continue-on-error を外して赤検知に切り替える。
     continue-on-error: true
     steps:
-      - uses: actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29 # v4.1.6
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
         with:
           persist-credentials: false
 
       - name: Run markdownlint-cli2
-        uses: DavidAnson/markdownlint-cli2-action@992badcdf24e3b8eb7e87ff9287fe931bcb00c6e # v20
+        uses: DavidAnson/markdownlint-cli2-action@ded1f9488f68a970bc66ea5619e13e9b52e601cd # v23.2.0
         with:
-          config: '.markdownlint-cli2.jsonc'
-          globs: '**/*.md'
+          config: ".markdownlint-cli2.jsonc"
+          globs: "**/*.md"
