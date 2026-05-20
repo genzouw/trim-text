@@ -7,7 +7,7 @@ on:
     branches: [main]
   schedule:
     # 毎週月曜 05:00 JST (= 日曜 20:00 UTC) に履歴全体を再スキャン
-    - cron: '0 20 * * 0'
+    - cron: "0 20 * * 0"
   workflow_dispatch:
 
 concurrency:
@@ -33,7 +33,10 @@ jobs:
         run: |
           set -euo pipefail
           GITLEAKS_VERSION=8.21.2
+          CHECKSUM_URL="https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
           curl -fsSLO "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+          curl -fsSLO "${CHECKSUM_URL}"
+          grep "gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" "gitleaks_${GITLEAKS_VERSION}_checksums.txt" | sha256sum -c -
           tar -xzf "gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" gitleaks
           sudo mv gitleaks /usr/local/bin/gitleaks
           gitleaks version
