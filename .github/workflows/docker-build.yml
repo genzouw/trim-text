@@ -43,3 +43,45 @@ jobs:
             exit 1
           fi
           echo "Smoke test passed"
+
+      - name: Smoke test (no trim - should be no-op)
+        run: |
+          set -eu
+          actual=$(printf 'abc\ndef\n' | docker run -i --rm trim-text:ci)
+          expected=$(printf 'abc\ndef')
+          if [ "${actual}" != "${expected}" ]; then
+            echo "::error::No-trim smoke test failed"
+            echo "expected:"
+            echo "${expected}"
+            echo "actual:"
+            echo "${actual}"
+            exit 1
+          fi
+          echo "No-trim smoke test passed"
+
+      - name: Smoke test (excessive trim - output should be empty)
+        run: |
+          set -eu
+          actual=$(printf 'abc\n' | docker run -i --rm trim-text:ci -t10 -b10)
+          if [ -n "${actual}" ]; then
+            echo "::error::Excessive trim smoke test failed (expected empty output)"
+            echo "actual:"
+            echo "${actual}"
+            exit 1
+          fi
+          echo "Excessive trim smoke test passed"
+
+      - name: Smoke test (special chars and empty lines)
+        run: |
+          set -eu
+          actual=$(printf '  hi  \n\n$$**\n' | docker run -i --rm trim-text:ci -l1 -r1)
+          expected=$(printf ' hi \n\n$*')
+          if [ "${actual}" != "${expected}" ]; then
+            echo "::error::Special chars / empty lines smoke test failed"
+            echo "expected:"
+            echo "${expected}"
+            echo "actual:"
+            echo "${actual}"
+            exit 1
+          fi
+          echo "Special chars / empty lines smoke test passed"
