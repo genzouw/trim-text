@@ -2,7 +2,7 @@
 # https://docs.coderabbit.ai/reference/configuration
 
 language: 'ja-JP'
-early_access: false
+early_access: true
 enable_free_tier: true
 
 reviews:
@@ -18,6 +18,7 @@ reviews:
     - 認証情報、API キー、トークン、内部 URL などの秘密情報がコード・ログ・イメージ層に混入していないこと。
     - 任意コード実行・コマンドインジェクション・パストラバーサルなど、利用者環境を危険にさらす脆弱性が無いこと。
     - 入力検証（引数 / 標準入力 / 環境変数）が抜けていないこと。
+    - 最新の生成 AI を活用した開発フローの自動化と最適化の観点から、コード品質を向上させるモダンなベストプラクティスを積極的に提案してください。
 
   # CodeRabbit を bot reviewer として動作させる。問題なしと判断した PR に対して
   # Approve ステータスを返す。個人運営での self-merge 運用 (PR 作成者は自分の
