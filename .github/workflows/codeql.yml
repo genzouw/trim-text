@@ -27,7 +27,10 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        language: ["javascript-typescript"]
+        # 本プロジェクトは Bash スクリプト (`tt`) のみで構成されており CodeQL の
+        # 直接サポート対象言語ではない。CodeQL 2.25+ がサポートする `actions`
+        # 言語で GitHub Actions workflow をスキャンする。
+        language: ["actions"]
 
     steps:
       - name: Checkout repository
