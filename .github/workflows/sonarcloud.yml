@@ -2,28 +2,36 @@ name: SonarCloud analysis
 
 on:
   push:
-    branches: [ "main" ]
+    branches: ["main"]
   pull_request:
-    branches: [ "main" ]
+    branches: ["main"]
+  workflow_dispatch:
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: sonarcloud-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
-  pull-requests: read
-  contents: read
+  contents: read # allows actions/checkout to fetch repository contents
+  pull-requests: read # allows SonarCloud to decorate PRs with analysis results
 
 jobs:
-  sonarcloud:
-    name: SonarCloud
+  Analysis:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5
         with:
-          fetch-depth: 0  # 分析の関連性を高めるため、シャロークローンは無効化する必要があります
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@master
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Analyze with SonarCloud
+        uses: SonarSource/sonarcloud-github-action@383f7e52eae3ab0510c3cb0e7d9d150bbaeab838
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # PRの情報を取得するために必要
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+        with:
+          # Additional arguments for the sonarcloud scanner
+          args: >
+            -Dsonar.projectKey=genzouw_trim-text
+            -Dsonar.organization=genzouw
