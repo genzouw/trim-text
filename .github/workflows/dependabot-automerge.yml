@@ -1,0 +1,33 @@
+name: Dependabot auto-merge
+
+on: pull_request
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  dependabot:
+    name: Dependabot 自動マージ
+    runs-on: ubuntu-latest
+    permissions:
+      # Dependabot PRのメタデータ取得と自動マージ設定のため
+      pull-requests: write
+      # マージコミット作成のため
+      contents: write
+    # Dependabot が作成した PR のみで実行
+    if: github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.user.type == 'Bot'
+    steps:
+      - name: Dependabot metadata
+        id: metadata
+        uses: dependabot/fetch-metadata@0fb21704c18a42ce5aa8d720ea4b912f5e6babef
+        with:
+          github-token: "${{ secrets.GITHUB_TOKEN }}"
+
+      - name: Enable auto-merge for Dependabot PRs
+        # CI (他のチェック) が通った後に自動マージされるように設定
+        if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        run: gh pr merge --auto --merge "$PR_URL"
+        env:
+          PR_URL: ${{github.event.pull_request.html_url}}
+          GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
