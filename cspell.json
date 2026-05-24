@@ -26,6 +26,7 @@
   "words": [
     "genzouw",
     "dockeri",
+    "coreutils",
     "shfmt",
     "hadolint",
     "actionlint",
@@ -44,10 +45,5 @@
     "Bloop",
     "Codeium"
   ],
-  "dictionaries": [
-    "softwareTerms",
-    "docker",
-    "bash",
-    "github-actions"
-  ]
+  "dictionaries": ["softwareTerms", "docker", "bash", "github-actions"]
 }
