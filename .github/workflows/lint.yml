@@ -14,13 +14,16 @@ concurrency:
 
 permissions:
   contents: read
-  pull-requests: write # reviewdog に必要
 
 jobs:
   shellcheck:
     name: ShellCheck
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # reviewdog による PR レビューコメント投稿のための最小権限。
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
@@ -59,6 +62,10 @@ jobs:
     name: Hadolint (Dockerfile)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # reviewdog による PR レビューコメント投稿のための最小権限。
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       HADOLINT_VERSION: v2.12.0
     steps:
@@ -101,6 +108,10 @@ jobs:
     name: actionlint (GitHub Actions workflows)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # reviewdog による PR レビューコメント投稿のための最小権限。
+    permissions:
+      contents: read
+      pull-requests: write
     env:
       ACTIONLINT_VERSION: 1.7.7
       # actionlint v1.7.7 linux_amd64 の公式 SHA256
