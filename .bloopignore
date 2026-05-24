@@ -1,4 +1,4 @@
-# Bloop AI Code Search ignore list
+# Bloop AI コード検索の無視リスト
 # .gitignore に加えて、AI検索のインデックス対象から外したいファイル・ディレクトリを指定します。
 
 # ビルド成果物やキャッシュ
