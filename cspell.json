@@ -1,0 +1,53 @@
+{
+  "version": "0.2",
+  "language": "en,ja",
+  "ignorePaths": [
+    "node_modules",
+    "dist",
+    "build",
+    "coverage",
+    ".git",
+    "*.lock",
+    "package-lock.json",
+    "yarn.lock",
+    "pnpm-lock.yaml",
+    "*.log",
+    "*.png",
+    "*.jpg",
+    "*.jpeg",
+    "*.gif",
+    "*.svg",
+    "*.ico",
+    "*.pdf",
+    "*.ttf",
+    "*.woff",
+    "*.woff2"
+  ],
+  "words": [
+    "genzouw",
+    "dockeri",
+    "shfmt",
+    "hadolint",
+    "actionlint",
+    "shellcheck",
+    "sonarcloud",
+    "sonarqube",
+    "dependabot",
+    "gitleaks",
+    "trivy",
+    "codeql",
+    "reviewdog",
+    "bloopignore",
+    "cursorrules",
+    "windsurfrules",
+    "CodeRabbit",
+    "Bloop",
+    "Codeium"
+  ],
+  "dictionaries": [
+    "softwareTerms",
+    "docker",
+    "bash",
+    "github-actions"
+  ]
+}
