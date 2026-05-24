@@ -4,15 +4,18 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened]
 
-permissions:
-  contents: read
-  pull-requests: write
+# 既定権限を最小限に絞り、ジョブごとに必要な権限のみ追加する。
+permissions: {}
 
 jobs:
   labeler:
     name: Auto Labeler
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # actions/labeler が PR ラベル更新のために必要とする最小権限。
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
