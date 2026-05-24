@@ -5,38 +5,38 @@ ci:
   - all:
       - changed-files:
           - any-glob-to-any-file:
-              - '.github/workflows/*.yml'
-              - '.github/workflows/*.yaml'
-              - '.github/*.yml'
-              - '.github/*.yaml'
+              - ".github/workflows/*.yml"
+              - ".github/workflows/*.yaml"
+              - ".github/*.yml"
+              - ".github/*.yaml"
 
 docker:
   - all:
       - changed-files:
           - any-glob-to-any-file:
-              - 'Dockerfile*'
+              - "Dockerfile*"
 
 docs:
   - all:
       - changed-files:
           - any-glob-to-any-file:
-              - '*.md'
-              - 'docs/**/*'
+              - "*.md"
+              - "docs/**/*"
 
 ai:
   - all:
       - changed-files:
           - any-glob-to-any-file:
-              - '.cursorrules'
-              - '.windsurfrules'
-              - '.github/copilot-instructions.md'
-              - '.coderabbit.yaml'
-              - '.pr_agent.toml'
-              - '.bloopignore'
+              - ".cursorrules"
+              - ".windsurfrules"
+              - ".github/copilot-instructions.md"
+              - ".coderabbit.yaml"
+              - ".pr_agent.toml"
+              - ".bloopignore"
 
 shell:
   - all:
       - changed-files:
           - any-glob-to-any-file:
-              - '*.sh'
-              - 'tt'
+              - "**/*.sh"
+              - "tt"
