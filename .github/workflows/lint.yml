@@ -14,7 +14,10 @@ concurrency:
 
 env:
   # reviewdog のバージョンは再現性確保のため固定する。
-  REVIEWDOG_VERSION: v0.21.0
+  REVIEWDOG_VERSION: 0.21.0
+  # reviewdog v0.21.0 linux_amd64 の公式 SHA256
+  # https://github.com/reviewdog/reviewdog/releases/tag/v0.21.0
+  REVIEWDOG_SHA256: ad5ce7d5ffa52aaa7ec8710a8fa764181b6cecaab843cc791e1cce1680381569
 
 permissions:
   contents: read
@@ -32,16 +35,24 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
 
-      - name: Setup reviewdog
-        uses: reviewdog/action-setup@3f401fc1eabe68065b722d3b41d2f786d70bc2db # v1.3.0
-        with:
-          reviewdog_version: ${{ env.REVIEWDOG_VERSION }}
+      - name: Install reviewdog
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -eu
+          # 供給網攻撃対策として公式の checksums と SHA256 で整合性検証を行う。
+          curl --fail --silent --show-error --location \
+            --retry 3 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 10 --max-time 120 \
+            -o reviewdog.tar.gz \
+            "https://github.com/reviewdog/reviewdog/releases/download/v${REVIEWDOG_VERSION}/reviewdog_${REVIEWDOG_VERSION}_Linux_x86_64.tar.gz"
+          echo "${REVIEWDOG_SHA256}  reviewdog.tar.gz" | sha256sum -c -
+          tar xzf reviewdog.tar.gz reviewdog
 
       - name: Run ShellCheck with reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          shellcheck -f checkstyle tt | reviewdog -f=checkstyle -name="shellcheck" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          shellcheck -f checkstyle tt | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="shellcheck" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   shfmt:
     name: shfmt
@@ -97,16 +108,24 @@ jobs:
           echo "${expected_sha}  hadolint" | sha256sum -c -
           chmod +x hadolint
 
-      - name: Setup reviewdog
-        uses: reviewdog/action-setup@3f401fc1eabe68065b722d3b41d2f786d70bc2db # v1.3.0
-        with:
-          reviewdog_version: ${{ env.REVIEWDOG_VERSION }}
+      - name: Install reviewdog
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -eu
+          # 供給網攻撃対策として公式の checksums と SHA256 で整合性検証を行う。
+          curl --fail --silent --show-error --location \
+            --retry 3 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 10 --max-time 120 \
+            -o reviewdog.tar.gz \
+            "https://github.com/reviewdog/reviewdog/releases/download/v${REVIEWDOG_VERSION}/reviewdog_${REVIEWDOG_VERSION}_Linux_x86_64.tar.gz"
+          echo "${REVIEWDOG_SHA256}  reviewdog.tar.gz" | sha256sum -c -
+          tar xzf reviewdog.tar.gz reviewdog
 
       - name: Run hadolint with reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          "${RUNNER_TEMP}/hadolint" -f tty Dockerfile | reviewdog -efm="%f:%l %m" -name="hadolint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          "${RUNNER_TEMP}/hadolint" -f tty Dockerfile | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l %m" -name="hadolint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   actionlint:
     name: actionlint (GitHub Actions workflows)
@@ -137,13 +156,21 @@ jobs:
           echo "${ACTIONLINT_SHA256}  actionlint.tar.gz" | sha256sum -c -
           tar xzf actionlint.tar.gz actionlint
 
-      - name: Setup reviewdog
-        uses: reviewdog/action-setup@3f401fc1eabe68065b722d3b41d2f786d70bc2db # v1.3.0
-        with:
-          reviewdog_version: ${{ env.REVIEWDOG_VERSION }}
+      - name: Install reviewdog
+        working-directory: ${{ runner.temp }}
+        run: |
+          set -eu
+          # 供給網攻撃対策として公式の checksums と SHA256 で整合性検証を行う。
+          curl --fail --silent --show-error --location \
+            --retry 3 --retry-all-errors --retry-delay 2 \
+            --connect-timeout 10 --max-time 120 \
+            -o reviewdog.tar.gz \
+            "https://github.com/reviewdog/reviewdog/releases/download/v${REVIEWDOG_VERSION}/reviewdog_${REVIEWDOG_VERSION}_Linux_x86_64.tar.gz"
+          echo "${REVIEWDOG_SHA256}  reviewdog.tar.gz" | sha256sum -c -
+          tar xzf reviewdog.tar.gz reviewdog
 
       - name: Run actionlint with reviewdog
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          "${RUNNER_TEMP}/actionlint" -oneline | reviewdog -efm="%f:%l:%c: %m" -name="actionlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          "${RUNNER_TEMP}/actionlint" -oneline | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="actionlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
