@@ -1,5 +1,5 @@
-# PR Labeler configuration
-# https://github.com/actions/labeler
+# PR ラベラーの設定
+# 参考: https://github.com/actions/labeler
 
 ci:
   - all:
