@@ -12,6 +12,10 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+env:
+  # reviewdog のバージョンは再現性確保のため固定する。
+  REVIEWDOG_VERSION: v0.21.0
+
 permissions:
   contents: read
 
@@ -31,7 +35,7 @@ jobs:
       - name: Setup reviewdog
         uses: reviewdog/action-setup@3f401fc1eabe68065b722d3b41d2f786d70bc2db # v1.3.0
         with:
-          reviewdog_version: latest
+          reviewdog_version: ${{ env.REVIEWDOG_VERSION }}
 
       - name: Run ShellCheck with reviewdog
         env:
@@ -96,7 +100,7 @@ jobs:
       - name: Setup reviewdog
         uses: reviewdog/action-setup@3f401fc1eabe68065b722d3b41d2f786d70bc2db # v1.3.0
         with:
-          reviewdog_version: latest
+          reviewdog_version: ${{ env.REVIEWDOG_VERSION }}
 
       - name: Run hadolint with reviewdog
         env:
@@ -136,7 +140,7 @@ jobs:
       - name: Setup reviewdog
         uses: reviewdog/action-setup@3f401fc1eabe68065b722d3b41d2f786d70bc2db # v1.3.0
         with:
-          reviewdog_version: latest
+          reviewdog_version: ${{ env.REVIEWDOG_VERSION }}
 
       - name: Run actionlint with reviewdog
         env:
