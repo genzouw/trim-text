@@ -1,4 +1,4 @@
-# Codeium Windsurf Configuration
+# Codeium Windsurf 設定
 
 ## プロジェクトの目的と概要
 本リポジトリは、テキスト操作CLIツール `trim-text` の提供と同時に、生成AIを活用した最新の開発フロー自動化・CI/CDパイプライン検証のためのプロトタイプ環境です。
