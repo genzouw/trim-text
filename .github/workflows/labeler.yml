@@ -1,0 +1,30 @@
+name: PR Labeler
+
+on:
+  pull_request_target:
+    types: [opened, synchronize, reopened]
+
+# 既定権限を最小限に絞り、ジョブごとに必要な権限のみ追加する。
+permissions: {}
+
+jobs:
+  labeler:
+    name: Auto Labeler
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # actions/labeler が PR ラベル更新のために必要とする最小権限。
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
+          persist-credentials: false
+
+      - name: Run Labeler
+        uses: actions/labeler@8558fd74291d67161a8a78ce36a881fa63b766a9 # v5.0.0
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          sync-labels: true

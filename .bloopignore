@@ -1,0 +1,29 @@
+# Bloop AI コード検索の無視リスト
+# .gitignore に加えて、AI検索のインデックス対象から外したいファイル・ディレクトリを指定します。
+
+# ビルド成果物やキャッシュ
+dist/
+build/
+coverage/
+node_modules/
+
+# ロックファイル (内容が多く検索ノイズになるため)
+*.lock
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# メディア・バイナリファイル
+*.png
+*.jpg
+*.jpeg
+*.gif
+*.svg
+*.ico
+*.pdf
+
+# ログファイル
+*.log
+
+# 依存関係
+vendor/

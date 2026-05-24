@@ -1,0 +1,42 @@
+# PR ラベラーの設定
+# 参考: https://github.com/actions/labeler
+
+ci:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - ".github/workflows/*.yml"
+              - ".github/workflows/*.yaml"
+              - ".github/*.yml"
+              - ".github/*.yaml"
+
+docker:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - "Dockerfile*"
+
+docs:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - "*.md"
+              - "docs/**/*"
+
+ai:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - ".cursorrules"
+              - ".windsurfrules"
+              - ".github/copilot-instructions.md"
+              - ".coderabbit.yaml"
+              - ".pr_agent.toml"
+              - ".bloopignore"
+
+shell:
+  - all:
+      - changed-files:
+          - any-glob-to-any-file:
+              - "**/*.sh"
+              - "tt"
