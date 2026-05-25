@@ -21,6 +21,10 @@ concurrency:
 permissions:
   contents: read
 
+env:
+  # markdownlint-cli2 のバージョンは再現性確保のため固定する。
+  MARKDOWNLINT_CLI2_VERSION: 0.22.1
+
 jobs:
   markdownlint:
     name: markdownlint-cli2
@@ -33,8 +37,8 @@ jobs:
         with:
           persist-credentials: false
 
+      # リポジトリの Actions 許可ポリシーが GitHub 所有 + Verified creator のみを許可するため、
+      # 個人作者の DavidAnson/markdownlint-cli2-action は利用できない。
+      # 代わりに npm から固定バージョンを直接実行する。
       - name: Run markdownlint-cli2
-        uses: DavidAnson/markdownlint-cli2-action@ded1f9488f68a970bc66ea5619e13e9b52e601cd # v23.2.0
-        with:
-          config: ".markdownlint-cli2.jsonc"
-          globs: "**/*.md"
+        run: npx --yes "markdownlint-cli2@${MARKDOWNLINT_CLI2_VERSION}" --config ".markdownlint-cli2.jsonc" "**/*.md"
