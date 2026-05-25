@@ -13,3 +13,8 @@ extra_instructions="日本語で記述してください。"
 
 [pr_questions]
 extra_instructions="日本語で回答してください。"
+
+[github_action_config]
+auto_review = true
+auto_describe = true
+auto_improve = true
