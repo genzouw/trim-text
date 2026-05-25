@@ -13,3 +13,10 @@ extra_instructions="日本語で記述してください。"
 
 [pr_questions]
 extra_instructions="日本語で回答してください。"
+
+[github_app]
+pr_commands = [
+  "/describe",
+  "/review",
+  "/improve"
+]
