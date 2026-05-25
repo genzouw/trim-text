@@ -37,9 +37,9 @@ $ docker run -i genzouw/trim-text -t1 -b1 -l1 -r1 < sample.txt
 It is convenient to set the following aliases.
 
 ```bash
-$ echo "alias tt='docker run -i genzouw/trim-text'" >> ~/.bashrc
+echo "alias tt='docker run -i genzouw/trim-text'" >> ~/.bashrc
 
-$ alias tt='docker run -i genzouw/trim-text'
+alias tt='docker run -i genzouw/trim-text'
 ```
 
 ## Requirements
@@ -62,7 +62,6 @@ You have the following options:
 ## License
 
 This software is released under the MIT License, see LICENSE.
-
 
 ## Author Information
 
