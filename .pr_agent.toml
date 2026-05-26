@@ -1,4 +1,4 @@
-[pr_agent]
+[config]
 model="gpt-4o"
 
 [pr_reviewer]
