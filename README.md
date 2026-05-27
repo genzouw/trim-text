@@ -1,5 +1,6 @@
 # trim-text
 
+[![Codacy Badge](https://api.codacy.com/project/badge/Grade/8c67317505ee408393ce6c36091e7f45)](https://app.codacy.com/gh/genzouw/trim-text?utm_source=github.com&utm_medium=referral&utm_content=genzouw/trim-text&utm_campaign=Badge_Grade)
 [![Docker Pulls](https://img.shields.io/docker/pulls/genzouw/trim-text.svg?style=for-the-badge)](https://hub.docker.com/r/genzouw/trim-text/)
 [![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/genzouw/trim-text.svg?style=for-the-badge)](https://hub.docker.com/r/genzouw/trim-text/)
 
