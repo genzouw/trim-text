@@ -31,6 +31,8 @@ jobs:
         with:
           # commit 履歴を含めてスキャンするため fetch-depth: 0
           fetch-depth: 0
+          # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
+          persist-credentials: false
 
       - name: Install gitleaks
         working-directory: ${{ runner.temp }}
@@ -71,6 +73,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
+          persist-credentials: false
 
       - name: Install Trivy
         working-directory: ${{ runner.temp }}
@@ -117,6 +122,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
+          persist-credentials: false
 
       - name: Install Trivy
         working-directory: ${{ runner.temp }}

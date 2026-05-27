@@ -23,6 +23,9 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+        with:
+          # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
+          persist-credentials: false
 
       - name: Build image
         # docker は ubuntu-latest にプリインストール済み。
