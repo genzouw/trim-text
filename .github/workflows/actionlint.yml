@@ -41,5 +41,7 @@ jobs:
           echo "executable=/tmp/actionlint" >> "$GITHUB_OUTPUT"
 
       - name: Run actionlint
+        env:
+          ACTIONLINT_BIN: ${{ steps.actionlint.outputs.executable }}
         run: |
-          "${{ steps.actionlint.outputs.executable }}" -color
+          "${ACTIONLINT_BIN}" -color

@@ -1,0 +1,10 @@
+# zizmor の設定
+# 参考: https://docs.zizmor.sh/configuration/
+
+rules:
+  # labeler.yml は actions/labeler でフォーク PR にもラベルを付けるため
+  # pull_request_target が必須。チェックアウトは persist-credentials: false
+  # を設定済みで、PR 由来のコードを実行しない安全な構成のため抑止する。
+  dangerous-triggers:
+    ignore:
+      - labeler.yml
