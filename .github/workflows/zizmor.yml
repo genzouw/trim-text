@@ -44,7 +44,7 @@ jobs:
             "https://github.com/woodruffw/zizmor/releases/download/v${ZIZMOR_VERSION}/zizmor-${ZIZMOR_VERSION}-x86_64-unknown-linux-musl.tar.gz"
           echo "${ZIZMOR_SHA256}  zizmor.tar.gz" | sha256sum -c -
           tar xzf zizmor.tar.gz
-          sudo mv zizmor-${ZIZMOR_VERSION}-x86_64-unknown-linux-musl/zizmor /usr/local/bin/
+          sudo mv "zizmor-${ZIZMOR_VERSION}-x86_64-unknown-linux-musl/zizmor" /usr/local/bin/
 
       - name: Run zizmor
         run: zizmor .github/workflows
