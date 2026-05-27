@@ -21,9 +21,22 @@ extra_instructions="""
 [pr_questions]
 extra_instructions="日本語で回答してください。"
 
+[pr_code_suggestions]
+num_code_suggestions = 4
+extra_instructions = "提案事項は必ず日本語で説明し、ベストプラクティスに基づいた具体的なコード例を含めてください。"
+
+[pr_update_changelog]
+push_changelog_changes = false
+extra_instructions = "日本語で CHANGELOG.md を更新する内容を提案してください。"
+
+[pr_add_docs]
+extra_instructions = "ドキュメントは日本語で記述し、プロジェクトの規約に沿った形式で提案してください。"
+
 [github_app]
 pr_commands = [
   "/describe",
   "/review",
-  "/improve"
+  "/improve",
+  "/add_docs",
+  "/update_changelog"
 ]

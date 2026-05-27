@@ -1,0 +1,21 @@
+# Aider AI pair programming configuration
+# https://aider.chat/docs/config/aider_conf.html
+
+# lint コマンドを定義。Aider はファイルの変更後にこれらを実行できる
+lint-cmd:
+  - "shellcheck -f gcc"
+  - "shfmt -d -i 2 -ci"
+  - "actionlint"
+  - "hadolint"
+
+# 自動コミットを有効化（Aider内での作業時）
+auto-commits: true
+
+# ファイル変更後のlintを自動で試行し、エラーがあれば修正させる
+auto-lint: true
+
+# 不要なファイルがコンテキストに入らないように .gitignore を尊重
+gitignore: true
+
+# ダークモード用のカラー設定
+dark-mode: true
