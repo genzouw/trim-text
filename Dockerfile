@@ -9,6 +9,7 @@ RUN apk add --no-cache \
 # 非 root ユーザーで実行することでコンテナエスケープのリスクを低減する (Trivy DS-0002)。
 RUN addgroup -S trim && adduser -S -G trim trim
 
-COPY --chown=trim:trim ./tt /
+WORKDIR /app
+COPY --chown=trim:trim ./tt /app/tt
 USER trim:trim
-ENTRYPOINT ["/tt"]
+ENTRYPOINT ["/app/tt"]
