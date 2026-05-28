@@ -29,7 +29,7 @@ jobs:
         if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
         run: |
           # ブランチ保護ルールでレビューが必須になっている場合に対処するため、先に Approve する
-          gh pr review --approve "$PR_URL"
+          gh pr review --approve "$PR_URL" || echo "Already approved"
           gh pr merge --auto --merge "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
