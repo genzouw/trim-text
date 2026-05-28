@@ -13,7 +13,7 @@
 - **設定ファイル**: `.pr_agent.toml`
 - **特徴**: リブランディングされた Qodo の機能を活用し、変更のスコアリング(`require_score_review = true`) やラベル提案などを通じて、自動マージ判定やレビュアーの負担軽減に貢献します。
 - **事前設定**:
-  1. GitHub App として [PR-Agent](https://github.com/marketplace/actions/the-pr-agent) (または Qodo Merge) をリポジトリにインストールしてください（公開リポジトリは無料）。
+  1. GitHub App として [PR-Agent](https://github.com/apps/qodo-merge) (または Qodo Merge) をリポジトリにインストールしてください（公開リポジトリは無料）。
   2. インストール後、リポジトリへのアクセス権限（Read & Write）を付与してください。
 
 ### 2. CodeRabbit
@@ -22,7 +22,7 @@
 - **設定ファイル**: `.coderabbit.yaml`
 - **特徴**: プロジェクト全体への影響や、ドキュメント・テストコードとの整合性を厳格にチェックします。
 - **事前設定**:
-  1. GitHub App として [CodeRabbit](https://github.com/marketplace/coderabbit) をインストールしてください（公開 OSS リポジトリは無料）。
+  1. GitHub App として [CodeRabbit](https://github.com/apps/coderabbitai) をインストールしてください（公開 OSS リポジトリは無料）。
   2. プロジェクトのダッシュボードからリポジトリを有効化し、適切な権限を付与してください。
 
 ### 3. Sweep AI
