@@ -10,6 +10,6 @@ RUN apk add --no-cache \
 RUN addgroup -S trim && adduser -S -G trim trim
 
 WORKDIR /app
-COPY --chown=trim:trim ./tt /app/tt
+COPY --chown=root:root --chmod=0555 ./tt /app/tt
 USER trim:trim
 ENTRYPOINT ["/app/tt"]
