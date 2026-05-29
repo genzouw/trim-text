@@ -6,11 +6,13 @@ on:
     paths:
       - ".github/workflows/**"
       - ".github/actionlint*"
+      - ".github/scripts/verify-action-pins.sh"
   pull_request:
     branches: [main]
     paths:
       - ".github/workflows/**"
       - ".github/actionlint*"
+      - ".github/scripts/verify-action-pins.sh"
 
 concurrency:
   group: actionlint-${{ github.ref }}
@@ -45,3 +47,10 @@ jobs:
           ACTIONLINT_BIN: ${{ steps.actionlint.outputs.executable }}
         run: |
           "${ACTIONLINT_BIN}" -color
+
+      - name: Verify action pins resolve to commit SHAs
+        env:
+          # annotated tag object SHA を誤って pin した場合に startup_failure を防ぐ。
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          .github/scripts/verify-action-pins.sh
