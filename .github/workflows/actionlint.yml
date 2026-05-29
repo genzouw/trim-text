@@ -53,4 +53,4 @@ jobs:
           # annotated tag object SHA を誤って pin した場合に startup_failure を防ぐ。
           GH_TOKEN: ${{ github.token }}
         run: |
-          .github/scripts/verify-action-pins.sh
+          bash .github/scripts/verify-action-pins.sh
