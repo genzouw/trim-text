@@ -34,7 +34,7 @@ jobs:
       - name: Run Repomix
         run: |
           # 依存関係として最新の repomix を実行
-          npx --yes repomix --output repomix-output.xml --format xml
+          npx --yes repomix --output repomix-output.xml --style xml
 
       - name: Upload Repomix Output
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
