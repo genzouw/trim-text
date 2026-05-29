@@ -41,6 +41,7 @@ for entry in "${entries[@]}"; do
   rest="${full_repo#*/}"
   repo="${rest%%/*}"
   key="${owner}/${repo}@${sha}"
+  [[ "${full_repo}" == ./* ]] && continue
   [[ -n "${checked[${key}]:-}" ]] && continue
   checked[${key}]=1
   if gh api "repos/${owner}/${repo}/commits/${sha}" --silent >/dev/null 2>&1; then
