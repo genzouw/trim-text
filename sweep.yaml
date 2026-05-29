@@ -1,0 +1,22 @@
+# Sweep AI Configuration File
+# https://docs.sweep.dev/
+
+# プロジェクトの目的とAIの活用
+description: "This is a repository for 'trim-text', a CLI/Docker tool for trimming text. It also serves as a prototype environment for generative AI integrations and CI/CD pipelines. All communication, PRs, and documentation must be in Japanese."
+
+# 適用するルール
+rules:
+  - "すべてのコミットメッセージ、Pull Requestのタイトルと説明文、コード内のコメント、および Sweep AI とのやり取りは**必ず日本語**で記述してください。"
+  - "Bash スクリプト (*.sh, tt) を編集する際は、必ず `set -euo pipefail` を維持または追加し、エラーハンドリングを厳格に行ってください。変数展開は必ずダブルクォートで囲んでください。"
+  - "Bash スクリプトを編集した後は、可能であれば `shellcheck` をパスするように修正し、`shfmt -d -i 2 -ci` に沿ったインデント（スペース2つ）を適用してください。"
+  - "Dockerfile を編集する際は、`hadolint` のベストプラクティスに従い、可能であればベースイメージを SHA256 ダイジェストで固定してください。"
+  - "GitHub Actions のワークフロー (.github/workflows/*.yml) を編集する際は、外部アクションのバージョンを完全なコミットハッシュ (SHA) で固定し、権限 (permissions) を最小限にしてください。"
+  - "シークレット情報（API キー、トークン、パスワードなど）は絶対にコード内やログに残さないでください。"
+  - "提案する新しいツールやサービスは、公開 GitHub リポジトリで無料で利用可能なものに限定してください。"
+
+# ブランチのプレフィックス
+branch: "sweep/"
+
+# PR のレビューアー
+reviewers:
+  - "genzouw"
