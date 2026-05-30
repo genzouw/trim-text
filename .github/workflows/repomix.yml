@@ -31,12 +31,11 @@ jobs:
         with:
           node-version: 20
 
-      - name: Run Repomix
+      - name: Run Repomix (XML)
         run: |
-          # 依存関係として最新の repomix を実行
           npx --yes repomix --output repomix-output.xml --style xml
 
-      - name: Upload Repomix Output
+      - name: Upload Repomix Output (XML)
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: repomix-output
