@@ -6,7 +6,8 @@ description: "This is a repository for 'trim-text', a CLI/Docker tool for trimmi
 
 # 適用するルール
 rules:
-  - "すべてのコミットメッセージ、Pull Requestのタイトルと説明文、コード内のコメント、および Sweep AI とのやり取りは**必ず日本語**で記述してください。"
+  - "すべてのコミットメッセージ、Pull Requestのタイトルと説明文、コード内のコメント、および Sweep AI とのやり取りは**必ず日本語**で記述し、プロジェクトの背景や理由を明確にしてください。"
+  - "AI向けコンテキスト規格（llms.txt）の更新や、新しいAIツール（DeepSource, Scorecard等）の設定変更が含まれる場合は、AIエージェントにとって読みやすい記述を心がけてください。"
   - "Bash スクリプト (*.sh, tt) を編集する際は、必ず `set -euo pipefail` を維持または追加し、エラーハンドリングを厳格に行ってください。変数展開は必ずダブルクォートで囲んでください。"
   - "Bash スクリプトを編集した後は、可能であれば `shellcheck` をパスするように修正し、`shfmt -d -i 2 -ci` に沿ったインデント（スペース2つ）を適用してください。"
   - "Dockerfile を編集する際は、`hadolint` のベストプラクティスに従い、可能であればベースイメージを SHA256 ダイジェストで固定してください。"

@@ -43,15 +43,32 @@
   1. GitHub App として [bloop](https://github.com/apps/bloop-ai) をインストールしてください（公開リポジトリは無料）。
   2. インストール後、リポジトリへのアクセス権限を付与してください。
 
-### 5. Repomix (LLM 向けリポジトリコンテキスト生成)
+### 5. Repomix (LLM 向けリポジトリコンテキスト生成) とサーチサービス連携
 
-- **目的**: AI アシスタントや LLM に対して、リポジトリ全体の構造や主要なコードを読み込ませるためのコンテキストファイル（XML等）を自動生成します。
+- **目的**: AI アシスタントや LLM、AI 検索エンジンに対して、リポジトリ全体の構造や主要なコードを読み込ませるためのコンテキストファイル（XML、および `llms.txt` 規格の Markdown）を自動生成します。
 - **設定ファイル**: `.github/workflows/repomix.yml`
-- **特徴**: リポジトリの最新状態を常に Artifact として提供することで、カスタム GPT 等の構築・連携を強力にサポートします。
+- **特徴**: リポジトリの最新状態を常に Artifact として提供するだけでなく、GitHub Pages を通じて `llms.txt` および `llms-full.txt` を公開することで、Perplexity や ChatGPT Web Browsing などの AI エージェントからのアクセスを容易にします。
 - **事前設定**:
-  1. GitHub Actions として自動実行されるため、特に追加の App インストールは不要ですが、Actions の実行結果（Artifacts）を利用してください。
+  1. リポジトリの `Settings` > `Pages` から、**Build and deployment** の Source を **GitHub Actions** に設定し、GitHub Pages を有効化してください。
 
-### 6. Mend Renovate (高度な依存関係管理)
+### 6. OSSF Scorecard (サプライチェーンセキュリティ・品質評価)
+
+- **目的**: 業界標準の品質・セキュリティ評価ツールを利用して、公開リポジトリの継続的なセキュリティスキャンと品質チェック（トークン権限、ブランチ保護、テストの有無など）を行います。
+- **設定ファイル**: `.github/workflows/scorecard.yml`
+- **特徴**: GitHub の Code Scanning アラートと連携し、セキュリティベストプラクティスへの準拠状況を自動的に評価・可視化します。
+- **事前設定**:
+  1. 特に追加の App インストールは不要ですが、GitHub の Code Scanning の機能を有効化していることを確認してください。
+
+### 7. DeepSource (AIを活用した静的解析と自動修正)
+
+- **目的**: AI による高度な静的解析と Autofix（自動修正）機能を利用して、シェルスクリプトや Dockerfile の品質向上とセキュリティ強化を図ります。
+- **設定ファイル**: `.deepsource.toml`
+- **特徴**: 既存の CI/CD を補完する形で、コードのアンチパターンやパフォーマンスの問題を自動的に検出し、修正案を提案します。
+- **事前設定**:
+  1. GitHub App として [DeepSource](https://github.com/apps/deepsource) をインストールしてください（公開 OSS リポジトリは無料）。
+  2. プロジェクトのダッシュボードからリポジトリを連携し、初期設定を行ってください。
+
+### 8. Mend Renovate (高度な依存関係管理)
 
 - **目的**: Dependabot よりさらに高度な依存関係の自動更新・グルーピング・マージ制御を行います。
 - **設定ファイル**: `renovate.json`
@@ -59,7 +76,7 @@
 - **事前設定**:
   1. GitHub App として [Mend Renovate](https://github.com/apps/renovate) をインストールしてください（公開リポジトリは無料）。
 
-### 7. Release Please (リリース自動化)
+### 9. Release Please (リリース自動化)
 
 - **目的**: Conventional Commits に基づいてリリース PR を自動生成し、セマンティックバージョニングによるタグ付けと CHANGELOG 生成を行います。
 - **設定ファイル**: `.github/workflows/release-please.yml`
