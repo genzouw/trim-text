@@ -17,6 +17,14 @@ permissions:
 
 jobs:
   Analysis:
+    # SonarCloud スキャンを許容する PR 作成者の allowlist。
+    # dependabot 起動の workflow run では Dependabot scope secrets が使われ
+    # SONAR_TOKEN が空になり "Project not found" で失敗するため、
+    # ここで列挙した作成者の pull_request イベントではジョブ自体をスキップする。
+    # push / workflow_dispatch では pull_request コンテキストが無く login は空文字となり、
+    # allowlist に一致しないので通常通り実行される。
+    # 作成者を追加したい場合は JSON 配列に '<login>' を追記する。
+    if: ${{ !contains(fromJSON('["dependabot[bot]"]'), github.event.pull_request.user.login) }}
     runs-on: ubuntu-latest
 
     steps:
