@@ -99,7 +99,7 @@
 - **特徴**: 開発者のエディタ内で、ローカルおよびクラウドのLLMを用いてコードの補完やチャットベースのサポートを提供します。
 - **事前設定**:
   1. VS Code や Cursor などの拡張機能として [Continue](https://continue.dev/) をインストールしてください。
-  2. リポジトリの `.continue/config.json` が自動的に読み込まれ、プロジェクト固有のルール（.cursorrules など）が適用されます。
+  2. リポジトリの `.continue/config.json` が自動的に読み込まれ、プロジェクト固有のルール（`sweep.yaml` など）が適用されます。
 
 ### 12. StepSecurity Harden-Runner (CI/CD サプライチェーンセキュリティ)
 
