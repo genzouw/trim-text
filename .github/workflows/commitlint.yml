@@ -15,6 +15,11 @@ permissions:
 jobs:
   commitlint:
     name: Commit Message Lint
+    # commitlint を許容する PR 作成者の allowlist。
+    # 例えば dependabot が生成するコミット本文は長い URL を含み body-max-line-length に違反するため
+    # ここで列挙した作成者の PR ではジョブ自体をスキップして success として扱う。
+    # 作成者を追加したい場合は JSON 配列に '<login>' を追記する。
+    if: ${{ !contains(fromJSON('["dependabot[bot]"]'), github.event.pull_request.user.login) }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
     steps:
