@@ -58,5 +58,6 @@
       "name": "cmd",
       "description": "Generate a shell command"
     }
-  ]
+  ],
+  "mergeBehavior": "merge"
 }
