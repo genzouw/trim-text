@@ -13,14 +13,14 @@ jobs:
     permissions:
       # Dependabot PRのメタデータ取得と自動マージ設定のため
       pull-requests: write
-      # マージコミット作成のため
+      # squash マージ実行のため
       contents: write
     # Dependabot が作成した PR のみで実行
     if: github.event.pull_request.user.login == 'dependabot[bot]' && github.event.pull_request.user.type == 'Bot'
     steps:
       - name: Dependabot metadata
         id: metadata
-        uses: dependabot/fetch-metadata@0fb21704c18a42ce5aa8d720ea4b912f5e6babef
+        uses: dependabot/fetch-metadata@25dd0e34f4fe68f24cc83900b1fe3fe149efef98
         with:
           github-token: "${{ secrets.GITHUB_TOKEN }}"
 
@@ -30,7 +30,9 @@ jobs:
         run: |
           # ブランチ保護ルールでレビューが必須になっている場合に対処するため、先に Approve する
           gh pr review --approve "$PR_URL" || echo "Already approved"
-          gh pr merge --auto --merge "$PR_URL"
+          # リポジトリ設定で allow_merge_commit=false / required_linear_history=true のため
+          # --merge ではなく --squash を使う（dependabot PR は通常 1 commit のため見た目は同じ）
+          gh pr merge --auto --squash "$PR_URL"
         env:
           PR_URL: ${{github.event.pull_request.html_url}}
           GH_TOKEN: ${{secrets.GITHUB_TOKEN}}
