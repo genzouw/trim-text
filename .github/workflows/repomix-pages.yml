@@ -35,6 +35,15 @@ jobs:
           echo "# trim-text Context" > public/llms.txt
           echo "This repository contains the trim-text CLI tool. See [llms-full.txt](llms-full.txt) for the full context." >> public/llms.txt
 
+          # AI検索エンジン向けにインデックス・サイトマップ・robots.txtを生成
+          cat << 'HTML' > public/index.html
+          <!DOCTYPE html><html><head><title>trim-text AI Context</title></head><body><h1>trim-text AI Context</h1><p>See <a href="llms.txt">llms.txt</a> or <a href="llms-full.txt">llms-full.txt</a></p></body></html>
+          HTML
+          echo "User-agent: *" > public/robots.txt
+          echo "Allow: /" >> public/robots.txt
+          echo "Sitemap: https://genzouw.github.io/trim-text/sitemap.xml" >> public/robots.txt
+          echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://genzouw.github.io/trim-text/llms.txt</loc></url><url><loc>https://genzouw.github.io/trim-text/llms-full.txt</loc></url></urlset>' > public/sitemap.xml
+
       # Inline upload-pages-artifact: its internal actions/upload-artifact@v4 (unpinned) violates org SHA-pin policy
       - name: Archive Pages artifact
         run: |
