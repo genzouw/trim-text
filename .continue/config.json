@@ -19,7 +19,7 @@
   "customCommands": [
     {
       "name": "check",
-      "prompt": "Please run a security and linting check on this file according to our .cursorrules and report any issues.",
+      "prompt": "Please run a security and linting check on this file according to our sweep.yaml rules and report any issues.",
       "description": "Check file for linting and security issues"
     }
   ],
