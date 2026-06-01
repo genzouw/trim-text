@@ -84,6 +84,37 @@
 - **事前設定**:
   1. コミットメッセージに Conventional Commits の形式（`feat:`, `fix:`, `chore:` 等）を厳密に守るようにしてください。
 
+### 10. Devcontainer (開発環境のコード化)
+
+- **目的**: 開発環境を Docker コンテナとして定義し、チーム全体や AI エージェントが同一の環境で開発・テストを行えるようにします。
+- **設定ファイル**: `.devcontainer/devcontainer.json`
+- **特徴**: GitHub Codespaces、Cursor、Windsurf、Roo Code (Cline) などのモダンな IDE や AI アシスタントと連携し、すぐにテストやLintが実行可能なコンテキストを提供します。
+- **事前設定**:
+  1. 特に追加の設定は不要ですが、Devcontainer に対応した IDE（VS Code, Cursor など）で「Reopen in Container」を選択して起動してください。
+
+### 11. Continue.dev (AI コーディングアシスタント)
+
+- **目的**: オープンソースの AI アシスタントである Continue を活用し、リポジトリ固有のコンテキストを考慮したコード生成や質問対応を行います。
+- **設定ファイル**: `.continue/config.json`
+- **特徴**: 開発者のエディタ内で、ローカルおよびクラウドのLLMを用いてコードの補完やチャットベースのサポートを提供します。
+- **事前設定**:
+  1. VS Code や Cursor などの拡張機能として [Continue](https://continue.dev/) をインストールしてください。
+  2. リポジトリの `.continue/config.json` が自動的に読み込まれ、プロジェクト固有のルール（.cursorrules など）が適用されます。
+
+### 12. StepSecurity Harden-Runner (CI/CD サプライチェーンセキュリティ)
+
+- **目的**: GitHub Actions 実行時の予期せぬ外部通信を監視・遮断し、サプライチェーン攻撃（依存関係の改ざんによる情報漏洩など）を防止します。
+- **設定ファイル**: 各種ワークフロー（例: `.github/workflows/docker-build.yml` など）
+- **特徴**: 2024年以降の CI/CD セキュリティのトレンドである egress 通信の制限を無料で実現します。
+- **事前設定**:
+  1. ワークフローに追加された `step-security/harden-runner` アクションにより自動的に適用されます。
+
+### 13. LLM SEO / GEO (AI検索エンジン最適化)
+
+- **目的**: Perplexity、ChatGPT Search、Google AI Overviews などの AI 検索エンジンがリポジトリのコンテキストを正しく理解し、参照できるようにします。
+- **設定ファイル**: `.github/workflows/repomix-pages.yml`
+- **特徴**: `llms.txt` だけでなく、`robots.txt` や `sitemap.xml` を自動生成し、AI ボットのクローラビリティを向上させます。
+
 ## CI/CD との連携
 
 Dependabot や Renovate によるマイナー・パッチバージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。
