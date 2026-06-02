@@ -66,6 +66,12 @@ reviews:
         - 外部 action は SHA pin されているか。
         - permissions: が最小権限になっているか。
 
+    - path: 'docs/AI_AUTOMATION.md'
+      instructions: |
+        AI自動化に関するドキュメントとしてレビューしてください:
+        - 新しいツールやサービスが追加された場合、必ず「事前設定（手動での導入手順）」が明記されているか確認してください。
+        - 記述内容が他のAI設定ファイル（.pr_agent.toml, repomix.config.json 等）と矛盾していないか確認してください。
+
   # 生成物 / 依存物 / ロックファイルなどはレビュー対象から除外する。
   path_filters:
     - '!**/dist/**'
