@@ -47,7 +47,7 @@
 
 - **目的**: AI アシスタントや LLM、AI 検索エンジンに対して、リポジトリ全体の構造や主要なコードを読み込ませるためのコンテキストファイル（XML、および `llms.txt` 規格の Markdown）を自動生成します。
 - **設定ファイル**: `.github/workflows/repomix.yml`
-- **特徴**: リポジトリの最新状態を常に Artifact として提供するだけでなく、GitHub Pages を通じて `llms.txt` および `llms-full.txt` を公開することで、Perplexity や ChatGPT Web Browsing などの AI エージェントからのアクセスを容易にします。
+- **特徴**: リポジトリの最新状態を常に Artifact として提供するだけでなく、GitHub Pages を通じて `llms.txt` および `llms-full.txt` を公開することで、Perplexity や ChatGPT Web Browsing などの AI エージェントからのアクセスを容易にします。また、`repomix.config.json` により、LLM向けにプロジェクト独自のカスタムインストラクションを付与しています。
 - **事前設定**:
   1. リポジトリの `Settings` > `Pages` から、**Build and deployment** の Source を **GitHub Actions** に設定し、GitHub Pages を有効化してください。
 
@@ -114,6 +114,24 @@
 - **目的**: Perplexity、ChatGPT Search、Google AI Overviews などの AI 検索エンジンがリポジトリのコンテキストを正しく理解し、参照できるようにします。
 - **設定ファイル**: `.github/workflows/repomix-pages.yml`
 - **特徴**: `llms.txt` だけでなく、`robots.txt` や `sitemap.xml` を自動生成し、AI ボットのクローラビリティを向上させます。
+
+### 14. Aider (AI ペアプログラミング)
+
+- **目的**: ターミナル上で動作するAIペアプログラミングツールとして、コードの変更、リファクタリング、バグ修正を対話的に行います。
+- **設定ファイル**: `.aider.conf.yml`
+- **特徴**: コマンドラインから直接LLMと連携し、自動コミットや Lint 実行（`auto-lint`）をサポートします。
+- **事前設定**:
+  1. ローカル環境に Aider をインストールしてください（例: `pip install aider-chat`）。
+  2. 利用する LLM の API キー（例: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`）を環境変数に設定して実行してください。
+
+### 15. Roo Code (旧 Cline) / Windsurf (AI IDE アシスタント)
+
+- **目的**: VS Code 拡張機能や専用 IDE を通じて、自律型の AI エージェントとしてタスクを処理します。
+- **設定ファイル**: `.clinerules`, `.windsurfrules`
+- **特徴**: エディタ内でプロジェクトのコンテキストを理解し、ファイルの作成・編集、コマンドの実行を自律的に行います。
+- **事前設定**:
+  1. VS Code に [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooCode.roo-cline) 拡張機能をインストールするか、[Windsurf IDE](https://codeium.com/windsurf) をインストールしてください。
+  2. 各拡張機能・IDE 内の設定画面から、利用する LLM のプロバイダと API キーを設定してください。
 
 ## CI/CD との連携
 

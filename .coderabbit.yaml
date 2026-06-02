@@ -1,14 +1,14 @@
 # CodeRabbit configuration
 # https://docs.coderabbit.ai/reference/configuration
 
-language: 'ja-JP'
+language: "ja-JP"
 early_access: true
 enable_free_tier: true
 
 reviews:
   # OSS として配布される Docker イメージ／シェル CLI のリポジトリのため、利用者環境への影響を取りこぼしたくない。
   # "assertive" で検出感度を高めに保ち、ノイズが過剰になった場合は "chill" に戻すことも検討する。
-  profile: 'assertive'
+  profile: "assertive"
 
   # PR 全体に対する指針。path_instructions に "**/*" を入れるとファイル毎に
   # 繰り返し適用されてノイズが増えるため、広範な指示は instructions に集約する。
@@ -40,52 +40,58 @@ reviews:
       - main
 
   path_instructions:
-    - path: 'Dockerfile*'
+    - path: "Dockerfile*"
       instructions: |
         Dockerfile としてレビューしてください:
         - ベースイメージのバージョンが固定 (タグ pin / digest pin) されているか。
         - 不要なパッケージ／キャッシュが残っていないか (イメージサイズと攻撃面の最小化)。
         - 機密情報 (鍵 / トークン) が ARG / ENV / COPY 経由で露出していないか。
         - root のまま実行していないか、非 root ユーザ切替を検討すべきか。
-    - path: '**/*.sh'
+    - path: "**/*.sh"
       instructions: |
         シェルスクリプトとしてレビューしてください:
         - `set -euo pipefail` 相当のエラー伝播設定が入っているか。
         - 変数展開のクォート漏れ・単語分割によるバグや任意コード実行の余地が無いか。
         - 外部入力をそのまま `eval` / `sh -c` へ流していないか。
-    - path: 'tt'
+    - path: "tt"
       instructions: |
         本リポジトリの主要 CLI 実体 (シェルスクリプト) です。次の観点を重視してレビューしてください:
         - 標準入力／引数の取り扱いがクォート漏れなく安全か。
         - `head` / `tail` / `cut` 等のオプション差異 (BusyBox vs GNU coreutils) によるポータビリティ問題が無いか。
         - エラー時の終了コードが妥当か (パイプ内エラーが握り潰されていないか)。
-    - path: '.github/workflows/**'
+    - path: ".github/workflows/**"
       instructions: |
         GitHub Actions ワークフローとしてレビューしてください:
         - シークレットの露出 (echo / set-output 経由のリーク) が無いか。
         - 外部 action は SHA pin されているか。
         - permissions: が最小権限になっているか。
 
+    - path: "docs/AI_AUTOMATION.md"
+      instructions: |
+        AI自動化に関するドキュメントとしてレビューしてください:
+        - 新しいツールやサービスが追加された場合、必ず「事前設定（手動での導入手順）」が明記されているか確認してください。
+        - "記述内容が他のAI設定ファイル（.pr_agent.toml, repomix-instruction.txt 等）と矛盾していないか確認してください。"
+
   # 生成物 / 依存物 / ロックファイルなどはレビュー対象から除外する。
   path_filters:
-    - '!**/dist/**'
-    - '!**/build/**'
-    - '!**/coverage/**'
-    - '!**/node_modules/**'
-    - '!**/.wrangler/**'
-    - '!**/.turbo/**'
-    - '!**/.next/**'
-    - '!infra/cdktf.out/**'
-    - '!infra/.gen/**'
-    - '!**/bun.lock'
-    - '!**/package-lock.json'
-    - '!**/yarn.lock'
-    - '!**/pnpm-lock.yaml'
-    - '!**/*.min.js'
-    - '!**/*.min.css'
-    - '!**/*.map'
-    - '!**/*.snap'
-    - '!**/*.tsbuildinfo'
+    - "!**/dist/**"
+    - "!**/build/**"
+    - "!**/coverage/**"
+    - "!**/node_modules/**"
+    - "!**/.wrangler/**"
+    - "!**/.turbo/**"
+    - "!**/.next/**"
+    - "!infra/cdktf.out/**"
+    - "!infra/.gen/**"
+    - "!**/bun.lock"
+    - "!**/package-lock.json"
+    - "!**/yarn.lock"
+    - "!**/pnpm-lock.yaml"
+    - "!**/*.min.js"
+    - "!**/*.min.css"
+    - "!**/*.map"
+    - "!**/*.snap"
+    - "!**/*.tsbuildinfo"
 
   abort_on_close: true
 
