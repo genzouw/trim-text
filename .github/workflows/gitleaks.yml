@@ -42,6 +42,9 @@ jobs:
           gitleaks version
 
       - name: Run gitleaks
+        # actions/checkout@v6 + fetch-depth: 0 はリモートの全 refs/heads/* を取得するため、
+        # --log-opts 未指定だと gitleaks は未マージのブランチまで横断スキャンしてしまう。
+        # 対象 ref から到達可能なコミットだけを対象とする。
         run: |
           gitleaks detect \
             --source . \
@@ -50,7 +53,8 @@ jobs:
             --no-banner \
             --exit-code 1 \
             --report-format sarif \
-            --report-path gitleaks.sarif
+            --report-path gitleaks.sarif \
+            --log-opts="HEAD"
 
       - name: Upload SARIF
         if: always() && hashFiles('gitleaks.sarif') != ''
