@@ -23,11 +23,11 @@ jobs:
       - name: Evaluate PR
         uses: linear-b/gitstream-github-action@f0bdd32f4fb2c5e23e7d5a30ecdc3877c8f235dd # v2.0.240
         id: rules-engine
+        # action.yml が受け付ける入力は full_repository / head_ref / base_ref /
+        # client_payload / installation_id / resolver_url / resolver_token / debug_mode のみ。
+        # head_commit_sha / base_commit_sha / pull_request_number / github_token は無効入力で、
+        # 渡すと「Unexpected input(s)」warning + テンプレート解析エラーで実行が失敗する。
         with:
           full_repository: ${{ github.repository }}
           head_ref: ${{ github.event.pull_request.head.ref }}
-          head_commit_sha: ${{ github.event.pull_request.head.sha }}
           base_ref: ${{ github.event.pull_request.base.ref }}
-          base_commit_sha: ${{ github.event.pull_request.base.sha }}
-          pull_request_number: ${{ github.event.pull_request.number }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
