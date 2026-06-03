@@ -53,6 +53,20 @@ jobs:
           #     of the value entered here.
           publish_results: true
 
+      # Filter out the Code-Review check from SARIF results.
+      # Rationale: this is a solo-maintained repository, so committer == merger
+      # for most changes, making the Scorecard Code-Review check structurally
+      # unsatisfiable. The recurring high-severity Code Scanning alert it
+      # produces does not reflect real risk, so we suppress it from the
+      # Code Scanning dashboard while keeping the check running for the
+      # OpenSSF Scorecard badge / observability.
+      - name: "Filter Code-Review check from SARIF"
+        run: |
+          jq '(.runs[].results) |= map(select(.ruleId != "CodeReviewID"))
+              | (.runs[].tool.driver.rules) |= map(select(.id != "CodeReviewID"))' \
+              results.sarif > results.filtered.sarif
+          mv results.filtered.sarif results.sarif
+
       # Upload the results as artifacts (optional). Commenting out will disable uploads of run results in SARIF
       # format to the repository Actions tab.
       - name: "Upload artifact"
