@@ -1,11 +1,11 @@
 # -*- mode: yaml -*-
-# This example configuration for provides basic automations to get started with gitStream.
-# View the gitStream quickstart for more examples: https://docs.linearb.io/gitstream/quickstart/
+# gitStream の基本的な自動化設定を提供します。
+# より多くの例については gitStream クイックスタートを参照: https://docs.linearb.io/gitstream/quickstart/
 manifest:
   version: 1.0
 
 automations:
-  # Add a label that indicates how many minutes it will take to review the PR.
+  # PRのレビューに必要な時間（分）を示すラベルを追加します。
   estimated_time_to_review:
     if:
       - true
@@ -13,12 +13,12 @@ automations:
       - action: add-label@v1
         args:
           label: "{{ calc.etr }} min review"
-          color: {{ 'E94637' if (calc.etr >= 20) else ('FBBD10' if (calc.etr >= 5) else '36A853') }}
+          color: "{{ 'E94637' if (calc.etr >= 20) else ('FBBD10' if (calc.etr >= 5) else '36A853') }}"
 
-  # Auto-approve documentation-only changes
+  # ドキュメントのみの変更を自動承認します
   auto_approve_docs:
     if:
-      - {{ is.docs }}
+      - "{{ is.docs }}"
     run:
       - action: approve@v1
       - action: add-label@v1
@@ -26,7 +26,7 @@ automations:
           label: 'docs-approved'
 
 calc:
-  etr: {{ branch | estimatedReviewTime }}
+  etr: "{{ branch | estimatedReviewTime }}"
 
 is:
-  docs: {{ files | allDocs }}
+  docs: "{{ files | allDocs }}"
