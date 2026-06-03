@@ -1,0 +1,31 @@
+name: gitStream workflow automation
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  gitStream:
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    name: gitStream workflow automation
+    steps:
+      - name: Evaluate PR
+        uses: linear-b/gitstream-github-action@d4812fce2d01869e99aeb6e21b7ff3b1da293df2 # v2
+        id: rules-engine
+        with:
+          full_repository: ${{ github.repository }}
+          head_ref: ${{ github.event.pull_request.head.ref }}
+          head_commit_sha: ${{ github.event.pull_request.head.sha }}
+          base_ref: ${{ github.event.pull_request.base.ref }}
+          base_commit_sha: ${{ github.event.pull_request.base.sha }}
+          pull_request_number: ${{ github.event.pull_request.number }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}

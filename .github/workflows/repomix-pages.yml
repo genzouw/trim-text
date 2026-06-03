@@ -44,6 +44,11 @@ jobs:
           echo "Sitemap: https://genzouw.github.io/trim-text/sitemap.xml" >> public/robots.txt
           echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://genzouw.github.io/trim-text/llms.txt</loc></url><url><loc>https://genzouw.github.io/trim-text/llms-full.txt</loc></url></urlset>' > public/sitemap.xml
 
+          # IndexNow key generation for pinging search engines (e.g. Bing)
+          export INDEXNOW_KEY="a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+          echo "$INDEXNOW_KEY" > public/$INDEXNOW_KEY.txt
+          echo "INDEXNOW_KEY=$INDEXNOW_KEY" >> $GITHUB_ENV
+
       # Inline upload-pages-artifact: its internal actions/upload-artifact@v4 (unpinned) violates org SHA-pin policy
       - name: Archive Pages artifact
         run: |
@@ -75,3 +80,10 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
+      - name: Notify IndexNow
+        run: |
+          export INDEXNOW_KEY="a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6"
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms.txt&key=$INDEXNOW_KEY" || true
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms-full.txt&key=$INDEXNOW_KEY" || true
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/&key=$INDEXNOW_KEY" || true

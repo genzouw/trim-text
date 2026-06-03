@@ -1,0 +1,32 @@
+# -*- mode: yaml -*-
+# This example configuration for provides basic automations to get started with gitStream.
+# View the gitStream quickstart for more examples: https://docs.linearb.io/gitstream/quickstart/
+manifest:
+  version: 1.0
+
+automations:
+  # Add a label that indicates how many minutes it will take to review the PR.
+  estimated_time_to_review:
+    if:
+      - true
+    run:
+      - action: add-label@v1
+        args:
+          label: "{{ calc.etr }} min review"
+          color: {{ 'E94637' if (calc.etr >= 20) else ('FBBD10' if (calc.etr >= 5) else '36A853') }}
+
+  # Auto-approve documentation-only changes
+  auto_approve_docs:
+    if:
+      - {{ is.docs }}
+    run:
+      - action: approve@v1
+      - action: add-label@v1
+        args:
+          label: 'docs-approved'
+
+calc:
+  etr: {{ branch | estimatedReviewTime }}
+
+is:
+  docs: {{ files | allDocs }}
