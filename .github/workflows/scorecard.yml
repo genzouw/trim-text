@@ -19,14 +19,18 @@ jobs:
     name: Scorecard analysis
     runs-on: ubuntu-latest
     permissions:
-      # Needed to upload the results to code-scanning dashboard.
-      security-events: write
       # Needed to publish results and get a badge (see publish_results below).
       id-token: write
       # Uncomment the permissions below if installing in a private repository.
       # contents: read
       # actions: read
 
+    # NOTE: The Scorecard publishing webapp verifies that this job contains
+    # ONLY `uses:` steps (no `run:` steps). Adding a `run:` step here will
+    # break sigstore signing with:
+    #   "scorecard job must only have steps with `uses`"
+    # See: https://github.com/ossf/scorecard-action#workflow-restrictions
+    # SARIF post-processing (e.g. filtering checks) must live in a separate job.
     steps:
       - name: "Checkout code"
         uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
@@ -53,22 +57,8 @@ jobs:
           #     of the value entered here.
           publish_results: true
 
-      # Filter out the Code-Review check from SARIF results.
-      # Rationale: this is a solo-maintained repository, so committer == merger
-      # for most changes, making the Scorecard Code-Review check structurally
-      # unsatisfiable. The recurring high-severity Code Scanning alert it
-      # produces does not reflect real risk, so we suppress it from the
-      # Code Scanning dashboard while keeping the check running for the
-      # OpenSSF Scorecard badge / observability.
-      - name: "Filter Code-Review check from SARIF"
-        run: |
-          jq '(.runs[].results) |= map(select(.ruleId != "CodeReviewID"))
-              | (.runs[].tool.driver.rules) |= map(select(.id != "CodeReviewID"))' \
-              results.sarif > results.filtered.sarif
-          mv results.filtered.sarif results.sarif
-
-      # Upload the results as artifacts (optional). Commenting out will disable uploads of run results in SARIF
-      # format to the repository Actions tab.
+      # Upload the raw (unfiltered) SARIF as an artifact so the downstream
+      # job can post-process and forward it to Code Scanning.
       - name: "Upload artifact"
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
@@ -76,8 +66,35 @@ jobs:
           path: results.sarif
           retention-days: 5
 
-      # Upload the results to GitHub's code scanning dashboard (optional).
-      # Commenting out will disable upload of results to your repo's Code Scanning dashboard
+  # Post-process and forward to Code Scanning in a separate job, because the
+  # `analysis` job above must remain `uses:`-only for sigstore signing.
+  upload-code-scanning:
+    name: Filter and upload SARIF to Code Scanning
+    needs: analysis
+    runs-on: ubuntu-latest
+    permissions:
+      # Needed to upload the results to the code-scanning dashboard.
+      security-events: write
+    steps:
+      - name: "Download SARIF artifact"
+        uses: actions/download-artifact@018cc2cf5baa6db3ef3c5f8a56943fffe632ef53 # v6.0.0
+        with:
+          name: SARIF file
+
+      # Filter out the Code-Review check from the SARIF before forwarding to
+      # Code Scanning. Rationale: this is a solo-maintained repository, so
+      # committer == merger for most changes, making the Scorecard Code-Review
+      # check structurally unsatisfiable. The recurring high-severity Code
+      # Scanning alert it produces does not reflect real risk, so we suppress
+      # it from the Code Scanning dashboard while keeping the check running
+      # for the OpenSSF Scorecard badge / observability.
+      - name: "Filter Code-Review check from SARIF"
+        run: |
+          jq '(.runs[].results) |= map(select(.ruleId != "CodeReviewID"))
+              | (.runs[].tool.driver.rules) |= map(select(.id != "CodeReviewID"))' \
+              results.sarif > results.filtered.sarif
+          mv results.filtered.sarif results.sarif
+
       - name: "Upload to code-scanning"
         uses: github/codeql-action/upload-sarif@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
         with:
