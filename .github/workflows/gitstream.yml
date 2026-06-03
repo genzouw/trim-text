@@ -1,16 +1,18 @@
+# gitStream による PR パイプライン自動化
+# レビュー時間見積もり（ETR）ラベル追加とドキュメント変更の自動承認を実行
 name: gitStream workflow automation
 on:
   pull_request:
+    # PRの作成、更新、再オープン、レビュー準備完了、ラベル変更時に実行
     types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
+# 同一PRに対する並行実行を防ぎ、最新の実行のみを保持
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
-  pull-requests: write
-  issues: write
 
 jobs:
   gitStream:
