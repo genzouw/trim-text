@@ -49,11 +49,7 @@ jobs:
           echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://genzouw.github.io/trim-text/llms.txt</loc></url><url><loc>https://genzouw.github.io/trim-text/llms-full.txt</loc></url></urlset>' > public/sitemap.xml
 
           # IndexNow key generation for pinging search engines (e.g. Bing)
-          if [ -n "$INDEXNOW_KEY" ]; then
-            echo "$INDEXNOW_KEY" > "public/$INDEXNOW_KEY.txt"
-          else
-            echo "INDEXNOW_KEY が未設定のため、キーファイル生成をスキップします。" >&2
-          fi
+          echo "$INDEXNOW_KEY" > "public/$INDEXNOW_KEY.txt"
 
       # Inline upload-pages-artifact: its internal actions/upload-artifact@v4 (unpinned) violates org SHA-pin policy
       - name: Archive Pages artifact
@@ -93,11 +89,6 @@ jobs:
         env:
           INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
         run: |
-          if [ -z "$INDEXNOW_KEY" ]; then
-            echo "INDEXNOW_KEY が未設定のため、IndexNow通知をスキップします。" >&2
-            exit 0
-          fi
-          KEY_LOC="https://genzouw.github.io/trim-text/${INDEXNOW_KEY}.txt"
-          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms.txt&key=$INDEXNOW_KEY&keyLocation=$KEY_LOC" || true
-          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms-full.txt&key=$INDEXNOW_KEY&keyLocation=$KEY_LOC" || true
-          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/&key=$INDEXNOW_KEY&keyLocation=$KEY_LOC" || true
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms.txt&key=$INDEXNOW_KEY" || true
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms-full.txt&key=$INDEXNOW_KEY" || true
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/&key=$INDEXNOW_KEY" || true
