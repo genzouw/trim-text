@@ -1,0 +1,7 @@
+---
+# Codacy 解析の除外設定
+# 参考: https://docs.codacy.com/repositories-configure/codacy-configuration-file/
+exclude_paths:
+  # SECURITY.md は人間向けドキュメント。Codacy の AI/エージェント向け
+  # ドキュメント解析 rule (priority signals 等) は不適合なため除外する。
+  - "SECURITY.md"
