@@ -12,14 +12,10 @@
 
 ## 脆弱性の報告方法
 
-セキュリティ上の問題を見つけた場合は、**公開 Issue を作成せず**、以下のいずれかの方法で非公開に連絡してください。
+セキュリティ上の問題を見つけた場合は、**公開 Issue を作成せず**、GitHub の **Private vulnerability reporting** から非公開に連絡してください。
 
-1. GitHub の **Private vulnerability reporting** を使う (推奨)
-   - リポジトリの `Security` タブ → `Report a vulnerability` から非公開でレポートを作成できます
-   - 参考: <https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability>
-2. メンテナへのメール
-   - 宛先: <genzouw@gmail.com>
-   - 件名に `[SECURITY] trim-text` を含めてください
+- リポジトリの `Security` タブ → `Report a vulnerability` から非公開レポートを作成する
+- 参考: <https://docs.github.com/en/code-security/security-advisories/guidance-on-reporting-and-writing-information-about-vulnerabilities/privately-reporting-a-security-vulnerability>
 
 報告には以下の情報を可能な範囲で含めてください。
 
