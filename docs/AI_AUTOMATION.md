@@ -142,6 +142,14 @@
   1. GitHub App として [gitStream](https://github.com/apps/gitstream-cm) をリポジトリにインストールしてください（公開リポジトリは無料）。
   2. インストール後、ダッシュボードからリポジトリを連携させてください。
 
+### 17. VulnHawk (AI-powered SAST Scanner)
+
+- **目的**: 従来のパターンマッチングツール（SemgrepやCodeQL）では見逃されがちな、認証バイパスやIDOR、ビジネスロジックのバグをLLM（生成AI）を用いて検出します。
+- **設定ファイル**: `.github/workflows/vulnhawk.yml`
+- **特徴**: OpenAI, Claude, Claude Code, またはローカルのOllamaをバックエンドとして活用し、高度なセキュリティスキャンを提供します。本リポジトリでは無料利用枠を考慮し、ローカルやClaude CodeのOAuthトークンなどを活用します。
+- **事前設定**:
+  1. GitHub Secrets に `CLAUDE_CODE_OAUTH_TOKEN` (Claude Codeを利用する場合)、または `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` 等を設定してください。完全無料で使用する場合はローカル環境のOllama等を利用してください。
+
 ## CI/CD との連携
 
 Dependabot や Renovate によるマイナー・パッチバージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。
