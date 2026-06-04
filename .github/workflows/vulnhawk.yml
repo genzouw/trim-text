@@ -27,8 +27,8 @@ jobs:
           persist-credentials: false
 
       - name: Run VulnHawk Security Scan
-        uses: momenbasel/vulnhawk@main
+        uses: momenbasel/vulnhawk@4db8bbc44f62a8cce4e287f32e5de015f846f8d0 # main
         with:
-          target: '.'
-          backend: 'claude-code'
+          target: "."
+          backend: "claude-code"
           claude-code-oauth-token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
