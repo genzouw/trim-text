@@ -5,14 +5,18 @@ on:
     branches:
       - main
 
-permissions:
-  contents: write
-  pull-requests: write
+# Declare default permissions as read only.
+permissions: read-all
 
 jobs:
   release-please:
     name: Release Please
     runs-on: ubuntu-latest
+    permissions:
+      # Needed to create release commits, tags, and GitHub releases.
+      contents: write
+      # Needed to open and update the release PR.
+      pull-requests: write
     steps:
       - name: Run release-please
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
