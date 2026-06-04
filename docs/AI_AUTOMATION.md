@@ -113,7 +113,7 @@
 
 - **目的**: Perplexity、ChatGPT Search、Google AI Overviews などの AI 検索エンジンがリポジトリのコンテキストを正しく理解し、参照できるようにします。
 - **設定ファイル**: `.github/workflows/repomix-pages.yml`
-- **特徴**: `llms.txt` だけでなく、`robots.txt` や `sitemap.xml` を自動生成し、AI ボットのクローラビリティを向上させます。
+- **特徴**: `llms.txt` だけでなく、`robots.txt` や `sitemap.xml` を自動生成し、AI ボットのクローラビリティを向上させます。また、IndexNowのPing機能を利用し、更新時にリアルタイムで検索エンジンに通知を送信します。
 
 ### 14. Aider (AI ペアプログラミング)
 
@@ -132,6 +132,15 @@
 - **事前設定**:
   1. VS Code に [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooCode.roo-cline) 拡張機能をインストールするか、[Windsurf IDE](https://codeium.com/windsurf) をインストールしてください。
   2. 各拡張機能・IDE 内の設定画面から、利用する LLM のプロバイダと API キーを設定してください。
+
+### 16. gitStream (PR Pipeline Automation)
+
+- **目的**: Pull Requestの規模に応じたレビュー時間の見積もり（ETR）算出や、ドキュメントのみの変更の自動承認など、継続的マージ（Continuous Merge）を自動化します。
+- **設定ファイル**: `.cm/gitstream.cm`, `.github/workflows/gitstream.yml`
+- **特徴**: リポジトリの運用ルールをコードとして定義し（Policy-as-Code）、レビュアーの負担軽減とマージまでのリードタイム短縮を実現します。
+- **事前設定**:
+  1. GitHub App として [gitStream](https://github.com/apps/gitstream-cm) をリポジトリにインストールしてください（公開リポジトリは無料）。
+  2. インストール後、ダッシュボードからリポジトリを連携させてください。
 
 ## CI/CD との連携
 

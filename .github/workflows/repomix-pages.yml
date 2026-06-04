@@ -29,6 +29,10 @@ jobs:
           node-version: 20
 
       - name: Run Repomix (Markdown for llms.txt)
+        # ${{ vars.INDEXNOW_KEY }} を run 本文に直接展開すると zizmor の template-injection 警告対象になるため、
+        # env 経由でシェル変数として参照し、コード注入リスクを抑制する。
+        env:
+          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
         run: |
           mkdir -p public
           npx --yes repomix --output public/llms-full.txt --style markdown
@@ -43,6 +47,13 @@ jobs:
           echo "Allow: /" >> public/robots.txt
           echo "Sitemap: https://genzouw.github.io/trim-text/sitemap.xml" >> public/robots.txt
           echo '<?xml version="1.0" encoding="UTF-8"?><urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"><url><loc>https://genzouw.github.io/trim-text/llms.txt</loc></url><url><loc>https://genzouw.github.io/trim-text/llms-full.txt</loc></url></urlset>' > public/sitemap.xml
+
+          # IndexNow key generation for pinging search engines (e.g. Bing)
+          if [ -n "$INDEXNOW_KEY" ]; then
+            echo "$INDEXNOW_KEY" > "public/$INDEXNOW_KEY.txt"
+          else
+            echo "INDEXNOW_KEY が未設定のため、キーファイル生成をスキップします。" >&2
+          fi
 
       # Inline upload-pages-artifact: its internal actions/upload-artifact@v4 (unpinned) violates org SHA-pin policy
       - name: Archive Pages artifact
@@ -75,3 +86,18 @@ jobs:
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@d6db90164ac5ed86f2b6aed7e0febac5b3c0c03e # v4
+
+      - name: Notify IndexNow
+        # ${{ vars.INDEXNOW_KEY }} を run 本文に直接展開すると zizmor の template-injection 警告対象になるため、
+        # env 経由でシェル変数として参照する。
+        env:
+          INDEXNOW_KEY: ${{ vars.INDEXNOW_KEY }}
+        run: |
+          if [ -z "$INDEXNOW_KEY" ]; then
+            echo "INDEXNOW_KEY が未設定のため、IndexNow通知をスキップします。" >&2
+            exit 0
+          fi
+          KEY_LOC="https://genzouw.github.io/trim-text/${INDEXNOW_KEY}.txt"
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms.txt&key=$INDEXNOW_KEY&keyLocation=$KEY_LOC" || true
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms-full.txt&key=$INDEXNOW_KEY&keyLocation=$KEY_LOC" || true
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/&key=$INDEXNOW_KEY&keyLocation=$KEY_LOC" || true
