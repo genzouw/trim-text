@@ -2,6 +2,8 @@
 
 [![Docker Pulls](https://img.shields.io/docker/pulls/genzouw/trim-text.svg?style=for-the-badge)](https://hub.docker.com/r/genzouw/trim-text/)
 [![Docker Cloud Automated build](https://img.shields.io/docker/cloud/automated/genzouw/trim-text.svg?style=for-the-badge)](https://hub.docker.com/r/genzouw/trim-text/)
+[![OpenSSF Best Practices](https://img.shields.io/badge/OpenSSF_Best_Practices-in_progress-yellow?style=for-the-badge)](https://www.bestpractices.dev/)
+[![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/genzouw/trim-text/badge)](https://scorecard.dev/viewer/?uri=github.com/genzouw/trim-text)
 
 [![dockeri.co](https://dockeri.co/image/genzouw/trim-text)](https://hub.docker.com/r/genzouw/trim-text)
 
@@ -44,7 +46,7 @@ alias tt='docker run -i genzouw/trim-text'
 
 ## Requirements
 
-* [Docker](https://www.docker.com)
+- [Docker](https://www.docker.com)
 
 ## Installation
 
@@ -54,10 +56,10 @@ No installation is required.
 
 You have the following options:
 
-* `-t` : Number of characters to trim from **top**
-* `-b` : Number of characters to trim from **bottom**
-* `-l` : Number of characters to trim from **left**
-* `-r` : Number of characters to trim from **right**
+- `-t` : Number of characters to trim from **top**
+- `-b` : Number of characters to trim from **bottom**
+- `-l` : Number of characters to trim from **left**
+- `-r` : Number of characters to trim from **right**
 
 ## License
 
@@ -67,7 +69,7 @@ This software is released under the MIT License, see LICENSE.
 
 [genzouw](https://genzouw.com)
 
-* Twitter   : @genzouw ( https://twitter.com/genzouw )
-* Facebook  : genzouw ( https://www.facebook.com/genzouw )
-* LinkedIn  : genzouw ( https://www.linkedin.com/in/genzouw/ )
-* Gmail     : genzouw@gmail.com
+- Twitter : @genzouw ( <https://twitter.com/genzouw> )
+- Facebook : genzouw ( <https://www.facebook.com/genzouw> )
+- LinkedIn : genzouw ( <https://www.linkedin.com/in/genzouw/> )
+- Gmail : <genzouw@gmail.com>
