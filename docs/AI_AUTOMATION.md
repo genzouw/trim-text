@@ -136,13 +136,11 @@
 ### 16. gitStream (PR Pipeline Automation)
 
 - **目的**: Pull Requestの規模に応じたレビュー時間の見積もり（ETR）算出や、ドキュメントのみの変更の自動承認など、継続的マージ（Continuous Merge）を自動化します。
-- **設定ファイル**: `.cm/gitstream.cm`
+- **設定ファイル**: `.cm/gitstream.cm`, `.github/workflows/gitstream.yml`
 - **特徴**: リポジトリの運用ルールをコードとして定義し（Policy-as-Code）、レビュアーの負担軽減とマージまでのリードタイム短縮を実現します。
 - **事前設定**:
-  1. GitHub App として [gitStream](https://github.com/apps/gitstream-cm) をリポジトリにインストールしてください（公開リポジトリは無料）。インストール完了時に gitStream 側が `repository_dispatch` トリガーのワークフローを自動でセットアップします。
+  1. GitHub App として [gitStream](https://github.com/apps/gitstream-cm) をリポジトリにインストールしてください（公開リポジトリは無料）。
   2. インストール後、ダッシュボードからリポジトリを連携させてください。
-
-> **Note**: `linear-b/gitstream-github-action` は GitHub App から `repository_dispatch` 経由でトリガーされる `client_payload` ベースの設計のため、本リポジトリでは自前の `.github/workflows/gitstream.yml` を持たず、App のセットアップに委ねる構成としています。
 
 ## CI/CD との連携
 
