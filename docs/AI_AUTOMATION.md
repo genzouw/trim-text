@@ -142,7 +142,7 @@
   1. GitHub App として [gitStream](https://github.com/apps/gitstream-cm) をリポジトリにインストールしてください（公開リポジトリは無料）。
   2. インストール後、ダッシュボードからリポジトリを連携させてください。
 
-### 17. VulnHawk (AI-powered SAST Scanner)
+### 17. [VulnHawk](https://github.com/momenbasel/vulnhawk) (AI-powered SAST Scanner)
 
 - **目的**: 従来のパターンマッチングツール（SemgrepやCodeQL）では見逃されがちな、認証バイパスやIDOR、ビジネスロジックのバグをLLM（生成AI）を用いて検出します。
 - **設定ファイル**: `.github/workflows/vulnhawk.yml`
