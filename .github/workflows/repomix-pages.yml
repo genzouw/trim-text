@@ -97,6 +97,7 @@ jobs:
             echo "INDEXNOW_KEY が未設定のため、IndexNow通知をスキップします。" >&2
             exit 0
           fi
-          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms.txt&key=$INDEXNOW_KEY" || true
-          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms-full.txt&key=$INDEXNOW_KEY" || true
-          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/&key=$INDEXNOW_KEY" || true
+          KEY_LOC="https://genzouw.github.io/trim-text/${INDEXNOW_KEY}.txt"
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms.txt&key=$INDEXNOW_KEY&keyLocation=$KEY_LOC" || true
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/llms-full.txt&key=$INDEXNOW_KEY&keyLocation=$KEY_LOC" || true
+          curl -s "https://api.indexnow.org/indexnow?url=https://genzouw.github.io/trim-text/&key=$INDEXNOW_KEY&keyLocation=$KEY_LOC" || true
