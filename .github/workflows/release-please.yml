@@ -19,6 +19,10 @@ jobs:
         with:
           app-id: ${{ secrets.RELEASE_PLEASE_APP_ID }}
           private-key: ${{ secrets.RELEASE_PLEASE_APP_PRIVATE_KEY }}
+          # release-please-action がリリース commit / tag / GitHub Release 作成のために必要
+          permission-contents: write
+          # release-please-action がリリース PR の作成・更新のために必要
+          permission-pull-requests: write
       - name: Run release-please
         uses: googleapis/release-please-action@45996ed1f6d02564a971a2fa1b5860e934307cf7 # v5.0.0
         with:
