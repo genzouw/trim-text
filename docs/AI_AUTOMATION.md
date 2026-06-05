@@ -162,7 +162,7 @@
 
 - **目的**: プロジェクト内で使用されているAIモデル、エージェント、API、および関連する脆弱性を自動検出し、ソフトウェア部品表(SBOM)やSARIF形式で可視化します。
 - **設定ファイル**: `.github/workflows/ai-bom.yml`
-- **特徴**: Trivy や Syft などの従来のSBOMツールでは検出が難しいAI固有のコンポーネントを検出し、GitHub Code Scanning と連携します。公開リポジトリ向けのActionとして無料で利用可能です。
+- **特徴**: [AI-BOM](https://github.com/safe-dep/ai-bom) は Trivy や Syft などの従来のSBOMツールでは検出が難しいAI固有のコンポーネントを検出し、GitHub Code Scanning と連携します。公開リポジトリ向けのActionとして無料で利用可能です。
 - **事前設定**:
   1. 特に追加の設定は不要ですが、GitHub の Code Scanning 機能が有効になっていることを確認してください。
 
