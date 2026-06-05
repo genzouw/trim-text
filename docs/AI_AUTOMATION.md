@@ -150,6 +150,22 @@
 - **事前設定**:
   1. GitHub Secrets に `CLAUDE_CODE_OAUTH_TOKEN` (Claude Codeを利用する場合)、または `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` 等を設定してください。完全無料で使用する場合はローカル環境のOllama等を利用してください。
 
+### 18. Vibecop (AIコード品質ゲート)
+
+- **目的**: LLMを使用しない決定論的な解析手法により、AIコーディングエージェントが導入しがちなスロップ（無駄なコメントや非効率なコード、セキュリティリスクなど）を検出し、コード品質を維持します。
+- **設定ファイル**: `.github/workflows/vibecop.yml`
+- **特徴**: [Vibecop](https://github.com/vibe-cop/vibecop) は PR 時の自動レビューに組み込まれ、`ast-grep`ベースの高速な静的解析を実行します。GitHub Actionsとして実行するため、利用は無料です。
+- **事前設定**:
+  1. 特に追加の設定は不要です。`.github/workflows/vibecop.yml` を通じて GitHub Actions 上で自動実行されます。
+
+### 19. AI-BOM (AI部品表・構成管理スキャナ)
+
+- **目的**: プロジェクト内で使用されているAIモデル、エージェント、API、および関連する脆弱性を自動検出し、ソフトウェア部品表(SBOM)やSARIF形式で可視化します。
+- **設定ファイル**: `.github/workflows/ai-bom.yml`
+- **特徴**: [AI-BOM](https://github.com/safe-dep/ai-bom) は Trivy や Syft などの従来のSBOMツールでは検出が難しいAI固有のコンポーネントを検出し、GitHub Code Scanning と連携します。公開リポジトリ向けのActionとして無料で利用可能です。
+- **事前設定**:
+  1. 特に追加の設定は不要ですが、GitHub の Code Scanning 機能が有効になっていることを確認してください。
+
 ## CI/CD との連携
 
 Dependabot や Renovate によるマイナー・パッチバージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。

@@ -1,0 +1,31 @@
+name: Vibecop AI Code Quality Gate
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  vibecop:
+    name: Vibecop Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Run Vibecop
+        uses: bhvbhushan/vibecop@7bd14c837a04c6c9bf464ff8fadee6d4fbb470ff
+        with:
+          on-failure: comment-only
+          severity-threshold: warning

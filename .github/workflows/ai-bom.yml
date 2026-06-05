@@ -1,0 +1,41 @@
+name: AI-BOM Scan
+
+on:
+  push:
+    branches: ["main"]
+  pull_request:
+    branches: ["main"]
+  schedule:
+    - cron: "0 0 * * 1"
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  security-events: write
+  contents: read
+
+jobs:
+  ai-bom:
+    name: AI-BOM Vulnerability and Components Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Scan for AI components
+        uses: trusera/ai-bom@012d53d389ca789f1d5b4a10135d42a6d0fa39f7 # main
+        with:
+          format: sarif
+          output: ai-bom-results.sarif
+          fail-on: critical
+          scan-level: deep
+
+      - name: Upload SARIF to Code Scanning
+        uses: github/codeql-action/upload-sarif@7211b7c8077ea37d8641b6271f6a365a22a5fbfa # v4.36.0
+        if: always()
+        with:
+          sarif_file: ai-bom-results.sarif
