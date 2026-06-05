@@ -154,7 +154,7 @@
 
 - **目的**: LLMを使用しない決定論的な解析手法により、AIコーディングエージェントが導入しがちなスロップ（無駄なコメントや非効率なコード、セキュリティリスクなど）を検出し、コード品質を維持します。
 - **設定ファイル**: `.github/workflows/vibecop.yml`
-- **特徴**: PR時の自動レビューに組み込まれ、`ast-grep`ベースの高速な静的解析を実行します。GitHub Actionsとして実行するため、利用は無料です。
+- **特徴**: [Vibecop](https://github.com/vibe-cop/vibecop) は PR 時の自動レビューに組み込まれ、`ast-grep`ベースの高速な静的解析を実行します。GitHub Actionsとして実行するため、利用は無料です。
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/vibecop.yml` を通じて GitHub Actions 上で自動実行されます。
 
