@@ -166,6 +166,15 @@
 - **事前設定**:
   1. 特に追加の設定は不要ですが、GitHub の Code Scanning 機能が有効になっていることを確認してください。
 
+### 20. Gemini AI Code Reviewer (AI コードレビューアシスタント)
+
+- **目的**: プルリクエストの作成や更新時に、Google の強力な LLM である Gemini を活用して、コードレビューを自動的に実行します。
+- **設定ファイル**: `.github/workflows/ai-codereviewer.yml`
+- **特徴**: `truongnh1992/gemini-ai-code-reviewer` を使用し、プルリクエストの差分に対して自動的にレビューコメントを生成します。AI モデルとして `gemini-2.5-flash` を利用し、コスト効率と高速なレスポンスを実現しています。公開リポジトリでは GitHub Actions 経由で実質無料で導入が可能です（Gemini API の無料枠などを活用）。
+- **事前設定**:
+  1. Google AI Studio などで Gemini API の API キーを取得してください。
+  2. 対象リポジトリの **Settings** > **Secrets and variables** > **Actions** にて、`GEMINI_API_KEY` という名前で取得した API キーを登録してください。
+
 ## CI/CD との連携
 
 Dependabot や Renovate によるマイナー・パッチバージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。
