@@ -164,9 +164,8 @@
 - **設定ファイル**: `.github/workflows/ai-codereviewer.yml`
 - **特徴**: 最新の `gemini-2.5-pro` モデルを活用し、高度な文脈理解に基づいた精度の高いレビューを無料で提供します。特定ファイルの除外(`EXCLUDE`)設定により、不要なノイズを減らすことができます。
 - **事前設定**:
-  1. [Google AI Studio](https://makersuite.google.com/app/apikey) にサインインし、Gemini API キーを発行してください。
+  1. [Google AI Studio](https://aistudio.google.com/app/apikey) にサインインし、Gemini API キーを発行してください。
   2. 発行した API キーを、GitHub リポジトリの Settings > Secrets and variables > Actions に `GEMINI_API_KEY` という名前で登録してください。
-
 
 ### 20. AI-BOM (AI部品表・構成管理スキャナ)
 
