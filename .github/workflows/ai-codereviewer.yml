@@ -46,8 +46,8 @@ jobs:
           REPOSITORY: ${{ github.repository }}
         run: |
           PR_JSON=$(gh api repos/"$REPOSITORY"/pulls/"$ISSUE_NUMBER")
-          echo "head_sha=$(echo $PR_JSON | jq -r .head.sha)" >> "$GITHUB_OUTPUT"
-          echo "base_sha=$(echo $PR_JSON | jq -r .base.sha)" >> "$GITHUB_OUTPUT"
+          echo "head_sha=$(echo "$PR_JSON" | jq -r .head.sha)" >> "$GITHUB_OUTPUT"
+          echo "base_sha=$(echo "$PR_JSON" | jq -r .base.sha)" >> "$GITHUB_OUTPUT"
 
       # Gemini AI を使用したコードレビューを実行します
       # /gemini-review のコメントでトリガーされ、差分を分析してレビュー結果を PR にコメントします
