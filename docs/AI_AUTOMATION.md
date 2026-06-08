@@ -158,7 +158,17 @@
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/vibecop.yml` を通じて GitHub Actions 上で自動実行されます。
 
-### 19. AI-BOM (AI部品表・構成管理スキャナ)
+### 19. Gemini AI Code Reviewer
+
+- **目的**: プルリクエストのコメント欄で `/gemini-review` と入力することで、Google の Gemini AI を使用したコードレビューを自動実行し、改善提案やフィードバックを取得します。
+- **設定ファイル**: `.github/workflows/ai-codereviewer.yml`
+- **特徴**: 最新の `gemini-2.5-pro` モデルを活用し、高度な文脈理解に基づいた精度の高いレビューを無料で提供します。特定ファイルの除外(`EXCLUDE`)設定により、不要なノイズを減らすことができます。
+- **事前設定**:
+  1. [Google AI Studio](https://makersuite.google.com/app/apikey) にサインインし、Gemini API キーを発行してください。
+  2. 発行した API キーを、GitHub リポジトリの Settings > Secrets and variables > Actions に `GEMINI_API_KEY` という名前で登録してください。
+
+
+### 20. AI-BOM (AI部品表・構成管理スキャナ)
 
 - **目的**: プロジェクト内で使用されているAIモデル、エージェント、API、および関連する脆弱性を自動検出し、ソフトウェア部品表(SBOM)やSARIF形式で可視化します。
 - **設定ファイル**: `.github/workflows/ai-bom.yml`

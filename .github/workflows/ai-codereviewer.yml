@@ -1,0 +1,60 @@
+name: Gemini AI Code Reviewer
+
+on:
+  issue_comment:
+    types: [created]
+
+permissions:
+  contents: read
+  pull-requests: write
+  issues: write
+
+jobs:
+  gemini-code-review:
+    name: Gemini AI Code Review
+    runs-on: ubuntu-latest
+    if: |
+      github.event.issue.pull_request &&
+      contains(github.event.comment.body, '/gemini-review')
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@91182cccc01ce5e619899e81a42252b88c528f81 # v2.10.1
+        with:
+          egress-policy: audit
+
+      - name: PR Info
+        env:
+          COMMENT_BODY: ${{ github.event.comment.body }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          echo "Comment: $COMMENT_BODY"
+          echo "Issue Number: $ISSUE_NUMBER"
+          echo "Repository: $REPOSITORY"
+
+      - name: Checkout Repo
+        uses: actions/checkout@df4cb1c069e1874edd31b4311f1884172cec0e10 # v6.0.3
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      - name: Get PR Details
+        id: pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPOSITORY: ${{ github.repository }}
+        run: |
+          PR_JSON=$(gh api repos/"$REPOSITORY"/pulls/"$ISSUE_NUMBER")
+          echo "head_sha=$(echo $PR_JSON | jq -r .head.sha)" >> "$GITHUB_OUTPUT"
+          echo "base_sha=$(echo $PR_JSON | jq -r .base.sha)" >> "$GITHUB_OUTPUT"
+
+      # Gemini AI を使用したコードレビューを実行します
+      # /gemini-review のコメントでトリガーされ、差分を分析してレビュー結果を PR にコメントします
+      - name: Gemini AI Code Review
+        uses: truongnh1992/gemini-ai-code-reviewer@a646cde6cf08db86df952dbd404c0ab61eefab00 # main
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GEMINI_MODEL: gemini-2.5-pro # より高度なモデルを指定
+          EXCLUDE: "*.md,*.txt,package-lock.json,*.yml,*.yaml"
