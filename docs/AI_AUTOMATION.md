@@ -36,7 +36,15 @@
   1. GitHub App として [CodeRabbit](https://github.com/apps/coderabbitai) をインストールしてください（公開 OSS リポジトリは無料）。
   2. プロジェクトのダッシュボードからリポジトリを有効化し、適切な権限を付与してください。
 
-### 3. Sweep AI
+### 3. Gemini AI Code Reviewer
+
+- **目的**: Google の Gemini AI モデルを使用して、Pull Request のコードレビューを自動的に実行します。
+- **設定ファイル**: `.github/workflows/ai-codereviewer.yml`
+- **特徴**: GitHub Actions として動作し、最新の `gemini-2.5-flash` などのモデルを利用したコードレビューを提供します。公開リポジトリ向けのActionとして無料で利用可能です。
+- **事前設定**:
+  1. GitHub Secrets に `GEMINI_API_KEY` を設定してください。
+
+### 4. Sweep AI
 
 - **目的**: Issue の内容に基づき、AI がリポジトリ全体をコンテキストとして読み込み、自動でコードの修正と Pull Request の作成を行う自律型エージェントです。
 - **設定ファイル**: `sweep.yaml`
@@ -45,7 +53,7 @@
   1. GitHub App として [Sweep](https://github.com/apps/sweep-ai) をインストールしてください（公開リポジトリは無料）。
   2. リポジトリへのアクセス権限を付与することで、Issue に `sweep:` などのトリガーをつけるか Sweep が自動でタスクをピックアップして動作し始めます。
 
-### 4. Bloop AI (AIコード検索エンジン)
+### 5. Bloop AI (AIコード検索エンジン)
 
 - **目的**: リポジトリ全体をインデックス化し、自然言語による検索やコードベースに関する質問を可能にします。
 - **設定ファイル**: `.bloopignore`
@@ -54,7 +62,7 @@
   1. GitHub App として [bloop](https://github.com/apps/bloop-ai) をインストールしてください（公開リポジトリは無料）。
   2. インストール後、リポジトリへのアクセス権限を付与してください。
 
-### 5. Repomix (LLM 向けリポジトリコンテキスト生成) とサーチサービス連携
+### 6. Repomix (LLM 向けリポジトリコンテキスト生成) とサーチサービス連携
 
 - **目的**: AI アシスタントや LLM、AI 検索エンジンに対して、リポジトリ全体の構造や主要なコードを読み込ませるためのコンテキストファイル（XML、および `llms.txt` 規格の Markdown）を自動生成します。
 - **設定ファイル**: `.github/workflows/repomix.yml`
@@ -62,7 +70,7 @@
 - **事前設定**:
   1. リポジトリの `Settings` > `Pages` から、**Build and deployment** の Source を **GitHub Actions** に設定し、GitHub Pages を有効化してください。
 
-### 6. OSSF Scorecard (サプライチェーンセキュリティ・品質評価)
+### 7. OSSF Scorecard (サプライチェーンセキュリティ・品質評価)
 
 - **目的**: 業界標準の品質・セキュリティ評価ツールを利用して、公開リポジトリの継続的なセキュリティスキャンと品質チェック（トークン権限、ブランチ保護、テストの有無など）を行います。
 - **設定ファイル**: `.github/workflows/scorecard.yml`
@@ -70,7 +78,7 @@
 - **事前設定**:
   1. 特に追加の App インストールは不要ですが、GitHub の Code Scanning の機能を有効化していることを確認してください。
 
-### 7. DeepSource (AIを活用した静的解析と自動修正)
+### 8. DeepSource (AIを活用した静的解析と自動修正)
 
 - **目的**: AI による高度な静的解析と Autofix（自動修正）機能を利用して、シェルスクリプトや Dockerfile の品質向上とセキュリティ強化を図ります。
 - **設定ファイル**: `.deepsource.toml`
@@ -79,7 +87,7 @@
   1. GitHub App として [DeepSource](https://github.com/apps/deepsource) をインストールしてください（公開 OSS リポジトリは無料）。
   2. プロジェクトのダッシュボードからリポジトリを連携し、初期設定を行ってください。
 
-### 8. Mend Renovate (高度な依存関係管理)
+### 9. Mend Renovate (高度な依存関係管理)
 
 - **目的**: Dependabot よりさらに高度な依存関係の自動更新・グルーピング・マージ制御を行います。
 - **設定ファイル**: `renovate.json`
@@ -87,7 +95,7 @@
 - **事前設定**:
   1. GitHub App として [Mend Renovate](https://github.com/apps/renovate) をインストールしてください（公開リポジトリは無料）。
 
-### 9. Release Please (リリース自動化)
+### 10. Release Please (リリース自動化)
 
 - **目的**: Conventional Commits に基づいてリリース PR を自動生成し、セマンティックバージョニングによるタグ付けと CHANGELOG 生成を行います。
 - **設定ファイル**: `.github/workflows/release-please.yml`
@@ -95,7 +103,7 @@
 - **事前設定**:
   1. コミットメッセージに Conventional Commits の形式（`feat:`, `fix:`, `chore:` 等）を厳密に守るようにしてください。
 
-### 10. Devcontainer (開発環境のコード化)
+### 11. Devcontainer (開発環境のコード化)
 
 - **目的**: 開発環境を Docker コンテナとして定義し、チーム全体や AI エージェントが同一の環境で開発・テストを行えるようにします。
 - **設定ファイル**: `.devcontainer/devcontainer.json`
@@ -103,7 +111,7 @@
 - **事前設定**:
   1. 特に追加の設定は不要ですが、Devcontainer に対応した IDE（VS Code, Cursor など）で「Reopen in Container」を選択して起動してください。
 
-### 11. Continue.dev (AI コーディングアシスタント)
+### 12. Continue.dev (AI コーディングアシスタント)
 
 - **目的**: オープンソースの AI アシスタントである Continue を活用し、リポジトリ固有のコンテキストを考慮したコード生成や質問対応を行います。
 - **設定ファイル**: `.continue/config.json`
@@ -112,7 +120,7 @@
   1. VS Code や Cursor などの拡張機能として [Continue](https://continue.dev/) をインストールしてください。
   2. リポジトリの `.continue/config.json` が自動的に読み込まれ、プロジェクト固有のルール（`sweep.yaml` など）が適用されます。
 
-### 12. StepSecurity Harden-Runner (CI/CD サプライチェーンセキュリティ)
+### 13. StepSecurity Harden-Runner (CI/CD サプライチェーンセキュリティ)
 
 - **目的**: GitHub Actions 実行時の予期せぬ外部通信を監視・遮断し、サプライチェーン攻撃（依存関係の改ざんによる情報漏洩など）を防止します。
 - **設定ファイル**: 各種ワークフロー（例: `.github/workflows/docker-build.yml` など）
@@ -120,13 +128,13 @@
 - **事前設定**:
   1. ワークフローに追加された `step-security/harden-runner` アクションにより自動的に適用されます。
 
-### 13. LLM SEO / GEO (AI検索エンジン最適化)
+### 14. LLM SEO / GEO (AI検索エンジン最適化)
 
 - **目的**: Perplexity、ChatGPT Search、Google AI Overviews などの AI 検索エンジンがリポジトリのコンテキストを正しく理解し、参照できるようにします。
 - **設定ファイル**: `.github/workflows/repomix-pages.yml`
 - **特徴**: `llms.txt` だけでなく、`robots.txt` や `sitemap.xml` を自動生成し、AI ボットのクローラビリティを向上させます。また、IndexNowのPing機能を利用し、更新時にリアルタイムで検索エンジンに通知を送信します。
 
-### 14. Aider (AI ペアプログラミング)
+### 15. Aider (AI ペアプログラミング)
 
 - **目的**: ターミナル上で動作するAIペアプログラミングツールとして、コードの変更、リファクタリング、バグ修正を対話的に行います。
 - **設定ファイル**: `.aider.conf.yml`
@@ -135,7 +143,7 @@
   1. ローカル環境に Aider をインストールしてください（例: `pip install aider-chat`）。
   2. 利用する LLM の API キー（例: `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`）を環境変数に設定して実行してください。
 
-### 15. Roo Code (旧 Cline) / Windsurf (AI IDE アシスタント)
+### 16. Roo Code (旧 Cline) / Windsurf (AI IDE アシスタント)
 
 - **目的**: VS Code 拡張機能や専用 IDE を通じて、自律型の AI エージェントとしてタスクを処理します。
 - **設定ファイル**: `.clinerules`, `.windsurfrules`
@@ -144,7 +152,7 @@
   1. VS Code に [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooCode.roo-cline) 拡張機能をインストールするか、[Windsurf IDE](https://codeium.com/windsurf) をインストールしてください。
   2. 各拡張機能・IDE 内の設定画面から、利用する LLM のプロバイダと API キーを設定してください。
 
-### 16. gitStream (PR Pipeline Automation)
+### 17. gitStream (PR Pipeline Automation)
 
 - **目的**: Pull Requestの規模に応じたレビュー時間の見積もり（ETR）算出や、ドキュメントのみの変更の自動承認など、継続的マージ（Continuous Merge）を自動化します。
 - **設定ファイル**: `.cm/gitstream.cm`, `.github/workflows/gitstream.yml`
@@ -153,7 +161,7 @@
   1. GitHub App として [gitStream](https://github.com/apps/gitstream-cm) をリポジトリにインストールしてください（公開リポジトリは無料）。
   2. インストール後、ダッシュボードからリポジトリを連携させてください。
 
-### 17. VulnHawk (AI-powered SAST Scanner)
+### 18. VulnHawk (AI-powered SAST Scanner)
 
 - **目的**: 従来のパターンマッチングツール（SemgrepやCodeQL）では見逃されがちな、認証バイパスやIDOR、ビジネスロジックのバグをLLM（生成AI）を用いて検出します。
 - **設定ファイル**: `.github/workflows/vulnhawk.yml`
@@ -161,7 +169,7 @@
 - **事前設定**:
   1. GitHub Secrets に `CLAUDE_CODE_OAUTH_TOKEN` (Claude Codeを利用する場合)、または `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` 等を設定してください。完全無料で使用する場合はローカル環境のOllama等を利用してください。
 
-### 18. Vibecop (AIコード品質ゲート)
+### 19. Vibecop (AIコード品質ゲート)
 
 - **目的**: LLMを使用しない決定論的な解析手法により、AIコーディングエージェントが導入しがちなスロップ（無駄なコメントや非効率なコード、セキュリティリスクなど）を検出し、コード品質を維持します。
 - **設定ファイル**: `.github/workflows/vibecop.yml`
@@ -169,7 +177,7 @@
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/vibecop.yml` を通じて GitHub Actions 上で自動実行されます。
 
-### 19. AI-BOM (AI部品表・構成管理スキャナ)
+### 20. AI-BOM (AI部品表・構成管理スキャナ)
 
 - **目的**: プロジェクト内で使用されているAIモデル、エージェント、API、および関連する脆弱性を自動検出し、ソフトウェア部品表(SBOM)やSARIF形式で可視化します。
 - **設定ファイル**: `.github/workflows/ai-bom.yml`
