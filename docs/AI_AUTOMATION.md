@@ -39,8 +39,8 @@
 ### 3. Gemini AI Code Reviewer
 
 - **目的**: Google の Gemini AI モデルを使用して、Pull Request のコードレビューを自動的に実行します。
-- **設定ファイル**: `.github/workflows/ai-codereviewer.yml`
-- **特徴**: GitHub Actions として動作し、最新の `gemini-2.5-flash` などのモデルを利用したコードレビューを提供します。公開リポジトリ向けのActionとして無料で利用可能です。
+- **設定ファイル**: なし（GitHub App として動作するため、ワークフローファイルは不要です）
+- **特徴**: GitHub App として動作し、最新の Gemini モデルを利用したコードレビューを提供します。公開リポジトリ向けに無料で利用可能です。
 - **事前設定**:
   1. GitHub Secrets に `GEMINI_API_KEY` を設定してください。
 
