@@ -42,7 +42,8 @@
 - **設定ファイル**: なし（GitHub App として動作するため、ワークフローファイルは不要です）
 - **特徴**: GitHub App として動作し、最新の Gemini モデルを利用したコードレビューを提供します。公開リポジトリ向けに無料で利用可能です。
 - **事前設定**:
-  1. GitHub Secrets に `GEMINI_API_KEY` を設定してください。
+  1. GitHub App として [Gemini Code Assist](https://github.com/apps/gemini-code-assist) をリポジトリにインストールしてください（公開リポジトリは無料）。
+  2. インストール後、リポジトリへのアクセス権限（Read & Write）を付与してください。
 
 ### 4. Sweep AI
 
