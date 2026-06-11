@@ -168,7 +168,8 @@
 - **設定ファイル**: `.github/workflows/vulnhawk.yml`
 - **特徴**: [VulnHawk](https://github.com/momenbasel/vulnhawk) は OpenAI, Claude, Claude Code, またはローカルのOllamaをバックエンドとして活用し、高度なセキュリティスキャンを提供します。本リポジトリでは無料利用枠を考慮し、ローカルやClaude CodeのOAuthトークンなどを活用します。
 - **事前設定**:
-  1. GitHub Secrets に `CLAUDE_CODE_OAUTH_TOKEN` (Claude Codeを利用する場合)、または `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` 等を設定してください。完全無料で使用する場合はローカル環境のOllama等を利用してください。
+  1. **CI 上での実行**は、ローカルの Ollama 等の無料・非 Secret バックエンドのみを使用してください。リポジトリの CI/CD ポリシー（有料 API キーを要求する Workflow の新規追加禁止）に従い、`ANTHROPIC_API_KEY` や `OPENAI_API_KEY` 等の有料 API キーを GitHub Secrets に登録して CI で使用することは禁止です。
+  2. **ローカル / 手動実行**の場合は、`CLAUDE_CODE_OAUTH_TOKEN`（Claude Code OAuth）、`ANTHROPIC_API_KEY`、`OPENAI_API_KEY` 等を環境変数として設定することができます。これらは **ローカル環境でのみ使用し、GitHub Secrets への登録および CI への組み込みは行わないでください**。
 
 ### 19. Vibecop (AIコード品質ゲート)
 
