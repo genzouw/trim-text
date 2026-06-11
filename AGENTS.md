@@ -29,13 +29,13 @@
 - 完全無料の GitHub Action / Workflow
 - ローカル LLM（Ollama 等）を用いる、Secrets 不要の自動化
 
-### AI コードレビューを追加したい場合
+### 導入済みの AI ツール / 連携サービス
 
 本リポジトリでは、以下の **完全無料の GitHub App** が既に設定されています。重複する PR を作らないでください。
 
-- [CodeRabbit](https://github.com/apps/coderabbitai) — `.coderabbit.yaml`
-- [PR-Agent (Qodo Merge)](https://github.com/apps/qodo-merge) — `.pr_agent.toml`
-- [Gemini Code Assist](https://github.com/apps/gemini-code-assist) — GitHub App（API キー不要）
+- [CodeRabbit](https://github.com/apps/coderabbitai) — `.coderabbit.yaml`（コードレビュー用）
+- [PR-Agent (Qodo Merge)](https://github.com/apps/qodo-merge) — `.pr_agent.toml`（コードレビュー用）
+- [Gemini Code Assist](https://github.com/apps/gemini-code-assist) — GitHub App（リポジトリインデックス用、API キー不要）
 
 `truongnh1992/gemini-ai-code-reviewer` のような **GEMINI_API_KEY を必要とする Action ベースの実装は導入禁止** です（[PR #68](https://github.com/genzouw/trim-text/pull/68) はこの理由でクローズされました）。
 
