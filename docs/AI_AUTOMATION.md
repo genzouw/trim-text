@@ -181,9 +181,10 @@
 
 - **目的**: プルリクエストにて `/gemini-review` とコメントすることで、Gemini の強力な推論能力を活用して指定したファイルや差分に対するコードレビューをオンデマンドで実行します。
 - **設定ファイル**: `.github/workflows/ai-codereviewer.yml`
-- **特徴**: Google の `gemini-2.5-flash` モデルを使用し、高速かつコンテキストを考慮したコードの改善提案を行います。公開リポジトリ向けのActionとして無料で利用可能です。
+- **特徴**: Google の `gemini-2.5-flash` モデルを使用し、高速かつコンテキストを考慮したコードの改善提案を行います。`/gemini-review` コメントによる手動トリガー方式のため、API 使用量を管理できます。
+- **⚠️ ポリシー注意事項**: 本ツールは `GEMINI_API_KEY`（Gemini API キー）を `Secrets` に登録して使用するため、本リポジトリ CI/CD ポリシーの例外として扱います。`gemini-2.5-flash` には無料枠（Rate Limit あり）が提供されており、手動トリガーによる使用量管理を前提として導入しています。無料枠の上限と課金条件は公式料金プランを必ず確認してください: [Gemini API Pricing](https://ai.google.dev/gemini-api/docs/pricing)
 - **事前設定**:
-  1. [Google AI Studio](https://aistudio.google.com/) にアクセスし、無料の Gemini API キーを取得してください。
+  1. [Google AI Studio](https://aistudio.google.com/) にアクセスし、Gemini API キーを取得してください。
   2. 取得した API キーを、対象リポジトリの **Settings > Secrets and variables > Actions** にて `GEMINI_API_KEY` という名前で登録してください。
 
 ## CI/CD との連携
