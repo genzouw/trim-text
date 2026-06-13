@@ -4,9 +4,14 @@ on: [pull_request]
 jobs:
   review:
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
     steps:
-      - uses: actions/checkout@v4
-      - uses: raye-deng/open-code-review@v1
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - uses: raye-deng/open-code-review@17ded117b47b32e958a62d1d2d9a2f8d8bb0fcff # v1
         with:
           sla: L1
           threshold: 60
