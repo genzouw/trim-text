@@ -191,7 +191,8 @@
 - **設定ファイル**: `.github/workflows/rabbitai.yml`
 - **特徴**: LangGraphエージェントを活用したオープンソースのAIコードレビュワーです。
 - **事前設定**:
-  1. 利用するプロバイダに応じて `GEMINI_API_KEY`, `PINECONE_API_KEY`, `OPENAI_API_KEY` を GitHub のリポジトリ `Secrets` に設定してください。
+  1. API キーを設定しない場合、ワークフローは自動的にスキップされます（デフォルト状態では何も実行されません）。
+  2. 有料 API キー（`GEMINI_API_KEY`, `PINECONE_API_KEY`, `OPENAI_API_KEY` 等）を利用する場合は、本ドキュメント冒頭の「CI/CD で利用するサービスのポリシー」を確認してください。有料 API の利用は **PR 作成前に Issue で提案し、リポジトリオーナーの明示的な承認を得る**必要があります。
 
 ## CI/CD との連携
 
