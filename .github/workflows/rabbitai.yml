@@ -28,7 +28,7 @@ jobs:
         run: pip install rabbitai-reviewer==0.1.6
 
       - name: Run RabbitAI
-        if: ${{ github.event.pull_request.head.repo.fork == false && secrets.GEMINI_API_KEY != '' }}
+        if: ${{ github.event.pull_request.head.repo.fork == false }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
