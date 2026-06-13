@@ -1,0 +1,13 @@
+name: Open Code Review
+on: [pull_request]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: raye-deng/open-code-review@v1
+        with:
+          sla: L1
+          threshold: 60
+          github-token: ${{ secrets.GITHUB_TOKEN }}

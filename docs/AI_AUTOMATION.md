@@ -177,6 +177,22 @@
 - **事前設定**:
   1. 特に追加の設定は不要ですが、GitHub の Code Scanning 機能が有効になっていることを確認してください。
 
+### 20. Open Code Review
+
+- **目的**: AIが生成したコード向けの品質ゲートとして動作します。
+- **設定ファイル**: `.github/workflows/open-code-review.yml`
+- **特徴**: 従来のLinterとは異なり、AIにより生成されたコード向けのレビューを行います。
+- **事前設定**:
+  1. 特に追加の設定は不要です。自動的に `GITHUB_TOKEN` を利用して実行されます。
+
+### 21. RabbitAI
+
+- **目的**: AIを活用した自動のコードレビューを提供します。
+- **設定ファイル**: `.github/workflows/rabbitai.yml`
+- **特徴**: LangGraphエージェントを活用したオープンソースのAIコードレビュワーです。
+- **事前設定**:
+  1. 利用するプロバイダに応じて `GEMINI_API_KEY`, `PINECONE_API_KEY`, `OPENAI_API_KEY` を GitHub のリポジトリ `Secrets` に設定してください。
+
 ## CI/CD との連携
 
 Dependabot や Renovate によるマイナー・パッチバージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。

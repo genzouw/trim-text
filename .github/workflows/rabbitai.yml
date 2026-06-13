@@ -1,0 +1,56 @@
+name: RabbitAI Code Review
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+
+    permissions:
+      pull-requests: write
+      contents: read
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install RabbitAI
+        run: pip install --upgrade rabbitai-reviewer
+
+      - name: Run RabbitAI
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PINECONE_API_KEY: ${{ secrets.PINECONE_API_KEY }}
+          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          VECTOR_STORE_PROVIDER: ${{ vars.VECTOR_STORE_PROVIDER }}
+          EMBEDDING_PROVIDER: ${{ vars.EMBEDDING_PROVIDER }}
+          EMBEDDING_MODEL: ${{ vars.EMBEDDING_MODEL }}
+          LLM_PROVIDER: ${{ vars.LLM_PROVIDER }}
+          LLM_MODEL: ${{ vars.LLM_MODEL }}
+          REVIEW_LANGUAGE: ${{ vars.REVIEW_LANGUAGE }}
+        run: |
+          python -c "
+          import os
+          from rabbitai.agent import run
+
+          repo = os.environ['GITHUB_REPOSITORY']
+          pr_number = int(os.environ['PR_NUMBER'])
+
+          result = run(repo, pr_number)
+          if result.posted:
+              print(f'Review posted: {result.comment_url}')
+          else:
+              print(f'Skipped: {result.reason}')
+          "
