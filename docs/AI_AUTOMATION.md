@@ -182,6 +182,24 @@
 Dependabot や Renovate によるマイナー・パッチバージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。
 さらに、pre-commit.ci によるコードの自動フォーマットや、Release Please によるリリースPRの自動作成など、CI/CD における様々な自動化が導入されています。
 
+### 20. Open Code Review
+
+- **目的**: LLM エージェントを利用して、ソースコードの変更差分からより深く、正確なコードレビュー（セキュリティ、バグ、パフォーマンス問題などの検出）を実行します。
+- **設定ファイル**: `.github/workflows/open-code-review.yml`
+- **特徴**: アリババがオープンソース化した、決定論的パイプラインと LLM エージェントを組み合わせたハイブリッドなアーキテクチャのコードレビューツールです。コンテキストの幻覚や位置ズレを防ぎ、精密なレビューを提供します。
+- **事前設定**:
+  1. GitHub Secrets に `OCR_LLM_URL` (LLM API のエンドポイント。例: `https://api.openai.com/v1/chat/completions`) および `OCR_LLM_AUTH_TOKEN` (API キー) を設定してください。
+  2. （オプション） `OCR_LLM_MODEL` を設定することで、利用するモデルを変更できます（デフォルトは `gpt-4o` ですが、適宜無料枠のローカルモデルやプロバイダを指定することも可能です）。
+
+### 21. Gemini AI Code Reviewer
+
+- **目的**: プルリクエスト作成時に、GoogleのGemini AIを使用してコード変更のレビューと改善の提案を行います。
+- **設定ファイル**: `.github/workflows/ai-codereviewer.yml`
+- **特徴**: コメントやコードベースの分析を通じて、バグの検出、ベストプラクティスの提案などを自動で行います。パブリックリポジトリでは無料で使用できるGemini APIを活用しています。
+- **事前設定**:
+  1. [Google AI Studio](https://makersuite.google.com/app/apikey) にてGemini API キーを取得します。
+  2. 取得したキーを GitHub Secrets に `GEMINI_API_KEY` として登録してください。
+
 ## プルリクエスト作成時の注意事項
 
 これらの AI ツールは、プルリクエストの概要（Description）やコミットメッセージをコンテキストとして活用します。そのため、PULL_REQUEST_TEMPLATE に沿って、**「なぜこの変更を行ったか」を日本語で明確に記述**するように心がけてください。
