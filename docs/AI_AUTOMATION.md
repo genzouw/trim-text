@@ -183,7 +183,7 @@
 - **設定ファイル**: `.github/workflows/ai-codereviewer.yml`
 - **特徴**: `truongnh1992/gemini-ai-code-reviewer` GitHub Action を利用し、PR の差分を Gemini に送信してフィードバックを得ます。GitHub の公開リポジトリ向けの無料ツール・サービスを利用するというポリシーに準拠しています。
 - **事前設定**:
-  1. GitHub Secrets に `GEMINI_API_KEY` を設定してください。Gemini API は一定の利用枠まで無料で利用可能です。
+  1. GitHub Secrets に `GEMINI_API_KEY` を設定してください。Gemini API は一定の利用枠まで無料で利用可能です（料金プランの詳細は [Google AI Studio Pricing](https://ai.google.dev/pricing) を参照してください。無料プランの範囲内では課金は発生しません）。
 
 ## CI/CD との連携
 
