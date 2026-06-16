@@ -66,6 +66,9 @@ jobs:
         with:
           fetch-depth: 0 # Full history needed for merge-base diff
 
+      # NOTE: This step fetches PR commits for diff analysis only (no code execution).
+      # CodeQL flags this pattern as "untrusted code in privileged context" (code-scanning/35).
+      # A proper fix (workflow_run architecture) is tracked in issue #80.
       - name: Fetch PR head ref (ensures fork commits are available)
         env:
           PR_NUMBER: ${{ github.event.pull_request.number || github.event.issue.number }}
