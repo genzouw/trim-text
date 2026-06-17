@@ -2,8 +2,9 @@ FROM alpine:3.24.1@sha256:28bd5fe8b56d1bd048e5babf5b10710ebe0bae67db86916198a6ee
 
 LABEL maintainer "genzouw <genzouw@gmail.com>"
 
-RUN apk add --no-cache \
-  bash \
+RUN apk upgrade --no-cache \
+  && apk add --no-cache \
+    bash \
   ;
 
 # 非 root ユーザーで実行することでコンテナエスケープのリスクを低減する (Trivy DS-0002)。
