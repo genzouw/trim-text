@@ -8,3 +8,6 @@ rules:
   dangerous-triggers:
     ignore:
       - labeler.yml
+      # pull_request_target is used for fork secret access; workflow only reads the diff
+      # and does not execute any code from the PR. Proper fix tracked in issue #80.
+      - open-code-review.yml

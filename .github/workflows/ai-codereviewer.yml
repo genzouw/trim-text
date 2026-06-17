@@ -18,10 +18,12 @@ jobs:
       (github.event_name == 'issue_comment' && github.event.issue.pull_request && contains(github.event.comment.body, '/gemini-review'))
     steps:
       - name: Checkout Repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
 
       - name: Gemini AI Code Review
-        uses: truongnh1992/gemini-ai-code-reviewer@v1.4
+        uses: truongnh1992/gemini-ai-code-reviewer@2f1b580ca5182e30cdebf1bd857513758a42d3a5 # v1.0.3
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           gemini_api_key: ${{ secrets.GEMINI_API_KEY }}
