@@ -374,3 +374,16 @@ jobs:
               const maxTicks = matches.reduce((max, ticks) => Math.max(max, ticks.length), 0);
               return '`'.repeat(Math.max(3, maxTicks + 1));
             }
+
+  raye-review:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request_target'
+    steps:
+      - uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
+        with:
+          persist-credentials: false
+      - uses: raye-deng/open-code-review@17ded117b47b32e958a62d1d2d9a2f8d8bb0fcff # v1
+        with:
+          sla: L1
+          threshold: 60
+          github-token: ${{ secrets.GITHUB_TOKEN }}
