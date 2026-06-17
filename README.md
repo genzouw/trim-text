@@ -61,6 +61,12 @@ You have the following options:
 - `-l` : Number of characters to trim from **left**
 - `-r` : Number of characters to trim from **right**
 
+## CI/CD Policy (For Contributors and AI Agents)
+
+This repository's CI/CD uses **only services that are free for public OSS repositories**. Workflows that require paid / metered LLM API keys (e.g. `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) to be configured as GitHub Secrets are **not accepted** and PRs adding them will be closed.
+
+If you are an AI coding agent (Jules, Codex, Copilot Agent, Claude Code, etc.) or a contributor planning to add a CI service, read [`AGENTS.md`](AGENTS.md) and [`docs/AI_AUTOMATION.md`](docs/AI_AUTOMATION.md#cicd-で利用するサービスのポリシー) first.
+
 ## License
 
 This software is released under the MIT License, see LICENSE.
