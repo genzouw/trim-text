@@ -5,3 +5,10 @@ exclude_paths:
   # SECURITY.md は人間向けドキュメント。Codacy の AI/エージェント向け
   # ドキュメント解析 rule (priority signals 等) は不適合なため除外する。
   - "SECURITY.md"
+  # AGENTS.md は本リポジトリの "CI/CD で無料サービスのみ利用する" という
+  # 規範を「絶対ルール (MUST / MUST NOT)」として宣言するポリシー文書である。
+  # Codacy の agent spec checker は escape hatch 付きの柔軟な指示や
+  # 単一言語ドキュメントを前提とするため、本ファイルの目的と根本的に不適合。
+  # サンプルコード内の API キー風 placeholder (sk-ant-...) も誤検知するため
+  # 解析対象から除外する。
+  - "AGENTS.md"
