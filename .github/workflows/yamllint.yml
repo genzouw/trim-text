@@ -1,0 +1,43 @@
+name: yamllint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.yml"
+      - "**/*.yaml"
+      - ".yamllint.yaml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/*.yml"
+      - "**/*.yaml"
+      - ".yamllint.yaml"
+
+concurrency:
+  group: yamllint-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  yamllint:
+    name: yamllint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
+        with:
+          persist-credentials: false
+
+      - name: Run yamllint with reviewdog
+        uses: reviewdog/action-yamllint@f01d8a48fd8d89f89895499fca2cff09f9e9e8c0 # v1.21.0
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: warning
+          fail_on_error: true
+          yamllint_flags: '.'
