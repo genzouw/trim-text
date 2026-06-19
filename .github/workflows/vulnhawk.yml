@@ -26,7 +26,7 @@ jobs:
           persist-credentials: false
 
       - name: Run VulnHawk Security Scan
-        uses: momenbasel/vulnhawk@4db8bbc44f62a8cce4e287f32e5de015f846f8d0 # main
+        uses: momenbasel/vulnhawk@db2aae65d7d8532afe35253e5ef12786f39fd1c2 # main
         with:
           target: "."
           backend: "claude-code"
