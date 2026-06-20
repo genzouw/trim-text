@@ -14,6 +14,7 @@ concurrency:
 
 permissions:
   contents: read
+  actions: write
 
 jobs:
   build:
@@ -36,9 +37,12 @@ jobs:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
 
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@f95db51fddba0c2d1ec667646a06c2ce06100226 # v3.0.0
+
       - name: Build image
-        # docker は ubuntu-latest にプリインストール済み。
-        run: docker build -t trim-text:ci .
+        # docker buildx と gha キャッシュを利用し、同一 PR の後続ジョブや再実行でのビルドを高速化
+        run: docker buildx build --load --cache-to type=gha,mode=max --cache-from type=gha -t trim-text:ci .
 
       - name: Smoke test (trim 1 char from each side)
         run: |
