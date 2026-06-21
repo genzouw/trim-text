@@ -18,14 +18,13 @@
 
 ## 導入ツール一覧
 
-### textlint (JTF日本語標準スタイルガイド)
+### textlint (技術文書向けルール)
 
-- **目的**: 日本語ドキュメント（Markdownなど）の品質を保つため、JTF日本語標準スタイルガイドに準拠したルールで文章の校正を自動で行います。
+- **目的**: 日本語ドキュメント（Markdownなど）の品質を保つため、技術文書向けのルールセット（`textlint-rule-preset-ja-technical-writing`）で文章の校正を自動で行います。
 - **設定ファイル**: `.textlintrc.json`, `.github/workflows/textlint.yml`
 - **特徴**: `textlint-rule-preset-ja-technical-writing` を用いて、読点（、）の多用や長すぎる文など、テクニカルライティングの観点からの問題を自動検出し、reviewdog連携によりPRの変更箇所に直接インラインコメントで指摘します。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions（`textlint.yml`）で自動的に実行されます。
-
 
 ### 1. PR-Agent (Qodo)
 
