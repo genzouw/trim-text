@@ -11,7 +11,7 @@ jobs:
       - uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           persist-credentials: false
-      - uses: raye-deng/open-code-review@17ded117b47b32e958a62d1d2d9a2f8d8bb0fcff # v1
+      - uses: raye-deng/open-code-review@eb099a26da8e47c423e098109fe0905fde675478 # v2.1.5
         with:
           sla: L1
           threshold: 60
