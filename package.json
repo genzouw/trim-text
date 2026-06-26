@@ -1,0 +1,9 @@
+{
+  "name": "trim-text-docs",
+  "version": "1.0.0",
+  "private": true,
+  "devDependencies": {
+    "textlint": "^15.0.0",
+    "textlint-rule-preset-ja-technical-writing": "^12.0.0"
+  }
+}
