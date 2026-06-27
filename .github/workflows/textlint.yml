@@ -1,0 +1,56 @@
+name: textlint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - ".textlintrc.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/textlint.yml"
+  pull_request:
+    branches: [main]
+    paths:
+      - "**/*.md"
+      - ".textlintrc.json"
+      - "package.json"
+      - "package-lock.json"
+      - ".github/workflows/textlint.yml"
+
+concurrency:
+  group: textlint-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  textlint:
+    name: textlint
+    runs-on: ubuntu-latest
+    # 既存ドキュメントの違反を片付けるまでは赤検知にしない。
+    continue-on-error: true
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@48b55a011bda9f5d6aeb4c2d9c7362e8dae4041e # v4.0.2
+        with:
+          node-version: 20
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run textlint with reviewdog
+        uses: tsuyoshicho/action-textlint@4305888a78631b1d7d0ddccbc7b69cd3161cba40 # v3.8.3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: warning
+          fail_on_error: true
+          textlint_flags: "**/*.md"
