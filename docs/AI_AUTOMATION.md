@@ -193,7 +193,7 @@
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
 
-### 22. textlint (日本語文章校正)
+### 22. textlint (日本語の文章校正)
 
 - **目的**: 日本語のドキュメント（Markdown など）に対して、JTF 日本語標準スタイルガイドなどの技術文書向けルールに基づいた校正を自動で行います。
 - **設定ファイル**: `.textlintrc.json`, `.github/workflows/textlint.yml`
