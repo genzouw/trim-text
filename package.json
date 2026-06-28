@@ -1,8 +1,0 @@
-{
-  "name": "trim-text",
-  "private": true,
-  "devDependencies": {
-    "textlint": "^14.0.0",
-    "textlint-rule-preset-ja-technical-writing": "^9.0.0"
-  }
-}
