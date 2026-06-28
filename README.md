@@ -63,9 +63,9 @@ You have the following options:
 
 ## CI/CD Policy (For Contributors and AI Agents)
 
-This repository's CI/CD uses **only services that are free for public OSS repositories**. Workflows that require paid / metered LLM API keys (e.g. `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`) to be configured as GitHub Secrets are **not accepted** and PRs adding them will be closed.
+This repository's CI/CD uses **only services that are free for public OSS repositories**. Some workflows require paid or metered LLM API keys to be configured as GitHub Secrets. Examples include `GEMINI_API_KEY`, `OPENAI_API_KEY`, and `ANTHROPIC_API_KEY`. Such workflows are **not accepted**, and PRs adding them will be closed.
 
-If you are an AI coding agent (Jules, Codex, Copilot Agent, Claude Code, etc.) or a contributor planning to add a CI service, read [`AGENTS.md`](AGENTS.md) and [`docs/AI_AUTOMATION.md`](docs/AI_AUTOMATION.md#cicd-で利用するサービスのポリシー) first.
+This section is for AI coding agents and contributors planning to add a CI service. Examples of such agents include Jules, Codex, Copilot Agent, and Claude Code. Please read [`AGENTS.md`](AGENTS.md) and [`docs/AI_AUTOMATION.md`](docs/AI_AUTOMATION.md#cicd-で利用するサービスのポリシー) first.
 
 ## License
 
