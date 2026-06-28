@@ -2,11 +2,11 @@
 
 > Version: 1.0.0
 > Last Updated: 2026-06-16
-> Audience: AI coding agents (GitHub Copilot Agent, Jules, Codex, Claude Code,
-> Aider, Cursor, Cline, Windsurf, Continue.dev, Sweep, PR-Agent, Devin, etc.)
-> and human contributors.
+> Audience: AI coding agents (GitHub Copilot Agent / Jules / Codex / Claude Code
+> / Aider / Cursor / Cline / Windsurf / Continue.dev / Sweep / PR-Agent / Devin
+> など) and human contributors.
 
-本ファイルは、本リポジトリ（`trim-text`）でコード変更や PR 作成を行うすべての AI コーディングエージェントおよび人間のコントリビュータが **作業開始前に必ず読み込み、すべての提案・実装・PR 作成において遵守すべき最上位ルール** を定義するものです。
+本ファイルは、本リポジトリ（`trim-text`）でコード変更や PR 作成をするすべての AI コーディングエージェントおよび人間のコントリビュータ向けの最上位ルールを定義します。対象者は作業開始前に必ず本ファイルを読み込んでください。すべての提案・実装・PR 作成において、本ファイルのルールを遵守してください。
 
 本ファイルの内容は、`README.md`・`docs/AI_AUTOMATION.md`・`.github/copilot-instructions.md` などほかのドキュメントよりも **優先** されます。本ファイルの内容と矛盾する提案・実装は行わないでください。
 
@@ -66,7 +66,10 @@
 
 ### 5.1 (MUST NOT) 従量課金型 API キーを要求するワークフロー / Action の新規追加
 
-- 例: `GEMINI_API_KEY`, `OPENAI_API_KEY`, `ANTHROPIC_API_KEY`, `CLAUDE_API_KEY`, `MISTRAL_API_KEY`, `COHERE_API_KEY`, `GROQ_API_KEY`, `DEEPSEEK_API_KEY`, `PERPLEXITY_API_KEY` などを GitHub Secrets に登録して CI から呼び出すもの。
+- 例: 次のような API キーを GitHub Secrets に登録して CI から呼び出すもの。
+  - `GEMINI_API_KEY` / `OPENAI_API_KEY` / `ANTHROPIC_API_KEY` / `CLAUDE_API_KEY`
+  - `MISTRAL_API_KEY` / `COHERE_API_KEY` / `GROQ_API_KEY`
+  - `DEEPSEEK_API_KEY` / `PERPLEXITY_API_KEY`
 - LLM プロバイダの API キー全般。無料枠が存在しても、超過すると課金が発生するため対象です。
 
 ### 5.2 (MUST NOT) 有料プラン / 有料ライセンスを必要とするサービスの CI 組み込み
@@ -83,7 +86,7 @@
 
 ### 5.5 ローカル開発向けエージェント設定ファイルの扱い
 
-`.aider.conf.yml` / `.continuerc.json` / `.clinerules` / `.windsurfrules` のような **開発者のローカル環境でのみ動作するエージェント設定** は、Secrets を扱わない限り上記禁止事項の対象外です。CI で実行されるか・実行されないかが判断基準です。
+`.aider.conf.yml` / `.continuerc.json` / `.clinerules` / `.windsurfrules` などを考えます。これらは **開発者のローカル環境でのみ動作するエージェント設定** です。Secrets を扱わない限り上記禁止事項の対象外です。CI で実行されるか・実行されないかが判断基準です。
 
 ## 6. Permissions / 許可されているもの (MAY)
 
@@ -147,7 +150,7 @@ jobs:
 
 ## 8. ローカル開発での扱い (MAY)
 
-LLM の API キー (`ANTHROPIC_API_KEY`, `OPENAI_API_KEY`, `CLAUDE_CODE_OAUTH_TOKEN` 等) は、**ローカル環境の環境変数として MAY 利用** してください。GitHub Secrets への登録および CI への組み込みは MUST NOT です。
+LLM の API キーには `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `CLAUDE_CODE_OAUTH_TOKEN` 等があります。これらは **ローカル環境の環境変数として MAY 利用** してください。GitHub Secrets への登録および CI への組み込みは MUST NOT です。
 
 ```bash
 # 良い例: ローカルシェルで export して claude / gh などから利用する
@@ -175,7 +178,7 @@ claude code "リファクタリングを提案して"
 - [ ] GitHub Secrets に **LLM プロバイダの API キー** を追加していない。
 - [ ] PR 説明文に「公開 OSS リポジトリで無料利用可能であること」「課金が発生しないこと」を明記し、**公式の料金プラン / ドキュメントの URL** を提示している。
 - [ ] 既存の AI ツール (CodeRabbit, PR-Agent, Gemini Code Assist 等) と機能が重複していない。
-- [ ] PR の本文は `.github/PULL_REQUEST_TEMPLATE.md` のテンプレートに沿って「なぜこの変更を行ったか」を日本語で明確に記述している。
+- [ ] PR の本文は `.github/PULL_REQUEST_TEMPLATE.md` のテンプレートに沿って「なぜこの変更をしたか」を日本語で明確に記述している。
 - [ ] コミットメッセージは Conventional Commits (`feat:` / `fix:` / `docs:` / `chore:` 等) に準拠している。
 
 ## 12. References / 参考リンク
