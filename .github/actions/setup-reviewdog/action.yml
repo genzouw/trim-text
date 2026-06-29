@@ -21,12 +21,15 @@ runs:
       if: steps.cache-reviewdog.outputs.cache-hit != 'true'
       working-directory: ${{ runner.temp }}
       shell: bash
+      env:
+        REVIEWDOG_VERSION: ${{ inputs.version }}
+        REVIEWDOG_SHA256: ${{ inputs.sha256 }}
       run: |
-        set -eu
+        set -euo pipefail
         curl --fail --silent --show-error --location \
           --retry 3 --retry-all-errors --retry-delay 2 \
           --connect-timeout 10 --max-time 120 \
           -o reviewdog.tar.gz \
-          "https://github.com/reviewdog/reviewdog/releases/download/v${{ inputs.version }}/reviewdog_${{ inputs.version }}_Linux_x86_64.tar.gz"
-        echo "${{ inputs.sha256 }}  reviewdog.tar.gz" | sha256sum -c -
+          "https://github.com/reviewdog/reviewdog/releases/download/v${REVIEWDOG_VERSION}/reviewdog_${REVIEWDOG_VERSION}_Linux_x86_64.tar.gz"
+        echo "${REVIEWDOG_SHA256}  reviewdog.tar.gz" | sha256sum -c -
         tar xzf reviewdog.tar.gz reviewdog
