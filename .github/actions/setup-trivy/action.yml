@@ -18,19 +18,21 @@ runs:
       if: steps.cache-trivy.outputs.cache-hit != 'true'
       working-directory: ${{ runner.temp }}
       shell: bash
+      env:
+        TRIVY_VERSION: ${{ inputs.version }}
       run: |
-        set -eu
+        set -euo pipefail
         curl --fail --silent --show-error --location \
           --retry 5 --retry-all-errors --retry-delay 5 --retry-max-time 300 \
           --connect-timeout 10 --max-time 120 \
           -o trivy.tar.gz \
-          "https://github.com/aquasecurity/trivy/releases/download/v${{ inputs.version }}/trivy_${{ inputs.version }}_Linux-64bit.tar.gz"
+          "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
         curl --fail --silent --show-error --location \
           --retry 5 --retry-all-errors --retry-delay 5 --retry-max-time 300 \
           --connect-timeout 10 --max-time 120 \
           -o trivy_checksums.txt \
-          "https://github.com/aquasecurity/trivy/releases/download/v${{ inputs.version }}/trivy_${{ inputs.version }}_checksums.txt"
-        expected_sha=$(awk -v target="trivy_${{ inputs.version }}_Linux-64bit.tar.gz" '$2 == target {print $1}' trivy_checksums.txt)
+          "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_checksums.txt"
+        expected_sha=$(awk -v target="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" '$2 == target {print $1}' trivy_checksums.txt)
         if [ -z "${expected_sha}" ]; then
           echo "::error::expected SHA256 not found in trivy checksums.txt"
           exit 1
