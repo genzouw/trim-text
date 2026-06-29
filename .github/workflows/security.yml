@@ -77,32 +77,10 @@ jobs:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
 
-      - name: Install Trivy
-        working-directory: ${{ runner.temp }}
-        run: |
-          set -eu
-          # 供給網攻撃対策として公式リリースの checksums.txt を取得し、
-          # ダウンロードした tar.gz の SHA256 整合性を検証する。
-          # checksums.txt にはオリジナル名 (trivy_<VER>_Linux-64bit.tar.gz) が
-          # 記載されているため、ハッシュのみを抜き出してローカル保存名と照合する。
-          curl --fail --silent --show-error --location \
-            --retry 5 --retry-all-errors --retry-delay 5 --retry-max-time 300 \
-            --connect-timeout 10 --max-time 120 \
-            -o trivy.tar.gz \
-            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
-          curl --fail --silent --show-error --location \
-            --retry 5 --retry-all-errors --retry-delay 5 --retry-max-time 300 \
-            --connect-timeout 10 --max-time 120 \
-            -o trivy_checksums.txt \
-            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_checksums.txt"
-          expected_sha=$(awk -v target="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" '$2 == target {print $1}' trivy_checksums.txt)
-          if [ -z "${expected_sha}" ]; then
-            echo "::error::expected SHA256 not found in trivy checksums.txt"
-            exit 1
-          fi
-          echo "${expected_sha}  trivy.tar.gz" | sha256sum -c -
-          tar xzf trivy.tar.gz trivy
-          ./trivy --version
+      - name: Setup Trivy
+        uses: ./.github/actions/setup-trivy
+        with:
+          version: ${{ env.TRIVY_VERSION }}
 
       - name: Run Trivy filesystem scan
         run: |
@@ -129,32 +107,10 @@ jobs:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
 
-      - name: Install Trivy
-        working-directory: ${{ runner.temp }}
-        run: |
-          set -eu
-          # 供給網攻撃対策として公式リリースの checksums.txt を取得し、
-          # ダウンロードした tar.gz の SHA256 整合性を検証する。
-          # checksums.txt にはオリジナル名 (trivy_<VER>_Linux-64bit.tar.gz) が
-          # 記載されているため、ハッシュのみを抜き出してローカル保存名と照合する。
-          curl --fail --silent --show-error --location \
-            --retry 5 --retry-all-errors --retry-delay 5 --retry-max-time 300 \
-            --connect-timeout 10 --max-time 120 \
-            -o trivy.tar.gz \
-            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz"
-          curl --fail --silent --show-error --location \
-            --retry 5 --retry-all-errors --retry-delay 5 --retry-max-time 300 \
-            --connect-timeout 10 --max-time 120 \
-            -o trivy_checksums.txt \
-            "https://github.com/aquasecurity/trivy/releases/download/v${TRIVY_VERSION}/trivy_${TRIVY_VERSION}_checksums.txt"
-          expected_sha=$(awk -v target="trivy_${TRIVY_VERSION}_Linux-64bit.tar.gz" '$2 == target {print $1}' trivy_checksums.txt)
-          if [ -z "${expected_sha}" ]; then
-            echo "::error::expected SHA256 not found in trivy checksums.txt"
-            exit 1
-          fi
-          echo "${expected_sha}  trivy.tar.gz" | sha256sum -c -
-          tar xzf trivy.tar.gz trivy
-          ./trivy --version
+      - name: Setup Trivy
+        uses: ./.github/actions/setup-trivy
+        with:
+          version: ${{ env.TRIVY_VERSION }}
 
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@d7f5e7f509e45cec5c76c4d5afdd7de93d0b3df5 # v4.1.0
