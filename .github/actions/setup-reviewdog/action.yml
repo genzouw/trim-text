@@ -1,0 +1,32 @@
+name: "Setup reviewdog"
+description: "Downloads, validates, extracts, and caches reviewdog"
+inputs:
+  version:
+    description: "The version of reviewdog to install"
+    required: true
+  sha256:
+    description: "The expected SHA256 checksum of the reviewdog tar.gz file"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Cache reviewdog
+      id: cache-reviewdog
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/reviewdog
+        key: reviewdog-${{ runner.os }}-${{ inputs.version }}-${{ inputs.sha256 }}
+
+    - name: Install reviewdog
+      if: steps.cache-reviewdog.outputs.cache-hit != 'true'
+      working-directory: ${{ runner.temp }}
+      shell: bash
+      run: |
+        set -eu
+        curl --fail --silent --show-error --location \
+          --retry 3 --retry-all-errors --retry-delay 2 \
+          --connect-timeout 10 --max-time 120 \
+          -o reviewdog.tar.gz \
+          "https://github.com/reviewdog/reviewdog/releases/download/v${{ inputs.version }}/reviewdog_${{ inputs.version }}_Linux_x86_64.tar.gz"
+        echo "${{ inputs.sha256 }}  reviewdog.tar.gz" | sha256sum -c -
+        tar xzf reviewdog.tar.gz reviewdog
