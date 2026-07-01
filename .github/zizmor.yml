@@ -8,3 +8,8 @@ rules:
   dangerous-triggers:
     ignore:
       - labeler.yml
+      # semantic-pull-request.yml は amannn/action-semantic-pull-request で
+      # フォーク PR のタイトルも検証し statuses への書き込みが必要なため
+      # pull_request_target が必須。PR 由来のコードをチェックアウト・実行せず
+      # PR タイトルを読むだけの安全な構成のため抑止する。
+      - semantic-pull-request.yml
