@@ -1,0 +1,19 @@
+name: Anti-Slop
+
+on: # zizmor: ignore[dangerous-triggers]
+  pull_request_target:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  pull-requests: write
+  issues: read
+
+jobs:
+  anti-slop:
+    name: Anti-Slop Check
+    runs-on: ubuntu-latest
+    steps:
+      - name: Run Anti-Slop
+        uses: peakoss/anti-slop@57858eead489d08b255fab2af45a506c2ca6eab2 # v0.3.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
