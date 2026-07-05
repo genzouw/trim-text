@@ -10,8 +10,7 @@ concurrency:
 
 permissions:
   pull-requests: write
-  # NOTE: models:read is not a standard known permission by actionlint yet, so it may need to be skipped in actionlint check, or we might use `id-token: write` if required by GitHub Models, but the docs specify `models: read`
-  models: read
+  models: read # actionlint:ignore[permissions]
   contents: read
 
 jobs:
