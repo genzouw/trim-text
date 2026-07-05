@@ -1,0 +1,30 @@
+name: QA Instructions
+
+on:
+  pull_request:
+    types: [opened, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+  # NOTE: models:read is not a standard known permission by actionlint yet, so it may need to be skipped in actionlint check, or we might use `id-token: write` if required by GitHub Models, but the docs specify `models: read`
+  models: read
+  contents: read
+
+jobs:
+  qa-instructions:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Generate QA Instructions
+        uses: BadIdeaFactory/qa-instructions-action@40c187996e71bac084412c803e45d9550beb0b76 # v0.1.0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
