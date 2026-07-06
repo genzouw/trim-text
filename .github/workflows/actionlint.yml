@@ -46,7 +46,7 @@ jobs:
         env:
           ACTIONLINT_BIN: ${{ steps.actionlint.outputs.executable }}
         run: |
-          "${ACTIONLINT_BIN}" -color
+          "${ACTIONLINT_BIN}" -color -ignore 'unknown permission scope "models"'
 
       - name: Verify action pins resolve to commit SHAs
         env:
