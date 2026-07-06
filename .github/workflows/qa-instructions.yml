@@ -10,7 +10,7 @@ concurrency:
 
 permissions:
   pull-requests: write
-  models: read # actionlint:ignore[permissions]
+  models: read
   contents: read
 
 jobs:
