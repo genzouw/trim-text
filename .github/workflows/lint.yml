@@ -164,4 +164,4 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          "${RUNNER_TEMP}/actionlint" -oneline | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="actionlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          "${RUNNER_TEMP}/actionlint" -oneline -ignore 'unknown permission scope "models"' | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="actionlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
