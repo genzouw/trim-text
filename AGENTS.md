@@ -54,7 +54,7 @@
 | [PR-Agent (Qodo Merge)](https://github.com/apps/qodo-merge)      | PR スコアリング / レビュー            | `.pr_agent.toml`                 |
 | [Gemini Code Assist](https://github.com/apps/gemini-code-assist) | リポジトリインデックス (API キー不要) | GitHub App 設定のみ              |
 | Repomix                                                          | LLM 向けコンテキスト生成              | `.github/workflows/repomix.yml`  |
-| Codacy / SonarCloud                                              | 静的解析                              | `.codacy.yaml` / SonarCloud 連携 |
+| SonarCloud                                                       | 静的解析                              | SonarCloud 連携                  |
 
 ## 4. 大原則 (MUST): CI/CD では「無料サービスのみ」を利用する
 
