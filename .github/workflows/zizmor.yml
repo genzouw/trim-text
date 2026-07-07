@@ -1,50 +1,24 @@
-name: zizmor (GitHub Actions Security Scanner)
+name: zizmor
 
+# 本ワークフローは genzouw/ci-workflows の reusable workflow を呼び出す薄いスタブ。
+# ロジックの実体・変更は ci-workflows 側で一元管理する (トリガー定義のみここで持つ)。
+# 参照 SHA の更新は Dependabot (github-actions ecosystem) が自動で PR を出す。
+# 必須チェック (context: "zizmor / zizmor") のため paths フィルタ禁止。
 on:
   push:
-    branches:
-      - main
+    branches: ['**']
   pull_request:
-    branches:
-      - main
-  schedule:
-    - cron: "0 0 * * 1"
+    branches: ['**']
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
+  group: zizmor-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
   contents: read
+  security-events: write
+  actions: read
 
 jobs:
   zizmor:
-    name: Run zizmor
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    permissions:
-      contents: read
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
-        with:
-          persist-credentials: false
-
-      - name: Install zizmor
-        working-directory: ${{ runner.temp }}
-        env:
-          ZIZMOR_VERSION: 1.25.2
-          ZIZMOR_SHA256: aa1facd105f0d83fe5c55b1adcd9d7417de5d83aa27471f91dc0b66cf3803577
-        run: |
-          set -euo pipefail
-          curl --fail --silent --show-error --location \
-            --retry 3 --retry-all-errors --retry-delay 2 \
-            --connect-timeout 10 --max-time 120 \
-            -o zizmor.tar.gz \
-            "https://github.com/zizmorcore/zizmor/releases/download/v${ZIZMOR_VERSION}/zizmor-x86_64-unknown-linux-gnu.tar.gz"
-          echo "${ZIZMOR_SHA256}  zizmor.tar.gz" | sha256sum -c -
-          tar xzf zizmor.tar.gz
-          sudo mv "zizmor" /usr/local/bin/
-
-      - name: Run zizmor
-        run: zizmor .github/workflows
+    uses: genzouw/ci-workflows/.github/workflows/zizmor.yml@28d2b9b6f563eb1126e786f28e308390b2558a47 # v1.0.1
