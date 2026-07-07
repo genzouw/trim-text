@@ -1,0 +1,32 @@
+name: woke
+
+on:
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: woke-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  woke:
+    name: Woke (Inclusive Language Linter)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          persist-credentials: false
+
+      - name: Run woke with reviewdog
+        uses: get-woke/woke-action-reviewdog@d46fa3085053f1f6d4b4194c7b3345719e75c602 # v0
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          reporter: github-pr-review
+          level: warning
+          fail-on-error: true
