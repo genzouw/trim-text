@@ -24,9 +24,10 @@ jobs:
           persist-credentials: false
 
       - name: Run woke with reviewdog
-        uses: get-woke/woke-action-reviewdog@d46fa3085053f1f6d4b4194c7b3345719e75c602 # v0
+        uses: get-woke/woke-action-reviewdog@d71fd0115146a01c3181439ce714e21a69d75e31 # v0
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
+          woke-version: v0.19.0
           reporter: github-pr-review
           level: warning
           fail-on-error: true
