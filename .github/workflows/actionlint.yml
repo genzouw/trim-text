@@ -30,23 +30,14 @@ jobs:
         with:
           persist-credentials: false
 
-      - name: Download actionlint
-        id: actionlint
-        run: |
-          set -euo pipefail
-          VERSION=1.7.12
-          TARBALL="actionlint_${VERSION}_linux_amd64.tar.gz"
-          curl -fsSL -o "/tmp/${TARBALL}" "https://github.com/rhysd/actionlint/releases/download/v${VERSION}/${TARBALL}"
-          curl -fsSL -o /tmp/checksums.txt "https://github.com/rhysd/actionlint/releases/download/v${VERSION}/actionlint_${VERSION}_checksums.txt"
-          cd /tmp && grep "${TARBALL}" checksums.txt | sha256sum -c -
-          tar -xzf "/tmp/${TARBALL}" -C /tmp actionlint
-          echo "executable=/tmp/actionlint" >> "$GITHUB_OUTPUT"
+      - name: Setup actionlint
+        uses: ./.github/actions/setup-actionlint
+        with:
+          version: 1.7.12
 
       - name: Run actionlint
-        env:
-          ACTIONLINT_BIN: ${{ steps.actionlint.outputs.executable }}
         run: |
-          "${ACTIONLINT_BIN}" -color -ignore 'unknown permission scope "models"'
+          "${RUNNER_TEMP}/actionlint" -color -ignore 'unknown permission scope "models"'
 
       - name: Verify action pins resolve to commit SHAs
         env:

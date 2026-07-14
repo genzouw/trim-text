@@ -34,31 +34,10 @@ jobs:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
 
-      - name: Install gitleaks
-        working-directory: ${{ runner.temp }}
-        run: |
-          set -eu
-          # 供給網攻撃対策として公式リリースの checksums.txt を取得し、
-          # ダウンロードした tar.gz の SHA256 整合性を検証する。
-          # checksums.txt にはオリジナル名 (gitleaks_<VER>_linux_x64.tar.gz) が
-          # 記載されているため、ハッシュのみを抜き出してローカル保存名と照合する。
-          curl --fail --silent --show-error --location \
-            --retry 3 --retry-all-errors --retry-delay 2 \
-            --connect-timeout 10 --max-time 120 \
-            -o gitleaks.tar.gz \
-            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
-          curl --fail --silent --show-error --location \
-            --retry 3 --retry-all-errors --retry-delay 2 \
-            --connect-timeout 10 --max-time 120 \
-            -o gitleaks_checksums.txt \
-            "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
-          expected_sha=$(awk -v target="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" '$2 == target {print $1}' gitleaks_checksums.txt)
-          if [ -z "${expected_sha}" ]; then
-            echo "::error::expected SHA256 not found in gitleaks checksums.txt"
-            exit 1
-          fi
-          echo "${expected_sha}  gitleaks.tar.gz" | sha256sum -c -
-          tar xzf gitleaks.tar.gz gitleaks
+      - name: Setup gitleaks
+        uses: ./.github/actions/setup-gitleaks
+        with:
+          version: ${{ env.GITLEAKS_VERSION }}
 
       - name: Run gitleaks
         run: |

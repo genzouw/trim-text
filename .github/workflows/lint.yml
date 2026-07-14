@@ -89,26 +89,10 @@ jobs:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
 
-      - name: Install hadolint
-        working-directory: ${{ runner.temp }}
-        run: |
-          set -eu
-          # 供給網攻撃対策として公式の .sha256 を併せて取得し整合性検証を行う。
-          # 公式 .sha256 ファイルにはオリジナルのファイル名 (hadolint-Linux-x86_64) が
-          # 記載されているため、ハッシュのみを抜き出してローカル保存名と照合する。
-          curl --fail --silent --show-error --location \
-            --retry 3 --retry-all-errors --retry-delay 2 \
-            --connect-timeout 10 --max-time 120 \
-            -o hadolint \
-            "https://github.com/hadolint/hadolint/releases/download/${HADOLINT_VERSION}/hadolint-Linux-x86_64"
-          curl --fail --silent --show-error --location \
-            --retry 3 --retry-all-errors --retry-delay 2 \
-            --connect-timeout 10 --max-time 120 \
-            -o hadolint.sha256 \
-            "https://github.com/hadolint/hadolint/releases/download/${HADOLINT_VERSION}/hadolint-Linux-x86_64.sha256"
-          expected_sha=$(awk '{print $1}' hadolint.sha256)
-          echo "${expected_sha}  hadolint" | sha256sum -c -
-          chmod +x hadolint
+      - name: Setup hadolint
+        uses: ./.github/actions/setup-hadolint
+        with:
+          version: ${{ env.HADOLINT_VERSION }}
 
       - name: Setup reviewdog
         uses: ./.github/actions/setup-reviewdog
@@ -142,17 +126,11 @@ jobs:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
 
-      - name: Install actionlint
-        working-directory: ${{ runner.temp }}
-        run: |
-          set -eu
-          curl --fail --silent --show-error --location \
-            --retry 3 --retry-all-errors --retry-delay 2 \
-            --connect-timeout 10 --max-time 120 \
-            -o actionlint.tar.gz \
-            "https://github.com/rhysd/actionlint/releases/download/v${ACTIONLINT_VERSION}/actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
-          echo "${ACTIONLINT_SHA256}  actionlint.tar.gz" | sha256sum -c -
-          tar xzf actionlint.tar.gz actionlint
+      - name: Setup actionlint
+        uses: ./.github/actions/setup-actionlint
+        with:
+          version: ${{ env.ACTIONLINT_VERSION }}
+          sha256: ${{ env.ACTIONLINT_SHA256 }}
 
       - name: Setup reviewdog
         uses: ./.github/actions/setup-reviewdog

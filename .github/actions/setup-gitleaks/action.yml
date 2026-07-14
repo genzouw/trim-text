@@ -1,0 +1,41 @@
+name: "Setup gitleaks"
+description: "Downloads, validates, extracts, and caches gitleaks"
+inputs:
+  version:
+    description: "The version of gitleaks to install"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Cache gitleaks
+      id: cache-gitleaks
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: ${{ runner.temp }}/gitleaks
+        key: gitleaks-${{ runner.os }}-${{ inputs.version }}
+
+    - name: Install gitleaks
+      if: steps.cache-gitleaks.outputs.cache-hit != 'true'
+      working-directory: ${{ runner.temp }}
+      shell: bash
+      env:
+        GITLEAKS_VERSION: ${{ inputs.version }}
+      run: |
+        set -euo pipefail
+        curl --fail --silent --show-error --location \
+          --retry 3 --retry-all-errors --retry-delay 2 \
+          --connect-timeout 10 --max-time 120 \
+          -o gitleaks.tar.gz \
+          "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz"
+        curl --fail --silent --show-error --location \
+          --retry 3 --retry-all-errors --retry-delay 2 \
+          --connect-timeout 10 --max-time 120 \
+          -o gitleaks_checksums.txt \
+          "https://github.com/gitleaks/gitleaks/releases/download/v${GITLEAKS_VERSION}/gitleaks_${GITLEAKS_VERSION}_checksums.txt"
+        expected_sha=$(awk -v target="gitleaks_${GITLEAKS_VERSION}_linux_x64.tar.gz" '$2 == target {print $1}' gitleaks_checksums.txt)
+        if [ -z "${expected_sha}" ]; then
+          echo "::error::expected SHA256 not found in gitleaks checksums.txt"
+          exit 1
+        fi
+        echo "${expected_sha}  gitleaks.tar.gz" | sha256sum -c -
+        tar xzf gitleaks.tar.gz gitleaks
