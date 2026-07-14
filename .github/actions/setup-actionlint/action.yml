@@ -26,6 +26,14 @@ runs:
         ACTIONLINT_SHA256: ${{ inputs.sha256 }}
       run: |
         set -euo pipefail
+        if ! [[ "${ACTIONLINT_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+          echo "::error::Invalid actionlint version format"
+          exit 1
+        fi
+        if [ -n "${ACTIONLINT_SHA256}" ] && ! [[ "${ACTIONLINT_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
+          echo "::error::Invalid SHA256 format"
+          exit 1
+        fi
         TARBALL="actionlint_${ACTIONLINT_VERSION}_linux_amd64.tar.gz"
         curl --fail --silent --show-error --location \
           --retry 3 --retry-all-errors --retry-delay 2 \
