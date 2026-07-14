@@ -52,18 +52,11 @@ jobs:
       - name: Install textlint and presets
         run: npm init -y && npm install textlint textlint-rule-preset-ja-technical-writing textlint-filter-rule-comments
 
-      - name: Install reviewdog
-        working-directory: ${{ runner.temp }}
-        run: |
-          set -eu
-          # 供給網攻撃対策として公式の checksums と SHA256 で整合性検証を行う。
-          curl --fail --silent --show-error --location \
-            --retry 3 --retry-all-errors --retry-delay 2 \
-            --connect-timeout 10 --max-time 120 \
-            -o reviewdog.tar.gz \
-            "https://github.com/reviewdog/reviewdog/releases/download/v${REVIEWDOG_VERSION}/reviewdog_${REVIEWDOG_VERSION}_Linux_x86_64.tar.gz"
-          echo "${REVIEWDOG_SHA256}  reviewdog.tar.gz" | sha256sum -c -
-          tar xzf reviewdog.tar.gz reviewdog
+      - name: Setup reviewdog
+        uses: ./.github/actions/setup-reviewdog
+        with:
+          version: ${{ env.REVIEWDOG_VERSION }}
+          sha256: ${{ env.REVIEWDOG_SHA256 }}
 
       - name: Run textlint with reviewdog
         env:
