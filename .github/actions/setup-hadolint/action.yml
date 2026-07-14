@@ -22,6 +22,10 @@ runs:
         HADOLINT_VERSION: ${{ inputs.version }}
       run: |
         set -euo pipefail
+        if ! [[ "${HADOLINT_VERSION}" =~ ^v?[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+          echo "::error::Invalid hadolint version format"
+          exit 1
+        fi
         curl --fail --silent --show-error --location \
           --retry 3 --retry-all-errors --retry-delay 2 \
           --connect-timeout 10 --max-time 120 \
