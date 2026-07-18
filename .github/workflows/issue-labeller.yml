@@ -1,0 +1,35 @@
+name: GenAI Issue Labeller
+
+on:
+  issues:
+    types: [opened, reopened, edited]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+  models: read
+
+jobs:
+  issue-labeller:
+    name: Auto Label Issues
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.10.2
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v4
+        with:
+          persist-credentials: false
+
+      - name: Run GenAI Issue Labeller
+        uses: pelikhan/action-genai-issue-labeller@c0fc6f97571c9b49e70d59cf0fae8e6b00ab0511 # v0.0.37
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
