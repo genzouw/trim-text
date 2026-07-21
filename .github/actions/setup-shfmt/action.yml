@@ -1,0 +1,43 @@
+name: "Setup shfmt"
+description: "Downloads, validates, and caches shfmt"
+inputs:
+  version:
+    description: "The version of shfmt to install"
+    required: true
+  sha256:
+    description: "The expected SHA256 checksum of the shfmt binary"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Cache shfmt
+      id: cache-shfmt
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: ${{ runner.temp }}/shfmt
+        key: shfmt-${{ runner.os }}-${{ inputs.version }}-${{ inputs.sha256 }}
+
+    - name: Install shfmt
+      if: steps.cache-shfmt.outputs.cache-hit != 'true'
+      working-directory: ${{ runner.temp }}
+      shell: bash
+      env:
+        SHFMT_VERSION: ${{ inputs.version }}
+        SHFMT_SHA256: ${{ inputs.sha256 }}
+      run: |
+        set -euo pipefail
+        if ! [[ "${SHFMT_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+          echo "::error::Invalid shfmt version format"
+          exit 1
+        fi
+        if ! [[ "${SHFMT_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
+          echo "::error::Invalid SHA256 format"
+          exit 1
+        fi
+        curl --fail --silent --show-error --location \
+          --retry 3 --retry-all-errors --retry-delay 2 \
+          --connect-timeout 10 --max-time 120 \
+          -o shfmt \
+          "https://github.com/mvdan/sh/releases/download/v${SHFMT_VERSION}/shfmt_v${SHFMT_VERSION}_linux_amd64"
+        echo "${SHFMT_SHA256}  shfmt" | sha256sum -c -
+        chmod +x shfmt

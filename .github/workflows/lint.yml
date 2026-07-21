@@ -54,6 +54,11 @@ jobs:
     name: shfmt
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      SHFMT_VERSION: 3.10.0
+      # shfmt v3.10.0 linux_amd64 の公式 SHA256
+      # https://github.com/mvdan/sh/releases/tag/v3.10.0
+      SHFMT_SHA256: 1f57a384d59542f8fac5f503da1f3ea44242f46dff969569e80b524d64b71dbc
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
@@ -61,16 +66,15 @@ jobs:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
 
-      - name: Set up Go
-        uses: actions/setup-go@924ae3a1cded613372ab5595356fb5720e22ba16 # v6.5.0
+      - name: Setup shfmt
+        uses: ./.github/actions/setup-shfmt
         with:
-          go-version: stable
-
-      - name: Install shfmt
-        run: go install mvdan.cc/sh/v3/cmd/shfmt@v3.10.0
+          version: ${{ env.SHFMT_VERSION }}
+          sha256: ${{ env.SHFMT_SHA256 }}
 
       - name: Run shfmt
-        run: shfmt -d -i 2 -ci tt
+        run: |
+          "${RUNNER_TEMP}/shfmt" -d -i 2 -ci tt
 
   hadolint:
     name: Hadolint (Dockerfile)
