@@ -62,7 +62,7 @@ jobs:
         id: inference
         uses: actions/ai-inference@a7805884c80886efc241e94a5351df715968a0ad # v2.1.1
         with:
-          model: google/gemma-2-9b-it
+          model: openai/gpt-4o-mini
           prompt-file: pr_prompt.txt
           token: ${{ secrets.GITHUB_TOKEN }}
 
