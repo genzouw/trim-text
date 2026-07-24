@@ -72,8 +72,17 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           AI_RESPONSE: ${{ steps.inference.outputs.response }}
         run: |
-          COMMENT_BODY="### 🤖 AI PR Policy Checker
+          MARKER="<!-- ai-pr-policy-checker -->"
+          COMMENT_BODY="${MARKER}
+          ### 🤖 AI PR Policy Checker
 
           ${AI_RESPONSE}
           "
-          gh pr comment "${PR_NUMBER}" --body "${COMMENT_BODY}" || echo "Failed to post comment, PR may not be accessible"
+
+          EXISTING_COMMENT_ID=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate --jq "[.[] | select(.body | startswith(\"${MARKER}\"))][0].id // empty")
+
+          if [ -n "${EXISTING_COMMENT_ID}" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING_COMMENT_ID}" -f body="${COMMENT_BODY}" || echo "Failed to update comment"
+          else
+            gh pr comment "${PR_NUMBER}" --body "${COMMENT_BODY}" || echo "Failed to post comment, PR may not be accessible"
+          fi
