@@ -1,0 +1,41 @@
+name: "Setup bats-core"
+description: "Downloads, validates, extracts, and caches bats-core"
+inputs:
+  version:
+    description: "The version of bats-core to install"
+    required: true
+  sha256:
+    description: "The expected SHA256 checksum of the bats-core tar.gz file"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Cache bats
+      id: cache-bats
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: ${{ runner.temp }}/bats-core
+        key: bats-${{ runner.os }}-${{ inputs.version }}-${{ inputs.sha256 }}
+
+    - name: Install bats
+      if: steps.cache-bats.outputs.cache-hit != 'true'
+      working-directory: ${{ runner.temp }}
+      shell: bash
+      env:
+        BATS_VERSION: ${{ inputs.version }}
+        BATS_SHA256: ${{ inputs.sha256 }}
+      run: |
+        set -euo pipefail
+        curl --fail --silent --show-error --location \
+          --retry 3 --retry-all-errors --retry-delay 2 \
+          --connect-timeout 10 --max-time 120 \
+          -o bats.tar.gz \
+          "https://github.com/bats-core/bats-core/archive/refs/tags/v${BATS_VERSION}.tar.gz"
+        echo "${BATS_SHA256}  bats.tar.gz" | sha256sum -c -
+        mkdir -p bats-core
+        tar xzf bats.tar.gz -C bats-core --strip-components=1
+
+    - name: Add bats to PATH
+      shell: bash
+      run: |
+        echo "${{ runner.temp }}/bats-core/bin" >> $GITHUB_PATH
