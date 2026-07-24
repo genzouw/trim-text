@@ -34,7 +34,7 @@ jobs:
           PR_TITLE: ${{ github.event.pull_request.title }}
           PR_BODY: ${{ github.event.pull_request.body }}
         run: |
-          cat << PROMPT_EOF > pr_prompt.txt
+          cat << PR_POLICY_PROMPT_EOF_9f3a1c > pr_prompt.txt
           以下のPull Requestのタイトルと説明文が、プロジェクトの必須ポリシーを満たしているかチェックしてください。
 
           【チェック項目】
@@ -56,7 +56,7 @@ jobs:
           必須項目がすべて満たされている場合は、「✅ プロジェクトのAI/CIポリシー要件を満たしています。」から始め、各項目の確認結果を簡単に記載してください。
           不足している項目がある場合は、「❌ 以下の必須項目が不足しています。PRの説明文を修正してください。」から始め、不足項目を具体的に指摘してください。
           出力は日本語で行ってください。
-          PROMPT_EOF
+          PR_POLICY_PROMPT_EOF_9f3a1c
 
       - name: Run AI Inference
         id: inference
@@ -72,8 +72,17 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           AI_RESPONSE: ${{ steps.inference.outputs.response }}
         run: |
-          COMMENT_BODY="### 🤖 AI PR Policy Checker
+          MARKER="<!-- ai-pr-policy-checker -->"
+          COMMENT_BODY="${MARKER}
+          ### 🤖 AI PR Policy Checker
 
           ${AI_RESPONSE}
           "
-          gh pr comment "${PR_NUMBER}" --body "${COMMENT_BODY}" || echo "Failed to post comment, PR may not be accessible"
+
+          EXISTING_COMMENT_ID=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate --jq "[.[] | select(.body | startswith(\"${MARKER}\"))][0].id // empty")
+
+          if [ -n "${EXISTING_COMMENT_ID}" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING_COMMENT_ID}" -f body="${COMMENT_BODY}" || echo "Failed to update comment"
+          else
+            gh pr comment "${PR_NUMBER}" --body "${COMMENT_BODY}" || echo "Failed to post comment, PR may not be accessible"
+          fi
