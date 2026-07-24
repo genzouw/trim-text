@@ -54,6 +54,7 @@ jobs:
 
       - name: Run AI Inference
         id: inference
+        continue-on-error: true
         uses: actions/ai-inference@a7805884c80886efc241e94a5351df715968a0ad # v2.1.1
         with:
           model: openai/gpt-4o-mini
@@ -61,6 +62,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Comment on PR
+        if: steps.inference.outcome == 'success'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
