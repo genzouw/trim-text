@@ -1,0 +1,84 @@
+name: AI PR Policy Checker
+
+on:
+  pull_request:
+    types: [opened, edited, synchronize]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  pull-requests: write
+  models: read
+
+jobs:
+  check-policy:
+    name: Check PR Policy Compliance
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Create Prompt File
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+        run: |
+          cat << PR_POLICY_PROMPT_EOF_9f3a1c > pr_prompt.txt
+          以下のPull Requestのタイトルと説明文が、プロジェクトの必須ポリシーを満たしているかチェックしてください。
+
+          【チェック項目】
+          1. 目的（この変更で何を改善したいか）が記載されているか。
+          2. 導入する・変更するものが一覧化されているか。
+          3. 「公開 OSS で完全無料」の証明（公式の料金ページ URL と条件の引用）があるか。
+          4. 既存ツールとの重複がないことの確認があるか。
+          5. マージ前に必要な手動セットアップ手順（番号付き、URL併記、無料枠選択の回避手順など）があるか。
+          6. 想定リスクとロールバック手順があるか。
+          7. 説明文に LLM の API キー (例: GEMINI_API_KEY など) を追加するような記述がないか。
+
+          【Pull Request タイトル】
+          ${PR_TITLE}
+
+          【Pull Request 説明文】
+          ${PR_BODY}
+
+          【出力形式】
+          必須項目がすべて満たされている場合は、「✅ プロジェクトのAI/CIポリシー要件を満たしています。」から始め、各項目の確認結果を簡単に記載してください。
+          不足している項目がある場合は、「❌ 以下の必須項目が不足しています。PRの説明文を修正してください。」から始め、不足項目を具体的に指摘してください。
+          出力は日本語で行ってください。
+          PR_POLICY_PROMPT_EOF_9f3a1c
+
+      - name: Run AI Inference
+        id: inference
+        continue-on-error: true
+        uses: actions/ai-inference@a7805884c80886efc241e94a5351df715968a0ad # v2.1.1
+        with:
+          model: openai/gpt-4o-mini
+          prompt-file: pr_prompt.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on PR
+        if: steps.inference.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          AI_RESPONSE: ${{ steps.inference.outputs.response }}
+        run: |
+          MARKER="<!-- ai-pr-policy-checker -->"
+          COMMENT_BODY="${MARKER}
+          ### 🤖 AI PR Policy Checker
+
+          ${AI_RESPONSE}
+          "
+
+          EXISTING_COMMENT_ID=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate --jq "[.[] | select(.body | startswith(\"${MARKER}\"))][0].id // empty")
+
+          if [ -n "${EXISTING_COMMENT_ID}" ]; then
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING_COMMENT_ID}" -f body="${COMMENT_BODY}" || echo "Failed to update comment"
+          else
+            gh pr comment "${PR_NUMBER}" --body "${COMMENT_BODY}" || echo "Failed to post comment, PR may not be accessible"
+          fi
