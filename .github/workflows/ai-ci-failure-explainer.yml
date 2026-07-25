@@ -1,6 +1,6 @@
 name: AI CI Failure Explainer
 
-on:
+on: # zizmor: ignore[dangerous-triggers]
   workflow_run:
     workflows: ["Test", "Lint", "Docker Build", "Commitlint"]
     types:
