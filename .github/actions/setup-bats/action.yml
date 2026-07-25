@@ -26,6 +26,14 @@ runs:
         BATS_SHA256: ${{ inputs.sha256 }}
       run: |
         set -euo pipefail
+        # 注意: bats-core はバイナリリリースアセットを配布していないため、
+        # 兄弟 action（setup-actionlint / setup-hadolint）のような不変リリース
+        # アセットではなく、GitHub 自動生成のソース tarball を取得している。
+        # この自動生成 tarball のチェックサムは GitHub がバイト単位の安定性を
+        # 保証しておらず、圧縮方式変更で既存タグの sha256 が変わる可能性がある
+        # （その場合はキャッシュミス時に本ステップが失敗する）。上流でその事象が
+        # 起きた際は BATS_SHA256 を再計算して更新すること。このリスクを許容した
+        # 上での方式選択である。
         curl --fail --silent --show-error --location \
           --retry 3 --retry-all-errors --retry-delay 2 \
           --connect-timeout 10 --max-time 120 \
