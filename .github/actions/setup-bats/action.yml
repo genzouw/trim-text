@@ -26,6 +26,14 @@ runs:
         BATS_SHA256: ${{ inputs.sha256 }}
       run: |
         set -euo pipefail
+        if ! [[ "${BATS_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+          echo "::error::Invalid bats version format"
+          exit 1
+        fi
+        if ! [[ "${BATS_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
+          echo "::error::Invalid SHA256 format"
+          exit 1
+        fi
         # 注意: bats-core はバイナリリリースアセットを配布していないため、
         # 兄弟 action（setup-actionlint / setup-hadolint）のような不変リリース
         # アセットではなく、GitHub 自動生成のソース tarball を取得している。
