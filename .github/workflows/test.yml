@@ -20,18 +20,27 @@ jobs:
     name: bats (tt の境界値・ランダム入力テスト)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      BATS_VERSION: 1.11.0
+      # bats-core v1.11.0 tar.gz の公式 SHA256
+      BATS_SHA256: aeff09fdc8b0c88b3087c99de00cf549356d7a2f6a69e3fcec5e0e861d2f9063
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
         with:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
 
-      - name: Install bats
-        run: |
-          set -eu
-          sudo apt-get update
-          sudo apt-get install -y --no-install-recommends bats
+      - name: Setup bats
+        uses: ./.github/actions/setup-bats
+        with:
+          version: ${{ env.BATS_VERSION }}
+          sha256: ${{ env.BATS_SHA256 }}
 
       - name: Run bats
         run: bats tests/
