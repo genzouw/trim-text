@@ -31,11 +31,11 @@ jobs:
           PR_URL=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${{ github.event.workflow_run.id }}" --jq '.pull_requests[0].url')
           if [ -n "$PR_URL" ] && [ "$PR_URL" != "null" ]; then
             PR_NUMBER=$(basename "$PR_URL")
-            echo "pr_number=${PR_NUMBER}" >> $GITHUB_OUTPUT
+            echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
             echo "Found PR: ${PR_NUMBER}"
           else
             echo "No associated PR found. Exiting."
-            echo "pr_number=" >> $GITHUB_OUTPUT
+            echo "pr_number=" >> "$GITHUB_OUTPUT"
           fi
 
       - name: Fetch failed workflow logs
@@ -49,9 +49,11 @@ jobs:
 
           # Escape for multiline output
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
-          echo "logs<<$EOF" >> $GITHUB_OUTPUT
-          echo "$FAILED_LOGS" >> $GITHUB_OUTPUT
-          echo "$EOF" >> $GITHUB_OUTPUT
+          {
+            echo "logs<<$EOF"
+            echo "$FAILED_LOGS"
+            echo "$EOF"
+          } >> "$GITHUB_OUTPUT"
 
       - name: Create Prompt
         if: steps.get_pr.outputs.pr_number != ''
