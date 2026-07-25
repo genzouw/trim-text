@@ -276,3 +276,12 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
+### 29. AI CI Failure Explainer (CI 失敗のAI分析)
+
+- **目的**: CI (Test, Lint, Docker Buildなど) が失敗した際に、エラーログを自動的に解析し、失敗の原因と修正案をPRコメントとして提示します。
+- **設定ファイル**: `.github/workflows/ai-ci-failure-explainer.yml`
+- **特徴**: `actions/ai-inference` アクションを使用します。推論には GitHub Models の推論 API を利用し、認証には組み込みの `GITHUB_TOKEN` を利用します。外部の有料 LLM API キーを必要とせず、完全無料でチェックを実現します。
+- **事前設定**:
+  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
+  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。

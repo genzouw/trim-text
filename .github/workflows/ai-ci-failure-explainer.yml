@@ -1,0 +1,106 @@
+name: AI CI Failure Explainer
+
+on: # zizmor: ignore[dangerous-triggers]
+  workflow_run:
+    workflows: ["Test", "Lint", "Docker Build", "Commitlint"]
+    types:
+      - completed
+
+permissions:
+  pull-requests: write
+  actions: read
+  models: read
+
+jobs:
+  explain-failure:
+    name: Explain CI Failure
+    if: ${{ github.event.workflow_run.conclusion == 'failure' }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Get associated PR number
+        id: get_pr
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          PR_URL=$(gh api "repos/${GITHUB_REPOSITORY}/actions/runs/${{ github.event.workflow_run.id }}" --jq '.pull_requests[0].url')
+          if [ -n "$PR_URL" ] && [ "$PR_URL" != "null" ]; then
+            PR_NUMBER=$(basename "$PR_URL")
+            echo "pr_number=${PR_NUMBER}" >> "$GITHUB_OUTPUT"
+            echo "Found PR: ${PR_NUMBER}"
+          else
+            echo "No associated PR found. Exiting."
+            echo "pr_number=" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Fetch failed workflow logs
+        if: steps.get_pr.outputs.pr_number != ''
+        id: fetch_logs
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # Fetch logs of failed jobs. Using tail to keep the prompt within limits.
+          FAILED_LOGS=$(gh run view ${{ github.event.workflow_run.id }} --log-failed | tail -n 200)
+
+          # Escape for multiline output
+          EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          {
+            echo "logs<<$EOF"
+            echo "$FAILED_LOGS"
+            echo "$EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create Prompt
+        if: steps.get_pr.outputs.pr_number != ''
+        env:
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          FAILED_LOGS: ${{ steps.fetch_logs.outputs.logs }}
+        run: |
+          cat << PR_POLICY_PROMPT_EOF_9f3a1c > prompt.txt
+          以下の CI ワークフロー (${WORKFLOW_NAME}) が失敗しました。失敗の原因と、修正方法の提案を簡潔に日本語で教えてください。
+
+          【エラーログ】
+          ${FAILED_LOGS}
+          PR_POLICY_PROMPT_EOF_9f3a1c
+
+      - name: Run AI Inference
+        if: steps.get_pr.outputs.pr_number != ''
+        id: inference
+        continue-on-error: true
+        uses: actions/ai-inference@a7805884c80886efc241e94a5351df715968a0ad # v2.1.1
+        with:
+          model: openai/gpt-4o-mini
+          prompt-file: prompt.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on PR
+        if: steps.get_pr.outputs.pr_number != '' && steps.inference.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ steps.get_pr.outputs.pr_number }}
+          AI_RESPONSE: ${{ steps.inference.outputs.response }}
+          WORKFLOW_NAME: ${{ github.event.workflow_run.name }}
+          RUN_URL: ${{ github.event.workflow_run.html_url }}
+        run: |
+          MARKER="<!-- ai-ci-failure-explainer-${WORKFLOW_NAME} -->"
+          COMMENT_BODY="${MARKER}
+          ### 🚨 CI 失敗の AI 分析 (${WORKFLOW_NAME})
+
+          [ワークフローの実行結果](${RUN_URL}) に失敗がありました。
+
+          ${AI_RESPONSE}
+          "
+
+          # Find if we already commented for this specific workflow failure on this PR recently
+          EXISTING_COMMENT_ID=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate --jq "[.[] | select(.body | startswith(\"${MARKER}\"))][0].id // empty")
+
+          if [ -n "${EXISTING_COMMENT_ID}" ]; then
+             gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING_COMMENT_ID}" -f body="${COMMENT_BODY}" || echo "Failed to update comment"
+          else
+             gh pr comment "${PR_NUMBER}" --body "${COMMENT_BODY}" || echo "Failed to post comment"
+          fi
