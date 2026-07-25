@@ -37,5 +37,7 @@ runs:
 
     - name: Add bats to PATH
       shell: bash
-      run: |
-        echo "${{ runner.temp }}/bats-core/bin" >> $GITHUB_PATH
+      # RUNNER_TEMP はランナーが提供する信頼済みパスで、bats-core は SHA256 検証済み。
+      # PATH への追加値に攻撃者入力は混入しないため github-env の検出を抑止する。
+      run: | # zizmor: ignore[github-env]
+        echo "${RUNNER_TEMP}/bats-core/bin" >> "$GITHUB_PATH"
