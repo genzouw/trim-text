@@ -285,3 +285,12 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
+### 30. AI Issue Translator (AIによるIssue自動翻訳)
+
+- **目的**: 投稿または更新された GitHub Issue が日本語以外（英語など）で記述されている場合に、AI を用いて自動的に日本語へ翻訳し、コメントとして投稿します。
+- **設定ファイル**: `.github/workflows/ai-issue-translator.yml`
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳を行います。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料で Issue の多言語サポートを実現します。
+- **事前設定**:
+  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
+  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
