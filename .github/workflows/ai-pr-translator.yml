@@ -80,8 +80,9 @@ jobs:
             ${AI_RESPONSE}
             "
 
-            # 既存の翻訳コメントがあるか確認
-            EXISTING_COMMENT_ID=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate --jq "[.[] | select(.body | startswith(\"${MARKER}\"))][0].id // empty")
+            # 既存の翻訳コメントがあるか確認（このワークフローが作成したコメントのみを対象とする）
+            BOT_LOGIN="$(gh api user --jq '.login')"
+            EXISTING_COMMENT_ID=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate --jq "[.[] | select(.user.login == \"${BOT_LOGIN}\" and (.body | startswith(\"${MARKER}\")))][0].id // empty")
 
             if [ -n "${EXISTING_COMMENT_ID}" ]; then
               # 既存コメントを更新
