@@ -303,3 +303,11 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
+### 32. Dockle (コンテナイメージ Linter)
+
+- **目的**: Dockerイメージに対して、CIS（Center for Internet Security）ベンチマークなどのベストプラクティスに基づいた静的解析し、セキュリティリスク（rootユーザーでの実行、不必要な権限、不要なポートの公開など）を検出します。
+- **設定ファイル**: `.github/workflows/dockle.yml`
+- **特徴**: HadolintがDockerfileの構文やベストプラクティスをチェックし、Trivyが脆弱性をスキャンするのに対して、Dockleはビルドされた「イメージそのもの」の構成やセキュリティベストプラクティスをチェックします。外部APIを必要とせず、完全無料で動作します。
+- **事前設定**:
+  1. 特に追加の設定は不要です。`.github/workflows/dockle.yml` を通じて GitHub Actions 上で自動実行されます。
