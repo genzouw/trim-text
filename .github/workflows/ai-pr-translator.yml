@@ -69,6 +69,8 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
           AI_RESPONSE: ${{ steps.inference.outputs.response }}
         run: |
+          set -euo pipefail
+
           # 翻訳が必要ないと判定された場合（レスポンスが空の場合）はそのまま終了
           if [ -z "$(printf '%s\n' "${AI_RESPONSE}" | tr -d '[:space:]')" ]; then
             echo "PR is already in Japanese or no translation needed."
@@ -83,9 +85,9 @@ jobs:
 
             if [ -n "${EXISTING_COMMENT_ID}" ]; then
               # 既存コメントを更新
-              gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING_COMMENT_ID}" -f body="${COMMENT_BODY}" || echo "Failed to update comment"
+              gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING_COMMENT_ID}" -f body="${COMMENT_BODY}"
             else
               # 新規コメントを作成
-              gh pr comment "${PR_NUMBER}" --body "${COMMENT_BODY}" || echo "Failed to post comment"
+              gh pr comment "${PR_NUMBER}" --body "${COMMENT_BODY}"
             fi
           fi
