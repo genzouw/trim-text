@@ -17,6 +17,8 @@ jobs:
     name: Dockle (Container Image Linter)
     runs-on: ubuntu-latest
     timeout-minutes: 10
+    permissions:
+      contents: read
     steps:
       - name: Checkout repository
         uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0
@@ -34,4 +36,4 @@ jobs:
         with:
           image: trim-text:ci
           exit-code: 1
-          fatal: 'CIS-DI-0001,CIS-DI-0005,CIS-DI-0006'
+          fatal: "CIS-DI-0001,CIS-DI-0005,CIS-DI-0006"
