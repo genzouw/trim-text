@@ -38,3 +38,4 @@ jobs:
           image: trim-text:ci
           exit-code: 1
           failure-threshold: FATAL
+          dockle-version: "0.4.15"
