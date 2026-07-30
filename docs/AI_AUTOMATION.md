@@ -303,3 +303,11 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
+### 32. actions/stale (Stale Issue/PRの自動クローズ)
+
+- **目的**: 一定期間活動のない Issue および Pull Request を自動的に検出し、通知（ラベル付与）後、さらに動きがなければ自動でクローズします。これによりリポジトリの健全性を保ちます。
+- **設定ファイル**: `.github/workflows/stale.yml`
+- **特徴**: GitHub 公式が提供する `actions/stale` を利用しています。外部 API を呼び出すことなく `GITHUB_TOKEN` 権限内で完結するため、公開 OSS リポジトリで完全に無料で利用できます。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions の定期実行によって処理されます。
