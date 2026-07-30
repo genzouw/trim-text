@@ -310,4 +310,5 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **設定ファイル**: `.github/workflows/stale.yml`
 - **特徴**: GitHub 公式が提供する `actions/stale` を利用しています。組み込みの `GITHUB_TOKEN` を用いて GitHub API 経由で Issue/PR のリスト取得・ラベル付与・クローズを行うため、外部の有料 LLM API 等を利用せず、公開 OSS リポジトリで完全に無料で利用できます。
 - **事前設定**:
-  1. 特に追加の設定は不要です。GitHub Actions の定期実行によって処理されます。
+  1. リポジトリで GitHub Actions が有効化されていることを確認してください。
+  2. `.github/workflows/stale.yml` に Issues および Pull Requests への書き込み権限（`issues: write` / `pull-requests: write`）が付与されていることを確認してください。
