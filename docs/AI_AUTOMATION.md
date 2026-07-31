@@ -272,3 +272,11 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. リポジトリで GitHub Actions が有効化されていることを確認してください。
   2. `.github/workflows/stale.yml` に Issues および Pull Requests への書き込み権限（`issues: write` / `pull-requests: write`）が付与されていることを確認してください。
+
+### 33. editorconfig-checker (EditorConfig 検証)
+
+- **目的**: プロジェクト全体のコードのインデント、改行コード、末尾の空白などのフォーマットが `.editorconfig` ファイルの定義に準拠しているかを自動的に検証します。
+- **設定ファイル**: `.editorconfig`, `.github/workflows/lint.yml`, `.github/actions/setup-editorconfig-checker/action.yml`
+- **特徴**: `editorconfig-checker` をローカルにダウンロードして実行し、結果を `reviewdog` を通じて PR にコメントとして通知します。外部 SaaS や API キーへの依存がなく、公開リポジトリで完全に無料で動作します。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。

@@ -147,3 +147,45 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           "${RUNNER_TEMP}/actionlint" -oneline -ignore 'unknown permission scope "models"' | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="actionlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+
+  editorconfig:
+    name: editorconfig-checker
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    # reviewdog による PR レビューコメント投稿のための最小権限。
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      EC_VERSION: 3.8.0
+      # editorconfig-checker v3.8.0 linux_amd64 の公式 SHA256
+      EC_SHA256: 613bd88f34165a334adcb6b7e92a123c9de0eada65846d31af63613b779ff3be
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
+          persist-credentials: false
+
+      - name: Setup editorconfig-checker
+        uses: ./.github/actions/setup-editorconfig-checker
+        with:
+          version: ${{ env.EC_VERSION }}
+          sha256: ${{ env.EC_SHA256 }}
+
+      - name: Setup reviewdog
+        uses: ./.github/actions/setup-reviewdog
+        with:
+          version: ${{ env.REVIEWDOG_VERSION }}
+          sha256: ${{ env.REVIEWDOG_SHA256 }}
+
+      - name: Run editorconfig-checker with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          "${RUNNER_TEMP}/editorconfig-checker/bin/ec-linux-amd64" -format gcc | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="editorconfig" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
