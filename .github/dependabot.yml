@@ -11,8 +11,11 @@ updates:
       day: monday
       time: "09:00"
       timezone: Asia/Tokyo
+    # target-branch は指定しない。指定すると、その update block の設定一式が
+    # Dependabot security updates に適用されなくなり (security updates は常に
+    # デフォルトブランチのみを対象とするため)、下記の codeql-action-security
+    # グループが無効化されてしまう。main はデフォルトブランチなので省略で足りる。
     open-pull-requests-limit: 5
-    target-branch: main
     reviewers:
       - genzouw
     labels:
@@ -23,6 +26,32 @@ updates:
       include: scope
     pull-request-branch-name:
       separator: /
+    # リリース直後の不安定なバージョンを避けるため、公開から一定日数が経過するまで
+    # 更新 PR を作成しない (zizmor dependabot-cooldown)。
+    #
+    # cooldown 7 日 + weekly スケジュールは積算されるため、取り込みまで最大 13 日
+    # かかる。これは意図的で、更新の確認を週次のレビューにまとめるためにこの遅延を
+    # 許容している。cooldown と schedule はいずれも version updates にのみ適用され、
+    # security updates は advisory 検知時に即座に PR が作られるため、この遅延幅が
+    # セキュリティ修正の適用を遅らせることはない。
+    cooldown:
+      default-days: 7
+    groups:
+      # github/codeql-action は init / autobuild / analyze / upload-sarif が
+      # 同一バージョンでないと "Loaded a configuration file for version 'X',
+      # but running version 'Y'" で CodeQL が失敗する。サブパスごとに個別 PR が
+      # 作られると必ずこの不整合が起きるため、1 つの PR にまとめる。
+      codeql-action:
+        patterns:
+          - github/codeql-action*
+      # groups は applies-to を省略すると version-updates にしか適用されない。
+      # github-actions は security updates の対象エコシステムでもあるため、
+      # advisory 経由の更新も同様にまとめないとサブパスごとの個別 PR に戻り、
+      # 上記のバージョン不整合がセキュリティ修正時に再発する。
+      codeql-action-security:
+        applies-to: security-updates
+        patterns:
+          - github/codeql-action*
 
   # Dockerfile のベースイメージ更新 (alpine など)
   - package-ecosystem: docker
@@ -32,8 +61,9 @@ updates:
       day: monday
       time: "09:00"
       timezone: Asia/Tokyo
+    # target-branch を指定すると security updates に設定が効かなくなるため、
+    # github-actions と同じ理由で省略する (main はデフォルトブランチ)。
     open-pull-requests-limit: 5
-    target-branch: main
     reviewers:
       - genzouw
     labels:
@@ -44,3 +74,5 @@ updates:
       include: scope
     pull-request-branch-name:
       separator: /
+    cooldown:
+      default-days: 7
