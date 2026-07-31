@@ -13,3 +13,9 @@ rules:
       # pull_request_target が必須。PR 由来のコードをチェックアウト・実行せず
       # PR タイトルを読むだけの安全な構成のため抑止する。
       - semantic-pull-request.yml
+      # ai-pr-translator.yml はフォーク PR のタイトル・本文も翻訳対象にするため
+      # pull_request_target が必須。チェックアウトを行わず、PR タイトル・本文は
+      # env コンテキスト経由で受け渡す（run スクリプトへの直接埋め込みを避ける）
+      # ことでスクリプトインジェクションを防いでおり、PR 由来のコードを
+      # 実行しない安全な構成のため抑止する。
+      - ai-pr-translator.yml
