@@ -49,3 +49,9 @@ runs:
 
         mkdir -p editorconfig-checker
         tar xzf "${TARBALL}" -C editorconfig-checker
+
+        BINARY_PATH="editorconfig-checker/bin/ec-linux-amd64"
+        if [ ! -x "${BINARY_PATH}" ]; then
+          echo "::error::Expected executable not found at ${BINARY_PATH} after extraction. The upstream archive layout may have changed."
+          exit 1
+        fi
