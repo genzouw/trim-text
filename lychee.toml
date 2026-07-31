@@ -1,0 +1,9 @@
+# lychee (リンクチェッカー) の設定。
+# .github/workflows/lychee.yml から参照される。
+
+# ブラウザ以外からのアクセスを拒否するサイトは、リンク自体が有効でも CI から
+# 到達性を検証できないため、チェック対象から除外する。
+exclude = [
+  # LinkedIn は bot からのリクエストに対して HTTP 999 を返す。
+  '^https://www\.linkedin\.com/',
+]

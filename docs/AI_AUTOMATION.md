@@ -50,18 +50,18 @@
 - **目的**: Issue の内容に基づき、AI がリポジトリ全体をコンテキストとして読み込み、自動でコードを修正し、Pull Request を作成する自律型エージェントです。
 - **設定ファイル**: `sweep.yaml`
 - **特徴**: 日本語でのやり取り、プロジェクト固有の Lint（shellcheck, shfmt, hadolint）の遵守、セキュリティ観点でのコード修正を自動で行います。
+- **注意**: Sweep AI は JetBrains IDE 向けのコーディングアシスタントへ方針転換したため、GitHub App としての提供は終了しています（インストールページ `github.com/apps/sweep-ai` は削除済み）。本リポジトリの `sweep.yaml` は設定として残っていますが、現在は機能しません。詳細は [sweep.dev](https://sweep.dev/) を参照してください。
 - **事前設定**:
-  1. GitHub App として [Sweep](https://github.com/apps/sweep-ai) をインストールしてください（公開リポジトリは無料）。
-  2. リポジトリへのアクセス権限を付与することで、Issue に `sweep:` などのトリガーをつけるか Sweep が自動でタスクをピックアップして動作し始めます。
+  1. 新規のインストールはできません。
 
 ### 4. Bloop AI (AIコード検索エンジン)
 
 - **目的**: リポジトリ全体をインデックス化し、自然言語による検索やコードベースに関する質問を可能にします。
 - **設定ファイル**: `.bloopignore`
 - **特徴**: 開発者がコードの目的や構造を簡単に把握できるようになり、新規参画時のオンボーディングなどをサポートします。
+- **注意**: Bloop AI は 2026 年 4 月にサービスを終了しました。GitHub App およびホスト型サービスは提供されておらず、本リポジトリの `.bloopignore` は設定として残っていますが、現在は機能しません。ソースコードは [BloopAI](https://github.com/BloopAI) にてコミュニティ管理の OSS として公開されています。
 - **事前設定**:
-  1. GitHub App として [bloop](https://github.com/apps/bloop-ai) をインストールしてください（公開リポジトリは無料）。
-  2. インストール後、リポジトリへのアクセス権限を付与してください。
+  1. 新規のインストールはできません。
 
 ### 5. Repomix (LLM 向けリポジトリコンテキスト生成) とサーチサービス連携
 
@@ -85,7 +85,7 @@
 - **設定ファイル**: `.deepsource.toml`
 - **特徴**: 既存の CI/CD を補完する形で、コードのアンチパターンやパフォーマンスの問題を自動的に検出し、修正案を提案します。
 - **事前設定**:
-  1. GitHub App として [DeepSource](https://github.com/apps/deepsource) をインストールしてください（公開 OSS リポジトリは無料）。
+  1. GitHub App として [DeepSource](https://github.com/apps/deepsource-io) をインストールしてください（公開 OSS リポジトリは無料）。
   2. プロジェクトのダッシュボードからリポジトリを連携し、初期設定してください。
 
 ### 8. Mend Renovate (高度な依存関係管理)
@@ -150,7 +150,7 @@
 - **設定ファイル**: `.clinerules`, `.windsurfrules`
 - **特徴**: エディタ内でプロジェクトのコンテキストを理解し、ファイルの作成・編集、コマンドの実行を自律的に行います。
 - **事前設定**:
-  1. VS Code に [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooCode.roo-cline) 拡張機能をインストールするか、[Windsurf IDE](https://codeium.com/windsurf) をインストールしてください。
+  1. VS Code に [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) 拡張機能をインストールするか、[Windsurf IDE（現 Devin Desktop）](https://devin.ai/desktop) をインストールしてください。
   2. 各拡張機能・IDE 内の設定画面から、利用する LLM のプロバイダと API キーを設定してください。
 
 ### 16. gitStream (PR Pipeline Automation)
