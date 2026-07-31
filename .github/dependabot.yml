@@ -25,6 +25,12 @@ updates:
       separator: /
     # リリース直後の不安定なバージョンを避けるため、公開から一定日数が経過するまで
     # 更新 PR を作成しない (zizmor dependabot-cooldown)。
+    #
+    # cooldown 7 日 + weekly スケジュールは積算されるため、取り込みまで最大 13 日
+    # かかる。これは意図的で、更新の確認を週次のレビューにまとめるためにこの遅延を
+    # 許容している。cooldown と schedule はいずれも version updates にのみ適用され、
+    # security updates は advisory 検知時に即座に PR が作られるため、この遅延幅が
+    # セキュリティ修正の適用を遅らせることはない。
     cooldown:
       default-days: 7
     groups:
