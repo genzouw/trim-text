@@ -6,12 +6,16 @@ on:
       - main
     paths:
       - "**/*.md"
+      - "lychee.toml"
+      - ".github/actions/setup-lychee/**"
       - ".github/workflows/lychee.yml"
   pull_request:
     branches:
       - main
     paths:
       - "**/*.md"
+      - "lychee.toml"
+      - ".github/actions/setup-lychee/**"
       - ".github/workflows/lychee.yml"
   schedule:
     - cron: "0 0 * * 0"
@@ -28,13 +32,32 @@ jobs:
     name: Check Links
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      # lychee のバージョンは再現性確保のため固定する。
+      LYCHEE_VERSION: 0.24.2
+      # lychee v0.24.2 x86_64-unknown-linux-gnu の公式 SHA256
+      # https://github.com/lycheeverse/lychee/releases/tag/lychee-v0.24.2
+      LYCHEE_SHA256: 1f4e0ef7f6554a6ed33dd7ac144fb2e1bbed98598e7af973042fc5cd43951c9a
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: Run Lychee Link Checker
-        uses: lycheeverse/lychee-action@e7477775783ea5526144ba13e8db5eec57747ce8 # v2.9.0
+      - name: Setup lychee
+        uses: ./.github/actions/setup-lychee
         with:
-          args: --verbose --no-progress './**/*.md'
+          version: ${{ env.LYCHEE_VERSION }}
+          sha256: ${{ env.LYCHEE_SHA256 }}
+
+      - name: Run Lychee Link Checker
+        env:
+          # GitHub のリンクは未認証だとレート制限に掛かりやすいため、トークンを渡す。
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          # 外部サイトへの一時的な接続失敗で CI が赤くならないよう、
+          # 既定 (3 回 / 1 秒間隔) よりリトライを緩める。
+          "${RUNNER_TEMP}/lychee" --verbose --no-progress \
+            --max-retries 5 --retry-wait-time 3 './**/*.md'

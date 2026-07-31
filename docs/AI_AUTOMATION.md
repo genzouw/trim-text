@@ -11,6 +11,7 @@
 - **禁止**: 利用に有料プランへの加入や有料ライセンスを必要とするサービスを CI に組み込むこと。
 - **禁止**: 上記に該当する API キーやトークンを `Secrets` として要求する Workflow を新規追加すること。
 - **許可**: GitHub Marketplace の公開 OSS リポジトリ向け無料プラン、GitHub App の公開 OSS リポジトリ向け無料利用枠、および完全無料の Action のみ。
+- **必須**: 本リポジトリは GitHub Actions の「Allowed actions」設定を `selected` にしており、GitHub 製・認証済みクリエイター製・および明示的に許可リストへ登録した Action だけが実行できます。許可されていない Action を `uses:` に指定したワークフローは、ジョブが 1 つも起動しないまま `startup_failure` で終了します（PR のチェック一覧にも現れないため、見落としやすい点に注意してください）。サードパーティ製の CLI ツールを利用したい場合は、Action を追加するのではなく、公式リリースのバイナリを SHA256 で検証してから実行するローカルの composite action（`.github/actions/setup-*`）として実装してください。
 - **必須**: PR で新たな CI サービスを追加する場合は、PR 説明文に「公開 OSS リポジトリで無料利用可能であること」「課金が発生しないこと」を明示してください。あわせて、それを確認できる公式の料金プランやドキュメントの URL を提示すること。
 - **例外**: 上記ポリシーから外れる導入を検討する場合は、PR を作成する前に Issue で提案し、リポジトリオーナーの明示的な承認を得てください。承認のない有料サービス導入 PR はクローズされます。
 
@@ -49,18 +50,18 @@
 - **目的**: Issue の内容に基づき、AI がリポジトリ全体をコンテキストとして読み込み、自動でコードを修正し、Pull Request を作成する自律型エージェントです。
 - **設定ファイル**: `sweep.yaml`
 - **特徴**: 日本語でのやり取り、プロジェクト固有の Lint（shellcheck, shfmt, hadolint）の遵守、セキュリティ観点でのコード修正を自動で行います。
+- **注意**: Sweep AI は JetBrains IDE 向けのコーディングアシスタントへ方針転換したため、GitHub App としての提供は終了しています（インストールページ `github.com/apps/sweep-ai` は削除済み）。本リポジトリの `sweep.yaml` は設定として残っていますが、現在は機能しません。詳細は [sweep.dev](https://sweep.dev/) を参照してください。
 - **事前設定**:
-  1. GitHub App として [Sweep](https://github.com/apps/sweep-ai) をインストールしてください（公開リポジトリは無料）。
-  2. リポジトリへのアクセス権限を付与することで、Issue に `sweep:` などのトリガーをつけるか Sweep が自動でタスクをピックアップして動作し始めます。
+  1. 新規のインストールはできません。
 
 ### 4. Bloop AI (AIコード検索エンジン)
 
 - **目的**: リポジトリ全体をインデックス化し、自然言語による検索やコードベースに関する質問を可能にします。
 - **設定ファイル**: `.bloopignore`
 - **特徴**: 開発者がコードの目的や構造を簡単に把握できるようになり、新規参画時のオンボーディングなどをサポートします。
+- **注意**: Bloop AI は 2026 年 4 月にサービスを終了しました。GitHub App およびホスト型サービスは提供されておらず、本リポジトリの `.bloopignore` は設定として残っていますが、現在は機能しません。ソースコードは [BloopAI](https://github.com/BloopAI) にてコミュニティ管理の OSS として公開されています。
 - **事前設定**:
-  1. GitHub App として [bloop](https://github.com/apps/bloop-ai) をインストールしてください（公開リポジトリは無料）。
-  2. インストール後、リポジトリへのアクセス権限を付与してください。
+  1. 新規のインストールはできません。
 
 ### 5. Repomix (LLM 向けリポジトリコンテキスト生成) とサーチサービス連携
 
@@ -84,7 +85,7 @@
 - **設定ファイル**: `.deepsource.toml`
 - **特徴**: 既存の CI/CD を補完する形で、コードのアンチパターンやパフォーマンスの問題を自動的に検出し、修正案を提案します。
 - **事前設定**:
-  1. GitHub App として [DeepSource](https://github.com/apps/deepsource) をインストールしてください（公開 OSS リポジトリは無料）。
+  1. GitHub App として [DeepSource](https://github.com/apps/deepsource-io) をインストールしてください（公開 OSS リポジトリは無料）。
   2. プロジェクトのダッシュボードからリポジトリを連携し、初期設定してください。
 
 ### 8. Mend Renovate (高度な依存関係管理)
@@ -149,7 +150,7 @@
 - **設定ファイル**: `.clinerules`, `.windsurfrules`
 - **特徴**: エディタ内でプロジェクトのコンテキストを理解し、ファイルの作成・編集、コマンドの実行を自律的に行います。
 - **事前設定**:
-  1. VS Code に [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooCode.roo-cline) 拡張機能をインストールするか、[Windsurf IDE](https://codeium.com/windsurf) をインストールしてください。
+  1. VS Code に [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) 拡張機能をインストールするか、[Windsurf IDE（現 Devin Desktop）](https://devin.ai/desktop) をインストールしてください。
   2. 各拡張機能・IDE 内の設定画面から、利用する LLM のプロバイダと API キーを設定してください。
 
 ### 16. gitStream (PR Pipeline Automation)
@@ -161,39 +162,7 @@
   1. GitHub App として [gitStream](https://github.com/apps/gitstream-cm) をリポジトリにインストールしてください（公開リポジトリは無料）。
   2. インストール後、ダッシュボードからリポジトリを連携させてください。
 
-### 17. VulnHawk (AI-powered SAST Scanner)
-
-- **目的**: 従来のパターンマッチングツール（SemgrepやCodeQL）では見逃されがちな、認証バイパスやIDOR、ビジネスロジックのバグをLLM（生成AI）を用いて検出します。
-- **設定ファイル**: `.github/workflows/vulnhawk.yml`
-- **特徴**: [VulnHawk](https://github.com/momenbasel/vulnhawk) は OpenAI, Claude, Claude Code, またはローカルのOllamaをバックエンドとして活用し、高度なセキュリティスキャンを提供します。本リポジトリでは無料利用枠を考慮し、ローカルやClaude CodeのOAuthトークンなどを活用します。
-- **事前設定**:
-  1. GitHub Secrets に `CLAUDE_CODE_OAUTH_TOKEN` (Claude Codeを利用する場合) を設定してください。または `ANTHROPIC_API_KEY`, `OPENAI_API_KEY` 等を設定します。完全無料で使用する場合はローカル環境のOllama等を利用してください。
-
-### 18. Vibecop (AIコード品質ゲート)
-
-- **目的**: LLMを使用しない決定論的な解析手法により、AIコーディングエージェントが導入しがちなスロップ（無駄なコメントや非効率なコード、セキュリティリスクなど）を検出し、コード品質を維持します。
-- **設定ファイル**: `.github/workflows/vibecop.yml`
-- **特徴**: [Vibecop](https://github.com/vibe-cop/vibecop) は PR 時の自動レビューに組み込まれ、`ast-grep`ベースの高速な静的解析をします。GitHub Actionsとして実行するため、利用は無料です。
-- **事前設定**:
-  1. 特に追加の設定は不要です。`.github/workflows/vibecop.yml` を通じて GitHub Actions 上で自動実行されます。
-
-### 19. AI-BOM (AI部品表・構成管理スキャナ)
-
-- **目的**: プロジェクト内で使用されているAIモデル、エージェント、API、および関連する脆弱性を自動検出し、ソフトウェア部品表(SBOM)やSARIF形式で可視化します。
-- **設定ファイル**: `.github/workflows/ai-bom.yml`
-- **特徴**: [AI-BOM](https://github.com/safe-dep/ai-bom) は Trivy や Syft などの従来のSBOMツールでは検出が難しいAI固有のコンポーネントを検出し、GitHub Code Scanning と連携します。公開リポジトリ向けのActionとして無料で利用可能です。
-- **事前設定**:
-  1. 特に追加の設定は不要ですが、GitHub の Code Scanning 機能が有効になっていることを確認してください。
-
-### 20. Open Code Review
-
-- **目的**: AIが生成したコード向けの品質ゲートとして動作します。
-- **設定ファイル**: `.github/workflows/open-code-review.yml`
-- **特徴**: 従来のLinterとは異なり、AIにより生成されたコードをレビューします。
-- **事前設定**:
-  1. 特に追加の設定は不要です。自動的に `GITHUB_TOKEN` を利用して実行されます。
-
-### 21. Lychee (Link Checker)
+### 17. Lychee (Link Checker)
 
 - **目的**: ドキュメント（Markdown など）内のリンク切れを自動的に検出し、メンテナンス漏れを防ぎます。
 - **設定ファイル**: `.github/workflows/lychee.yml`
@@ -201,7 +170,7 @@
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
 
-### 22. textlint (日本語の文章校正)
+### 18. textlint (日本語の文章校正)
 
 - **目的**: 日本語のドキュメント（Markdown など）に対して、JTF 日本語標準スタイルガイドなどの技術文書向けルールに基づいた校正を自動で行います。
 - **設定ファイル**: `.textlintrc.json`, `.github/workflows/textlint.yml`
@@ -218,7 +187,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 これらの AI ツールは、プルリクエストの概要（Description）やコミットメッセージをコンテキストとして活用します。そのため、PULL_REQUEST_TEMPLATE を踏まえ、**「なぜこの変更をしたか」を日本語で明確に記述**してください。
 
-### 22. textlint (日本語の文章校正ツール)
+### 19. textlint (日本語の文章校正ツール)
 
 - **目的**: Markdown などのドキュメントを対象に、日本語の技術文書向けのルール (JTF 日本語標準スタイルガイドなど) に従った静的な文章校正をします。
 - **設定ファイル**: `.textlintrc.json`, `.github/workflows/textlint.yml`
@@ -226,7 +195,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
 
-### 23. Semantic Pull Request (Pull Request タイトル検証)
+### 20. Semantic Pull Request (Pull Request タイトル検証)
 
 - **目的**: Pull Request のタイトルが [Conventional Commits](https://www.conventionalcommits.org/) の形式になっているかをチェックし、Release Please による自動リリース運用を安定させます。
 - **設定ファイル**: `.github/workflows/semantic-pull-request.yml`
@@ -234,32 +203,15 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. 特に追加の設定は不要です。Pull Request 作成時・編集時に GitHub Actions 上で自動的に実行されます。
 
-### 24. Anti-Slop (AIスパムPR検知)
+### 21. Woke (インクルーシブ言語 Linter)
 
-- **目的**: AI によって生成された低品質なスパム Pull Request (AI Slop PR) を自動検知し、ブロック・クローズします。
-- **設定ファイル**: `.github/workflows/anti-slop.yml`
-- **特徴**: コミット履歴や PR 内容などを評価し、人間による有益な変更か、AIによる無意味な変更（Slop）かを判定します。Vibecopがコードの内部品質を対象とするのに対し、こちらはPR自体のスパム性やAIによる自動生成を検知します。
-- **事前設定**:
-  1. 特に追加の設定は不要です。`.github/workflows/anti-slop.yml` を通じて GitHub Actions 上で自動実行されます。
-
-### 25. QA Instructions Action (AIによるQA手順の自動生成)
-
-- **目的**: Pull Requestの内容に基づき、QA（品質保証）のためのテスト手順をAIが自動生成してコメントとして投稿します。
-- **設定ファイル**: `.github/workflows/qa-instructions.yml`
-- **特徴**: 外部の有料LLM APIキーを必要とせず、GitHub Modelsの推論APIと組み込みの `GITHUB_TOKEN` を利用して動作します。これにより、完全無料でPRの変更内容を踏まえたテスト環境のセットアップや検証手順を提示します。
-- **事前設定**:
-  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
-  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
-
-### 26. Woke (インクルーシブ言語 Linter)
-
-- **目的**: ドキュメントやコード内に非インクルーシブな表現（例: master/slave, whitelist/blacklist など）が含まれていないか静的にチェックします。
+- **目的**: ドキュメントやコード内に非インクルーシブな表現（主従関係を表す旧来の用語や、許可・拒否リストの旧称など）が含まれていないか静的にチェックします。
 - **設定ファイル**: `.github/workflows/woke.yml`
 - **特徴**: オープンソースのCLIツールである `woke` を利用し、非インクルーシブな言葉を検出した際に `reviewdog` と連携して PR に自動でインラインコメントを投稿します。外部APIキーを必要とせず、完全無料で動作します。
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/woke.yml` を通じて GitHub Actions 上で自動実行されます（組み込みの `GITHUB_TOKEN` を使用します）。
 
-### 27. GenAI Issue Labeller (AIによるIssue自動ラベリング)
+### 22. GenAI Issue Labeller (AIによるIssue自動ラベリング)
 
 - **目的**: 投稿または更新された GitHub Issue の内容を解析し、最適なラベルを AI (GitHub Models) を使用して自動的に割り当てます。
 - **設定ファイル**: `.github/workflows/issue-labeller.yml`
@@ -268,7 +220,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
-### 28. AI PR Policy Checker (AIによるポリシー要件チェック)
+### 23. AI PR Policy Checker (AIによるポリシー要件チェック)
 
 - **目的**: プロジェクトで要求されている厳格な PR ポリシー（目的、無料の証明、重複確認、セットアップ手順などの6つの必須セクション）が PR タイトルおよび説明文で満たされているか、LLM を用いて自動的にチェックし、不足している場合は PR コメントとしてフィードバックします。
 - **設定ファイル**: `.github/workflows/pr-policy-checker.yml`
@@ -277,7 +229,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
-### 29. AI CI Failure Explainer (CI 失敗のAI分析)
+### 24. AI CI Failure Explainer (CI 失敗のAI分析)
 
 - **目的**: CI (Test, Lint, Docker Buildなど) が失敗した際に、エラーログを自動的に解析し、失敗の原因と修正案をPRコメントとして提示します。
 - **設定ファイル**: `.github/workflows/ai-ci-failure-explainer.yml`
@@ -286,7 +238,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
-### 30. AI Issue Translator (AIによるIssue自動翻訳)
+### 25. AI Issue Translator (AIによるIssue自動翻訳)
 
 - **目的**: 投稿または更新された GitHub Issue が日本語以外（英語など）で記述されている場合に、AI を用いて自動的に日本語へ翻訳し、コメントとして投稿します。
 - **設定ファイル**: `.github/workflows/ai-issue-translator.yml`
@@ -295,7 +247,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
-### 31. AI PR Translator (AIによるPR自動翻訳)
+### 26. AI PR Translator (AIによるPR自動翻訳)
 
 - **目的**: 投稿または更新された GitHub Pull Request のタイトルと本文が日本語以外（英語など）で記述されている場合に、AI を用いて自動的に日本語へ翻訳し、コメントとして投稿します。これにより、海外コントリビュータとのやり取りを円滑にします。
 - **設定ファイル**: `.github/workflows/ai-pr-translator.yml`
@@ -304,15 +256,15 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
-### 32. Dockle (コンテナイメージ Linter)
+### 27. Dockle (コンテナイメージ Linter)
 
 - **目的**: Dockerイメージに対して、CIS（Center for Internet Security）ベンチマークなどのベストプラクティスに基づいた静的解析し、セキュリティリスク（rootユーザーでの実行、不必要な権限、不要なポートの公開など）を検出します。
 - **設定ファイル**: `.github/workflows/dockle.yml`
-- **特徴**: HadolintがDockerfileの構文やベストプラクティスをチェックし、Trivyが脆弱性をスキャンするのに対して、Dockleはビルドされた「イメージそのもの」の構成やセキュリティベストプラクティスをチェックします。本体の [goodwithtech/dockle](https://github.com/goodwithtech/dockle)（Apache License 2.0）と、それを呼び出す [erzz/dockle-action](https://github.com/erzz/dockle-action)（MIT License）はいずれも公開OSSであり、外部のSaaSや有料APIキーを必要とせず、課金も発生しません。
+- **特徴**: HadolintがDockerfileの構文やベストプラクティスをチェックし、Trivyが脆弱性をスキャンするのに対して、Dockleはビルドされた「イメージそのもの」の構成やセキュリティベストプラクティスをチェックします。本体の [goodwithtech/dockle](https://github.com/goodwithtech/dockle)（Apache License 2.0）は公開OSSであり、外部のSaaSや有料APIキーを必要とせず、課金も発生しません。公式リリースのバイナリを SHA256 検証したうえで直接実行します（`.github/actions/setup-dockle`）。
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/dockle.yml` を通じて GitHub Actions 上で自動実行されます。
 
-### 33. actions/stale (Stale Issue/PRの自動クローズ)
+### 28. actions/stale (Stale Issue/PRの自動クローズ)
 
 - **目的**: 一定期間活動のない Issue および Pull Request を自動的に検出し、通知（ラベル付与）後、さらに動きがなければ自動でクローズします。これによりリポジトリの健全性を保ちます。
 - **設定ファイル**: `.github/workflows/stale.yml`
