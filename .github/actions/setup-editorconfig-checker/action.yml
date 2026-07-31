@@ -47,6 +47,7 @@ runs:
 
         echo "${EC_SHA256}  ${TARBALL}" | sha256sum -c -
 
+        rm -rf editorconfig-checker
         mkdir -p editorconfig-checker
         tar xzf "${TARBALL}" -C editorconfig-checker
 
