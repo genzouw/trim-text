@@ -25,7 +25,6 @@
   ],
   "words": [
     "genzouw",
-    "dockeri",
     "coreutils",
     "shfmt",
     "hadolint",
@@ -45,12 +44,11 @@
     "Bloop",
     "Codeium",
     "lychee",
-    "lycheeverse"
+    "lycheeverse",
+    "yamllint",
+    "dockle",
+    "goodwithtech",
+    "RooVeterinaryInc"
   ],
-  "dictionaries": [
-    "softwareTerms",
-    "docker",
-    "bash",
-    "github-actions"
-  ]
+  "dictionaries": ["softwareTerms", "docker", "bash", "github-actions"]
 }

@@ -1,0 +1,48 @@
+name: Dockle
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: dockle-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  dockle:
+    name: Dockle (Container Image Linter)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    env:
+      # Dockle のバージョンは再現性確保のため固定する。
+      DOCKLE_VERSION: 0.4.15
+      # Dockle v0.4.15 Linux-64bit の公式 SHA256
+      # https://github.com/goodwithtech/dockle/releases/tag/v0.4.15
+      DOCKLE_SHA256: 8bfc9183d1d3d67800edb45bea4bb63ddf1d28bec5f89944075a07007d79caad
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@bb05f3f5519dd87d3ba754cc423b652a5edd6d2c # v4.2.0
+
+      - name: Build image
+        run: docker buildx build --load --cache-to type=gha,mode=max --cache-from type=gha -t trim-text:ci .
+
+      - name: Setup Dockle
+        uses: ./.github/actions/setup-dockle
+        with:
+          version: ${{ env.DOCKLE_VERSION }}
+          sha256: ${{ env.DOCKLE_SHA256 }}
+
+      - name: Run Dockle
+        run: |
+          "${RUNNER_TEMP}/dockle" --no-color --exit-code 1 --exit-level fatal trim-text:ci

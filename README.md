@@ -5,8 +5,6 @@
 [![OpenSSF Best Practices](https://img.shields.io/badge/OpenSSF_Best_Practices-in_progress-yellow?style=for-the-badge)](https://www.bestpractices.dev/)
 [![OpenSSF Scorecard](https://api.securityscorecards.dev/projects/github.com/genzouw/trim-text/badge)](https://scorecard.dev/viewer/?uri=github.com/genzouw/trim-text)
 
-[![dockeri.co](https://dockeri.co/image/genzouw/trim-text)](https://hub.docker.com/r/genzouw/trim-text)
-
 ## Description
 
 This Docker image is intended to provide a UI that integrates command line text cut operations.
