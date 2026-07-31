@@ -56,12 +56,14 @@ jobs:
 
           # PR タイトル・本文はシェル展開を伴わない形で書き出す
           # （heredoc への直接埋め込みはコマンド置換によるインジェクションを招くため避ける）
+          # echo はオプション・エスケープの解釈が実装依存のため printf '%s\n' を使う
+          # （"-n" 始まりや "\" を含む値でも入力をそのまま書き出せる）
           {
-            echo "【Pull Request タイトル】"
-            echo "${PR_TITLE}"
-            echo ""
-            echo "【Pull Request 本文】"
-            echo "${PR_BODY}"
+            printf '%s\n' "【Pull Request タイトル】"
+            printf '%s\n' "${PR_TITLE}"
+            printf '\n'
+            printf '%s\n' "【Pull Request 本文】"
+            printf '%s\n' "${PR_BODY}"
           } > prompt.txt
 
       - name: Run AI Inference
