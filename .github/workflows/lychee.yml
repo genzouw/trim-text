@@ -51,4 +51,7 @@ jobs:
           # GitHub のリンクは未認証だとレート制限に掛かりやすいため、トークンを渡す。
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          "${RUNNER_TEMP}/lychee" --verbose --no-progress './**/*.md'
+          # 外部サイトへの一時的な接続失敗で CI が赤くならないよう、
+          # 既定 (3 回 / 1 秒間隔) よりリトライを緩める。
+          "${RUNNER_TEMP}/lychee" --verbose --no-progress \
+            --max-retries 5 --retry-wait-time 3 './**/*.md'
