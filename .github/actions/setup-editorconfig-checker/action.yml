@@ -15,7 +15,7 @@ runs:
       uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: ${{ runner.temp }}/editorconfig-checker
-        key: editorconfig-checker-${{ runner.os }}-${{ inputs.version }}-${{ inputs.sha256 }}
+        key: editorconfig-checker-${{ runner.os }}-${{ runner.arch }}-${{ inputs.version }}-${{ inputs.sha256 }}
 
     - name: Install editorconfig-checker
       if: steps.cache-editorconfig-checker.outputs.cache-hit != 'true'
@@ -32,6 +32,10 @@ runs:
         fi
         if ! [[ "${EC_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
           echo "::error::Invalid SHA256 format"
+          exit 1
+        fi
+        if [ "${{ runner.arch }}" != "X64" ]; then
+          echo "::error::Unsupported runner architecture: ${{ runner.arch }}. This action only supports X64 (amd64) runners."
           exit 1
         fi
         TARBALL="ec-linux-amd64.tar.gz"
