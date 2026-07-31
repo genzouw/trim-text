@@ -11,8 +11,11 @@ updates:
       day: monday
       time: "09:00"
       timezone: Asia/Tokyo
+    # target-branch は指定しない。指定すると、その update block の設定一式が
+    # Dependabot security updates に適用されなくなり (security updates は常に
+    # デフォルトブランチのみを対象とするため)、下記の codeql-action-security
+    # グループが無効化されてしまう。main はデフォルトブランチなので省略で足りる。
     open-pull-requests-limit: 5
-    target-branch: main
     reviewers:
       - genzouw
     labels:
@@ -58,8 +61,9 @@ updates:
       day: monday
       time: "09:00"
       timezone: Asia/Tokyo
+    # target-branch を指定すると security updates に設定が効かなくなるため、
+    # github-actions と同じ理由で省略する (main はデフォルトブランチ)。
     open-pull-requests-limit: 5
-    target-branch: main
     reviewers:
       - genzouw
     labels:
