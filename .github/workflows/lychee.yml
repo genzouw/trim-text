@@ -6,12 +6,16 @@ on:
       - main
     paths:
       - "**/*.md"
+      - "lychee.toml"
+      - ".github/actions/setup-lychee/**"
       - ".github/workflows/lychee.yml"
   pull_request:
     branches:
       - main
     paths:
       - "**/*.md"
+      - "lychee.toml"
+      - ".github/actions/setup-lychee/**"
       - ".github/workflows/lychee.yml"
   schedule:
     - cron: "0 0 * * 0"
