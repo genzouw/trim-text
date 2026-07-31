@@ -27,17 +27,33 @@ jobs:
     name: yamllint
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    env:
+      # yamllint のバージョンは再現性確保のため固定する。
+      YAMLLINT_VERSION: 1.38.0
+      # reviewdog のバージョンは再現性確保のため固定する。
+      REVIEWDOG_VERSION: 0.21.0
+      # reviewdog v0.21.0 linux_amd64 の公式 SHA256
+      # https://github.com/reviewdog/reviewdog/releases/tag/v0.21.0
+      REVIEWDOG_SHA256: ad5ce7d5ffa52aaa7ec8710a8fa764181b6cecaab843cc791e1cce1680381569
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
-      - name: Run yamllint with reviewdog
-        uses: reviewdog/action-yamllint@e02a49fdf53f51ddd8dfa89b09aa975043aeba38 # v1.23.0
+      - name: Install yamllint
+        run: |
+          set -euo pipefail
+          python3 -m pip install --user --disable-pip-version-check "yamllint==${YAMLLINT_VERSION}"
+
+      - name: Setup reviewdog
+        uses: ./.github/actions/setup-reviewdog
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          reporter: github-pr-review
-          level: warning
-          fail_on_error: true
-          yamllint_flags: '.'
+          version: ${{ env.REVIEWDOG_VERSION }}
+          sha256: ${{ env.REVIEWDOG_SHA256 }}
+
+      - name: Run yamllint with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 -m yamllint -f parsable . | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="yamllint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"

@@ -7,3 +7,6 @@ rules:
     min-spaces-from-content: 1
   truthy:
     allowed-values: ["true", "false"]
+    # GitHub Actions の `on:` キーは YAML 1.1 では真偽値と解釈されるが、
+    # ワークフロー定義としては正当なキー名であるため、キーの検査は無効化する。
+    check-keys: false
