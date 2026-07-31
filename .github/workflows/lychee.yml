@@ -32,6 +32,8 @@ jobs:
     name: Check Links
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     env:
       # lychee のバージョンは再現性確保のため固定する。
       LYCHEE_VERSION: 0.24.2

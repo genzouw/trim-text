@@ -17,6 +17,10 @@ jobs:
     name: Woke (Inclusive Language Linter)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      # reviewdog が github-pr-review でレビューコメントを投稿するために必要。
+      pull-requests: write
     env:
       # woke のバージョンは再現性確保のため固定する。
       WOKE_VERSION: 0.19.0

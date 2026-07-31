@@ -27,6 +27,10 @@ jobs:
     name: yamllint
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      # reviewdog が github-pr-review でレビューコメントを投稿するために必要。
+      pull-requests: write
     env:
       # yamllint のバージョンは再現性確保のため固定する。
       YAMLLINT_VERSION: 1.38.0
