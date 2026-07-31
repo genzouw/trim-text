@@ -1,0 +1,36 @@
+name: Close Stale Issues and PRs
+
+on:
+  schedule:
+    - cron: "30 1 * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  stale:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Close Stale Issues
+        uses: actions/stale@1e223db275d687790206a7acac4d1a11bd6fe629 # v10.4.0
+        with:
+          stale-issue-message: "このIssueは長期間活動がないため、staleとしてマークされました。7日以内にコメントまたは更新がない場合、自動的にクローズされます。"
+          stale-pr-message: "このPull Requestは長期間活動がないため、staleとしてマークされました。7日以内にコメントまたは更新がない場合、自動的にクローズされます。"
+          days-before-stale: 60
+          days-before-close: 7
+          stale-issue-label: "stale"
+          stale-pr-label: "stale"
+          exempt-issue-labels: "pinned,security"
+          exempt-pr-labels: "pinned,security"
