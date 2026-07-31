@@ -304,7 +304,15 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
-### 32. actions/stale (Stale Issue/PRの自動クローズ)
+### 32. Dockle (コンテナイメージ Linter)
+
+- **目的**: Dockerイメージに対して、CIS（Center for Internet Security）ベンチマークなどのベストプラクティスに基づいた静的解析し、セキュリティリスク（rootユーザーでの実行、不必要な権限、不要なポートの公開など）を検出します。
+- **設定ファイル**: `.github/workflows/dockle.yml`
+- **特徴**: HadolintがDockerfileの構文やベストプラクティスをチェックし、Trivyが脆弱性をスキャンするのに対して、Dockleはビルドされた「イメージそのもの」の構成やセキュリティベストプラクティスをチェックします。本体の [goodwithtech/dockle](https://github.com/goodwithtech/dockle)（Apache License 2.0）と、それを呼び出す [erzz/dockle-action](https://github.com/erzz/dockle-action)（MIT License）はいずれも公開OSSであり、外部のSaaSや有料APIキーを必要とせず、課金も発生しません。
+- **事前設定**:
+  1. 特に追加の設定は不要です。`.github/workflows/dockle.yml` を通じて GitHub Actions 上で自動実行されます。
+
+### 33. actions/stale (Stale Issue/PRの自動クローズ)
 
 - **目的**: 一定期間活動のない Issue および Pull Request を自動的に検出し、通知（ラベル付与）後、さらに動きがなければ自動でクローズします。これによりリポジトリの健全性を保ちます。
 - **設定ファイル**: `.github/workflows/stale.yml`
