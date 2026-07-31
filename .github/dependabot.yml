@@ -23,6 +23,18 @@ updates:
       include: scope
     pull-request-branch-name:
       separator: /
+    # リリース直後の不安定なバージョンを避けるため、公開から一定日数が経過するまで
+    # 更新 PR を作成しない (zizmor dependabot-cooldown)。
+    cooldown:
+      default-days: 7
+    groups:
+      # github/codeql-action は init / autobuild / analyze / upload-sarif が
+      # 同一バージョンでないと "Loaded a configuration file for version 'X',
+      # but running version 'Y'" で CodeQL が失敗する。サブパスごとに個別 PR が
+      # 作られると必ずこの不整合が起きるため、1 つの PR にまとめる。
+      codeql-action:
+        patterns:
+          - github/codeql-action*
 
   # Dockerfile のベースイメージ更新 (alpine など)
   - package-ecosystem: docker
@@ -44,3 +56,5 @@ updates:
       include: scope
     pull-request-branch-name:
       separator: /
+    cooldown:
+      default-days: 7
