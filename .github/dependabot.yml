@@ -35,6 +35,14 @@ updates:
       codeql-action:
         patterns:
           - github/codeql-action*
+      # groups は applies-to を省略すると version-updates にしか適用されない。
+      # github-actions は security updates の対象エコシステムでもあるため、
+      # advisory 経由の更新も同様にまとめないとサブパスごとの個別 PR に戻り、
+      # 上記のバージョン不整合がセキュリティ修正時に再発する。
+      codeql-action-security:
+        applies-to: security-updates
+        patterns:
+          - github/codeql-action*
 
   # Dockerfile のベースイメージ更新 (alpine など)
   - package-ecosystem: docker
