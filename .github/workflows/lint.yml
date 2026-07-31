@@ -33,7 +33,7 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
@@ -61,7 +61,7 @@ jobs:
       SHFMT_SHA256: 1f57a384d59542f8fac5f503da1f3ea44242f46dff969569e80b524d64b71dbc
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
@@ -88,7 +88,7 @@ jobs:
       HADOLINT_VERSION: v2.12.0
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
@@ -125,7 +125,7 @@ jobs:
       ACTIONLINT_SHA256: 023070a287cd8cccd71515fedc843f1985bf96c436b7effaecce67290e7e0757
     steps:
       - name: Checkout repository
-        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
