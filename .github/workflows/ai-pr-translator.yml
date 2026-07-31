@@ -96,8 +96,12 @@ jobs:
             "
 
             # 既存の翻訳コメントがあるか確認
-            # （マーカーを騙った人間のコメントを掴まないよう Bot 投稿に限定する）
-            EXISTING_COMMENT_ID=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate --jq "[.[] | select(.user.type == \"Bot\" and (.body | startswith(\"${MARKER}\")))][0].id // empty")
+            # - マーカーを騙った他者のコメントを掴まないよう github-actions[bot] の投稿に限定する
+            # - --paginate はページごとに JSON を出力するため --slurp で 1 配列にまとめてから
+            #   全ページを走査する（複数ページに一致があっても ID は 1 つに定まる）
+            # - --slurp は --jq と併用できないため、外部の jq に渡す
+            EXISTING_COMMENT_ID=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments" --paginate --slurp \
+              | jq -r --arg marker "${MARKER}" '[.[][] | select(.user.login == "github-actions[bot]" and (.body | startswith($marker)))][0].id // empty')
 
             if [ -n "${EXISTING_COMMENT_ID}" ]; then
               # 既存コメントを更新
