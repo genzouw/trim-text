@@ -1,0 +1,58 @@
+name: "Setup editorconfig-checker"
+description: "Downloads, validates, extracts, and caches editorconfig-checker"
+inputs:
+  version:
+    description: "The version of editorconfig-checker to install"
+    required: true
+  sha256:
+    description: "The expected SHA256 checksum of the editorconfig-checker tar.gz file"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Cache editorconfig-checker
+      id: cache-editorconfig-checker
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: ${{ runner.temp }}/editorconfig-checker
+        key: editorconfig-checker-${{ runner.os }}-${{ runner.arch }}-${{ inputs.version }}-${{ inputs.sha256 }}
+
+    - name: Install editorconfig-checker
+      if: steps.cache-editorconfig-checker.outputs.cache-hit != 'true'
+      working-directory: ${{ runner.temp }}
+      shell: bash
+      env:
+        EC_VERSION: ${{ inputs.version }}
+        EC_SHA256: ${{ inputs.sha256 }}
+      run: |
+        set -euo pipefail
+        if ! [[ "${EC_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+          echo "::error::Invalid editorconfig-checker version format"
+          exit 1
+        fi
+        if ! [[ "${EC_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
+          echo "::error::Invalid SHA256 format"
+          exit 1
+        fi
+        if [ "${{ runner.arch }}" != "X64" ]; then
+          echo "::error::Unsupported runner architecture: ${{ runner.arch }}. This action only supports X64 (amd64) runners."
+          exit 1
+        fi
+        TARBALL="ec-linux-amd64.tar.gz"
+        curl --fail --silent --show-error --location \
+          --retry 3 --retry-all-errors --retry-delay 2 \
+          --connect-timeout 10 --max-time 120 \
+          -o "${TARBALL}" \
+          "https://github.com/editorconfig-checker/editorconfig-checker/releases/download/v${EC_VERSION}/${TARBALL}"
+
+        echo "${EC_SHA256}  ${TARBALL}" | sha256sum -c -
+
+        rm -rf editorconfig-checker
+        mkdir -p editorconfig-checker
+        tar xzf "${TARBALL}" -C editorconfig-checker
+
+        BINARY_PATH="editorconfig-checker/bin/ec-linux-amd64"
+        if [ ! -x "${BINARY_PATH}" ]; then
+          echo "::error::Expected executable not found at ${BINARY_PATH} after extraction. The upstream archive layout may have changed."
+          exit 1
+        fi
