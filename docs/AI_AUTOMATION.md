@@ -285,3 +285,30 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
+### 30. AI Issue Translator (AIによるIssue自動翻訳)
+
+- **目的**: 投稿または更新された GitHub Issue が日本語以外（英語など）で記述されている場合に、AI を用いて自動的に日本語へ翻訳し、コメントとして投稿します。
+- **設定ファイル**: `.github/workflows/ai-issue-translator.yml`
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料で Issue の多言語サポートを実現します。
+- **事前設定**:
+  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
+  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
+### 31. AI PR Translator (AIによるPR自動翻訳)
+
+- **目的**: 投稿または更新された Pull Request が日本語以外（英語など）で記述されている場合に、AI を用いて自動的に日本語へ翻訳し、コメントとして投稿します。
+- **設定ファイル**: `.github/workflows/ai-pr-translator.yml`
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料で Pull Request の多言語サポートを実現します。Fork されたリポジトリからの PR にも対応するため、`pull_request_target` イベントを使用しています。
+- **事前設定**:
+  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
+  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
+### 32. actions/stale (Stale Issue/PRの自動クローズ)
+
+- **目的**: 一定期間活動のない Issue および Pull Request を自動的に検出し、通知（ラベル付与）後、さらに動きがなければ自動でクローズします。これによりリポジトリの健全性を保ちます。
+- **設定ファイル**: `.github/workflows/stale.yml`
+- **特徴**: GitHub 公式が提供する `actions/stale` を利用しています。組み込みの `GITHUB_TOKEN` を用いて GitHub API 経由で Issue/PR のリスト取得・ラベル付与・クローズをするため、外部の有料 LLM API 等を利用せず、公開 OSS リポジトリで完全に無料で利用できます。
+- **事前設定**:
+  1. リポジトリで GitHub Actions が有効化されていることを確認してください。
+  2. `.github/workflows/stale.yml` に Issues および Pull Requests への書き込み権限（`issues: write` / `pull-requests: write`）が付与されていることを確認してください。
