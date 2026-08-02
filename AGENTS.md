@@ -48,13 +48,12 @@
 
 ### 3.2 リポジトリに導入済みのツール (重複 PR を作らないこと)
 
-| ツール                                                           | 役割                                  | 設定ファイル                    |
-| :--------------------------------------------------------------- | :------------------------------------ | :------------------------------ |
-| [CodeRabbit](https://github.com/apps/coderabbitai)               | AI コードレビュー                     | `.coderabbit.yaml`              |
-| [PR-Agent (Qodo Merge)](https://github.com/apps/qodo-merge)      | PR スコアリング / レビュー            | `.pr_agent.toml`                |
-| [Gemini Code Assist](https://github.com/apps/gemini-code-assist) | リポジトリインデックス (API キー不要) | GitHub App 設定のみ             |
-| Repomix                                                          | LLM 向けコンテキスト生成              | `.github/workflows/repomix.yml` |
-| SonarCloud                                                       | 静的解析                              | `sonar-project.properties`      |
+| ツール                                                      | 役割                       | 設定ファイル                    |
+| :---------------------------------------------------------- | :------------------------- | :------------------------------ |
+| [CodeRabbit](https://github.com/apps/coderabbitai)          | AI コードレビュー          | `.coderabbit.yaml`              |
+| [PR-Agent (Qodo Merge)](https://github.com/apps/qodo-merge) | PR スコアリング / レビュー | `.pr_agent.toml`                |
+| Repomix                                                     | LLM 向けコンテキスト生成   | `.github/workflows/repomix.yml` |
+| SonarCloud                                                  | 静的解析                   | `sonar-project.properties`      |
 
 ## 4. 大原則 (MUST): CI/CD では「無料サービスのみ」を利用する
 
@@ -177,7 +176,7 @@ claude code "リファクタリングを提案して"
 - [ ] 追加するサービスは **公開 OSS リポジトリで完全無料** で利用できる。
 - [ ] GitHub Secrets に **LLM プロバイダの API キー** を追加していない。
 - [ ] PR 説明文に「公開 OSS リポジトリで無料利用可能であること」「課金が発生しないこと」を明記し、**公式の料金プラン / ドキュメントの URL** を提示している。
-- [ ] 既存の AI ツール (CodeRabbit, PR-Agent, Gemini Code Assist 等) と機能が重複していない。
+- [ ] 既存の AI ツール (CodeRabbit, PR-Agent 等) と機能が重複していない。
 - [ ] PR の本文は `.github/PULL_REQUEST_TEMPLATE.md` のテンプレートに沿って「なぜこの変更をしたか」を日本語で明確に記述している。
 - [ ] コミットメッセージは Conventional Commits (`feat:` / `fix:` / `docs:` / `chore:` 等) に準拠している。
 
