@@ -1,0 +1,65 @@
+name: AI Issue Responder
+
+on:
+  issues:
+    types: [opened]
+
+permissions:
+  issues: write
+  actions: read
+  models: read
+
+jobs:
+  respond:
+    name: Generate AI Response
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Create Prompt
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          cat << PR_POLICY_PROMPT_EOF > prompt.txt
+          あなたはオープンソースプロジェクトの親切なメンテナーです。
+          新しく作成されたIssueに対して、最初の挨拶と状況の整理を行う返信を日本語で作成してください。
+
+          バグ報告の場合は、再現手順や実行環境の情報（OS、Dockerのバージョンなど）が不足していれば追加をお願いしてください。
+          機能要望の場合は、提案への感謝と、どのようなユースケースを想定しているかの追加質問を検討してください。
+          質問の場合は、内容を明確にするための手助けを提供してください。
+
+          返信は簡潔で丁寧なトーンを保ち、Markdown形式で出力してください。
+
+          【Issue タイトル】
+          ${ISSUE_TITLE}
+
+          【Issue 本文】
+          ${ISSUE_BODY}
+          PR_POLICY_PROMPT_EOF
+
+      - name: Run AI Inference
+        id: inference
+        continue-on-error: true
+        uses: actions/ai-inference@a7805884c80886efc241e94a5351df715968a0ad # v2.1.1
+        with:
+          model: openai/gpt-4o-mini
+          prompt-file: prompt.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Comment on Issue
+        if: steps.inference.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          AI_RESPONSE: ${{ steps.inference.outputs.response }}
+        run: |
+          MARKER="<!-- ai-issue-responder -->"
+          COMMENT_BODY="${MARKER}
+          ${AI_RESPONSE}
+          "
+          gh issue comment "${ISSUE_NUMBER}" --body "${COMMENT_BODY}" || echo "Failed to post comment"
