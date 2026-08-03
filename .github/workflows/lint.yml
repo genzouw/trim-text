@@ -148,6 +148,13 @@ jobs:
         run: |
           "${RUNNER_TEMP}/actionlint" -oneline -ignore 'unknown permission scope "models"' | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="actionlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
+      - name: Verify action pins resolve to commit SHAs
+        env:
+          # annotated tag object SHA を誤って pin した場合に startup_failure を防ぐ。
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          bash .github/scripts/verify-action-pins.sh
+
   editorconfig:
     name: editorconfig-checker
     runs-on: ubuntu-latest
