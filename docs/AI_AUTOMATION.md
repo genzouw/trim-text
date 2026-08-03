@@ -275,7 +275,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 ### 29. AI Issue Responder (AIによるIssue自動応答)
 
-- **目的**: 新規に作成された GitHub Issue に対して、AI を用いて自動的に挨拶や状況整理（バグ再現手順の追加依頼など）の初期応答を行います。
+- **目的**: 新規に作成された GitHub Issue に対して、AI を用いて自動的に挨拶や状況整理（バグ再現手順の追加依頼など）の初期応答をします。
 - **設定ファイル**: `.github/workflows/ai-issue-responder.yml`
 - **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して自動応答テキストを生成します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料でIssueの一次対応を自動化し、メンテナーの負担を軽減します。
 - **事前設定**:
