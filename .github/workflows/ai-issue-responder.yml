@@ -65,4 +65,4 @@ jobs:
           COMMENT_BODY="${MARKER}
           ${AI_RESPONSE}
           "
-          gh issue comment "${ISSUE_NUMBER}" --body "${COMMENT_BODY}" || echo "Failed to post comment"
+          gh issue comment "${ISSUE_NUMBER}" --body "${COMMENT_BODY}"
