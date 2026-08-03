@@ -69,4 +69,19 @@ jobs:
           COMMENT_BODY="${MARKER}
           ${AI_RESPONSE}
           "
-          gh issue comment "${ISSUE_NUMBER}" --body "${COMMENT_BODY}"
+
+          # 既存のAI返信コメントがあるか確認
+          # - マーカーを騙った他者のコメントを掴まないよう github-actions[bot] の投稿に限定する
+          # - --paginate はページごとに JSON を出力するため --slurp で 1 配列にまとめてから
+          #   全ページを走査する（複数ページに一致があっても ID は 1 つに定まる）
+          # - --slurp は --jq と併用できないため、外部の jq に渡す
+          EXISTING_COMMENT_ID=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" --paginate --slurp \
+            | jq -r --arg marker "${MARKER}" '[.[][] | select(.user.login == "github-actions[bot]" and (.body | startswith($marker)))][0].id // empty')
+
+          if [ -n "${EXISTING_COMMENT_ID}" ]; then
+            # 既存コメントを更新（workflow の rerun / retry での重複投稿を防ぐ）
+            gh api --method PATCH "repos/${GITHUB_REPOSITORY}/issues/comments/${EXISTING_COMMENT_ID}" -f body="${COMMENT_BODY}"
+          else
+            # 新規コメントを作成
+            gh issue comment "${ISSUE_NUMBER}" --body "${COMMENT_BODY}"
+          fi
