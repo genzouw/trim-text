@@ -24,7 +24,7 @@ jobs:
           egress-policy: audit
 
       - name: Close Stale Issues
-        uses: actions/stale@1e223db275d687790206a7acac4d1a11bd6fe629 # v10.4.0
+        uses: actions/stale@4391f3da665fdf50b6810c1a66712fb9ba21aa93 # v11.0.0
         with:
           stale-issue-message: "このIssueは長期間活動がないため、staleとしてマークされました。7日以内にコメントまたは更新がない場合、自動的にクローズされます。"
           stale-pr-message: "このPull Requestは長期間活動がないため、staleとしてマークされました。7日以内にコメントまたは更新がない場合、自動的にクローズされます。"
