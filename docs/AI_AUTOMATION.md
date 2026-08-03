@@ -277,7 +277,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 - **目的**: 新規に作成された GitHub Issue に対して、AI を用いて自動的に挨拶や状況整理（バグ再現手順の追加依頼など）の初期応答をします。
 - **設定ファイル**: `.github/workflows/ai-issue-responder.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して、日本語で初回返信を生成しIssueコメントとして投稿します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料でIssueの一次対応を自動化し、メンテナーの負担を軽減します。
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して、日本語で初回返信を生成しIssueコメントとして投稿します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料でIssueの一次対応を自動化し、メンテナーの負担を軽減します。Issue タイトル・本文は `<issue_data>` タグでデータとして分離し、その内容に含まれる命令には従わないようプロンプトで明示することで、プロンプトインジェクションのリスクを低減します。
 - **事前設定**:
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
