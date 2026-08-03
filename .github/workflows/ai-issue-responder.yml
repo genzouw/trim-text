@@ -6,7 +6,6 @@ on:
 
 permissions:
   issues: write
-  actions: read
   models: read
 
 jobs:
