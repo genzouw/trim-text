@@ -282,7 +282,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
-### 33. editorconfig-checker (EditorConfig 検証)
+### 30. editorconfig-checker (EditorConfig 検証)
 
 - **目的**: プロジェクト全体のコードのインデント、改行コード、末尾の空白などのフォーマットが `.editorconfig` ファイルの定義に準拠しているかを自動的に検証します。
 - **設定ファイル**: `.editorconfig`, `.github/workflows/lint.yml`, `.github/actions/setup-editorconfig-checker/action.yml`
