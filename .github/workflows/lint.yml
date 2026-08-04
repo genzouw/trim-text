@@ -58,6 +58,7 @@ jobs:
               - '.github/workflows/**/*.yaml'
               - '.github/actions/**/*.yml'
               - '.github/actions/**/*.yaml'
+              - '.github/scripts/**'
             yaml_files:
               - '**/*.yml'
               - '**/*.yaml'
@@ -68,7 +69,9 @@ jobs:
 
   shellcheck:
     needs: changes
-    if: ${{ needs.changes.outputs.sh == 'true' }}
+    # ワークフロー/ローカルActionの変更でも自身のロジック変化を検知できるよう、
+    # gha（CI定義の変更）でも実行対象にする。
+    if: ${{ needs.changes.outputs.sh == 'true' || needs.changes.outputs.gha == 'true' }}
     name: ShellCheck
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -97,7 +100,9 @@ jobs:
 
   shfmt:
     needs: changes
-    if: ${{ needs.changes.outputs.sh == 'true' }}
+    # ワークフロー/ローカルActionの変更でも自身のロジック変化を検知できるよう、
+    # gha（CI定義の変更）でも実行対象にする。
+    if: ${{ needs.changes.outputs.sh == 'true' || needs.changes.outputs.gha == 'true' }}
     name: shfmt
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -128,7 +133,9 @@ jobs:
 
   hadolint:
     needs: changes
-    if: ${{ needs.changes.outputs.dockerfile == 'true' }}
+    # ワークフロー/ローカルActionの変更でも自身のロジック変化を検知できるよう、
+    # gha（CI定義の変更）でも実行対象にする。
+    if: ${{ needs.changes.outputs.dockerfile == 'true' || needs.changes.outputs.gha == 'true' }}
     name: Hadolint (Dockerfile)
     runs-on: ubuntu-latest
     timeout-minutes: 5
