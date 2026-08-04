@@ -1,0 +1,10 @@
+{
+  "name": "lint-yml-textlint",
+  "private": true,
+  "description": "lint.yml の textlint ジョブ専用の依存関係。package-lock.json による再現可能なインストールのために分離している。",
+  "dependencies": {
+    "textlint": "15.8.0",
+    "textlint-rule-preset-ja-technical-writing": "12.0.2",
+    "textlint-filter-rule-comments": "1.3.0"
+  }
+}
