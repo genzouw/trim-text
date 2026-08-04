@@ -21,9 +21,62 @@ env:
 
 permissions:
   contents: read
+  pull-requests: write
 
 jobs:
+  changes:
+    name: Detect File Changes
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      sh: ${{ steps.filter.outputs.sh }}
+      dockerfile: ${{ steps.filter.outputs.dockerfile }}
+      gha: ${{ steps.filter.outputs.gha }}
+      editorconfig: ${{ steps.filter.outputs.editorconfig }}
+      yaml_files: ${{ steps.filter.outputs.yaml_files }}
+      md: ${{ steps.filter.outputs.md }}
+      all: ${{ steps.filter.outputs.all }}
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Paths Filter
+        uses: dorny/paths-filter@de90cc6fb38fc0963ad72b210f1f284cd68cea36 # v3.0.2
+        id: filter
+        with:
+          filters: |
+            sh:
+              - '**/*.sh'
+              - 'tt'
+            dockerfile:
+              - '**/Dockerfile'
+              - '**/Dockerfile.*'
+              - '.hadolint.yaml'
+            gha:
+              - '.github/workflows/**/*.yml'
+              - '.github/workflows/**/*.yaml'
+              - '.github/actions/**/*.yml'
+              - '.github/actions/**/*.yaml'
+            editorconfig:
+              - '.editorconfig'
+              - '**/*'
+            yaml_files:
+              - '**/*.yml'
+              - '**/*.yaml'
+              - '.yamllint.yaml'
+            md:
+              - '**/*.md'
+              - '.textlintrc.json'
+            all:
+              - '**/*'
+
   shellcheck:
+    needs: changes
+    if: ${{ needs.changes.outputs.sh == 'true' }}
     name: ShellCheck
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -51,6 +104,8 @@ jobs:
           shellcheck -f checkstyle tt | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="shellcheck" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   shfmt:
+    needs: changes
+    if: ${{ needs.changes.outputs.sh == 'true' }}
     name: shfmt
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -77,6 +132,8 @@ jobs:
           "${RUNNER_TEMP}/shfmt" -d -i 2 -ci tt
 
   hadolint:
+    needs: changes
+    if: ${{ needs.changes.outputs.dockerfile == 'true' }}
     name: Hadolint (Dockerfile)
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -111,6 +168,8 @@ jobs:
           "${RUNNER_TEMP}/hadolint" -f tty Dockerfile | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l %m" -name="hadolint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   actionlint:
+    needs: changes
+    if: ${{ needs.changes.outputs.gha == 'true' }}
     name: actionlint (GitHub Actions workflows)
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -156,6 +215,8 @@ jobs:
           bash .github/scripts/verify-action-pins.sh
 
   editorconfig:
+    needs: changes
+    if: ${{ needs.changes.outputs.editorconfig == 'true' }}
     name: editorconfig-checker
     runs-on: ubuntu-latest
     timeout-minutes: 5
@@ -196,3 +257,133 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           "${RUNNER_TEMP}/editorconfig-checker/bin/ec-linux-amd64" -format gcc | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="editorconfig" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+
+  yamllint:
+    needs: changes
+    if: ${{ needs.changes.outputs.yaml_files == 'true' }}
+    name: yamllint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      # reviewdog が github-pr-review でレビューコメントを投稿するために必要。
+      pull-requests: write
+    env:
+      YAMLLINT_VERSION: 1.38.0
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Install yamllint
+        run: |
+          set -euo pipefail
+          python3 -m pip install --user --disable-pip-version-check "yamllint==${YAMLLINT_VERSION}"
+
+      - name: Setup reviewdog
+        uses: ./.github/actions/setup-reviewdog
+        with:
+          version: ${{ env.REVIEWDOG_VERSION }}
+          sha256: ${{ env.REVIEWDOG_SHA256 }}
+
+      - name: Run yamllint with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          python3 -m yamllint -f parsable . | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="yamllint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+
+  woke:
+    needs: changes
+    if: ${{ needs.changes.outputs.all == 'true' }}
+    name: Woke (Inclusive Language Linter)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      # reviewdog が github-pr-review でレビューコメントを投稿するために必要。
+      pull-requests: write
+    env:
+      WOKE_VERSION: 0.19.0
+      WOKE_SHA256: db5ed0906c81323a8c478cc57e00301dbf184db7a0293d70ba9f4729b6169d8c
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup woke
+        uses: ./.github/actions/setup-woke
+        with:
+          version: ${{ env.WOKE_VERSION }}
+          sha256: ${{ env.WOKE_SHA256 }}
+
+      - name: Setup reviewdog
+        uses: ./.github/actions/setup-reviewdog
+        with:
+          version: ${{ env.REVIEWDOG_VERSION }}
+          sha256: ${{ env.REVIEWDOG_SHA256 }}
+
+      - name: Run woke with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          "${RUNNER_TEMP}/woke" -o checkstyle . | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="woke" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+
+  textlint:
+    needs: changes
+    if: ${{ needs.changes.outputs.md == 'true' }}
+    name: textlint
+    runs-on: ubuntu-latest
+    # reviewdog による PR レビューコメント投稿のための最小権限。
+    permissions:
+      contents: read
+      pull-requests: write
+    # 既存ドキュメントの違反を片付けるまでは赤検知にしない。
+    # 整備完了後に continue-on-error を外して赤検知に切り替える。
+    continue-on-error: true
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+
+      - name: Install textlint and presets
+        run: npm install textlint textlint-rule-preset-ja-technical-writing textlint-filter-rule-comments --no-save
+
+      - name: Setup reviewdog
+        uses: ./.github/actions/setup-reviewdog
+        with:
+          version: ${{ env.REVIEWDOG_VERSION }}
+          sha256: ${{ env.REVIEWDOG_SHA256 }}
+
+      - name: Run textlint with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          npx textlint -f checkstyle "**/*.md" | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="textlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+
+  cspell:
+    needs: changes
+    if: ${{ needs.changes.outputs.all == 'true' }}
+    name: Check Spelling
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
+          persist-credentials: false
+
+      - name: Spell Check
+        uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0
+        with:
+          config: cspell.json
+          inline: warning
+          strict: false

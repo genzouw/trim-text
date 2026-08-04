@@ -1,0 +1,5 @@
+ci: consolidate multiple standalone linter workflows into lint.yml
+
+This change refactors the CI/CD pipeline by consolidating several standalone linter workflows (`cspell`, `textlint`, `woke`, `yamllint`) into the primary `lint.yml` workflow.
+
+The consolidation simplifies the structure of `.github/workflows` and improves maintainability. To ensure execution speed and avoid running unnecessary checks, a path-filtering job (`changes`) is introduced at the beginning of `lint.yml`. This determines which linters need to be executed based on the files modified in the pull request.
