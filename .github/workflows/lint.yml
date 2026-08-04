@@ -345,6 +345,12 @@ jobs:
     # 整備完了後に continue-on-error を外して赤検知に切り替える。
     continue-on-error: true
     timeout-minutes: 5
+    env:
+      # ロックファイルを持たない ad-hoc install のため、再現性・サプライチェーン
+      # リスク低減の観点でパッケージバージョンを明示的に固定する。
+      TEXTLINT_VERSION: 15.8.0
+      TEXTLINT_PRESET_JA_VERSION: 12.0.2
+      TEXTLINT_FILTER_COMMENTS_VERSION: 1.3.0
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -356,7 +362,12 @@ jobs:
           node-version: 20
 
       - name: Install textlint and presets
-        run: npm install textlint textlint-rule-preset-ja-technical-writing textlint-filter-rule-comments --no-save
+        run: |
+          npm install \
+            "textlint@${TEXTLINT_VERSION}" \
+            "textlint-rule-preset-ja-technical-writing@${TEXTLINT_PRESET_JA_VERSION}" \
+            "textlint-filter-rule-comments@${TEXTLINT_FILTER_COMMENTS_VERSION}" \
+            --no-save
 
       - name: Setup reviewdog
         uses: ./.github/actions/setup-reviewdog
