@@ -50,8 +50,10 @@ jobs:
               - '**/*.sh'
               - 'tt'
             dockerfile:
-              - '**/Dockerfile'
-              - '**/Dockerfile.*'
+              # hadolint はリポジトリ直下の Dockerfile のみを検査するため、
+              # トリガー対象もそれに合わせる（ネストした Dockerfile はここでは検査対象外）。
+              - 'Dockerfile'
+              - 'Dockerfile.*'
               - '.hadolint.yaml'
             gha:
               - '.github/workflows/**/*.yml'
