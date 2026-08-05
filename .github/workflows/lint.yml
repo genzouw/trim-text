@@ -50,10 +50,8 @@ jobs:
               - '**/*.sh'
               - 'tt'
             dockerfile:
-              # hadolint はリポジトリ直下の Dockerfile のみを検査するため、
-              # トリガー対象もそれに合わせる（ネストした Dockerfile はここでは検査対象外）。
-              - 'Dockerfile'
-              - 'Dockerfile.*'
+              - '**/Dockerfile'
+              - '**/Dockerfile.*'
               - '.hadolint.yaml'
             gha:
               - '.github/workflows/**/*.yml'
@@ -65,6 +63,7 @@ jobs:
               - '**/*.yml'
               - '**/*.yaml'
               - '.yamllint.yaml'
+              - '.github/yamllint/**'
             md:
               - '**/*.md'
               - '.textlintrc.json'
@@ -272,18 +271,20 @@ jobs:
       contents: read
       # reviewdog が github-pr-review でレビューコメントを投稿するために必要。
       pull-requests: write
-    env:
-      YAMLLINT_VERSION: 1.38.0
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
 
+      # yamllint のバージョンは .github/yamllint/requirements.txt を単一の情報源とする。
+      # --require-hashes により推移的依存関係を含めてハッシュ検証し、
+      # 差し替えられた配布物が CI ランナーで実行されるのを防ぐ。
       - name: Install yamllint
         run: |
           set -euo pipefail
-          python3 -m pip install --user --disable-pip-version-check "yamllint==${YAMLLINT_VERSION}"
+          python3 -m pip install --user --disable-pip-version-check \
+            --require-hashes -r .github/yamllint/requirements.txt
 
       - name: Setup reviewdog
         uses: ./.github/actions/setup-reviewdog
