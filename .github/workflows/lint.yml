@@ -165,11 +165,30 @@ jobs:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
 
+      # 検査対象は paths-filter の dockerfile フィルターと同じ条件
+      # ('**/Dockerfile' / '**/Dockerfile.*') で列挙する。ルート直下の Dockerfile
+      # だけを固定で渡すと、ネストした Dockerfile を変更してジョブが起動しても
+      # 検査されずに成功する (偽のグリーン) ため。
+      - name: Collect Dockerfiles
+        id: collect
+        run: |
+          set -euo pipefail
+          {
+            echo 'files<<EOF'
+            git ls-files -z -- 'Dockerfile' 'Dockerfile.*' '*/Dockerfile' '*/Dockerfile.*' |
+              tr '\0' '\n'
+            echo 'EOF'
+          } >>"${GITHUB_OUTPUT}"
+
       - name: Run hadolint with reviewdog
+        if: ${{ steps.collect.outputs.files != '' }}
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          DOCKERFILES: ${{ steps.collect.outputs.files }}
         run: |
-          "${RUNNER_TEMP}/hadolint" -f tty Dockerfile | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l %m" -name="hadolint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          mapfile -t dockerfiles <<<"${DOCKERFILES}"
+          printf 'hadolint target: %s\n' "${dockerfiles[@]}"
+          "${RUNNER_TEMP}/hadolint" -f tty "${dockerfiles[@]}" | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l %m" -name="hadolint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   actionlint:
     needs: changes
