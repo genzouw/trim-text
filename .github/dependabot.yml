@@ -53,6 +53,29 @@ updates:
         patterns:
           - github/codeql-action*
 
+  # CI の yamllint 用ハッシュ固定依存ファイル (.github/yamllint/requirements.txt) の更新。
+  # --require-hashes で運用しているため、推移的依存を含めて dependabot に追従させないと
+  # ハッシュが古いまま固定され、セキュリティ修正が取り込まれなくなる。
+  - package-ecosystem: pip
+    directory: /.github/yamllint
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    reviewers:
+      - genzouw
+    labels:
+      - dependencies
+    commit-message:
+      prefix: ci
+      include: scope
+    pull-request-branch-name:
+      separator: /
+    cooldown:
+      default-days: 7
+
   # Dockerfile のベースイメージ更新 (alpine など)
   - package-ecosystem: docker
     directory: /
