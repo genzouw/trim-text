@@ -282,7 +282,16 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
-### 30. editorconfig-checker (EditorConfig 検証)
+### 30. AI Issue Summarizer (AIによるIssue/PR議論の自動要約)
+
+- **目的**: Issue や Pull Request のコメントで `/summarize` コマンドが実行された際に、それまでの議論の文脈（タイトル、本文、全コメント）をAIが読み込み、議論の要約、合意事項、未解決の課題・Next Action を整理して返信します。長大化したスレッドの現状把握を容易にします。
+- **設定ファイル**: `.github/workflows/ai-issue-summarizer.yml`
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して要約を生成します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料で利用できます。プロンプトインジェクション対策として、ユーザー入力は `<issue_data>` タグで分離して処理します。
+- **事前設定**:
+  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
+  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
+### 31. editorconfig-checker (EditorConfig 検証)
 
 - **目的**: プロジェクト全体のコードのインデント、改行コード、末尾の空白などのフォーマットが `.editorconfig` ファイルの定義に準拠しているかを自動的に検証します。
 - **設定ファイル**: `.editorconfig`, `.github/workflows/lint.yml`, `.github/actions/setup-editorconfig-checker/action.yml`
