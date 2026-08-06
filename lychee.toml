@@ -6,4 +6,7 @@
 exclude = [
   # LinkedIn は bot からのリクエストに対して HTTP 999 を返す。
   '^https://www\.linkedin\.com/',
+  # scorecard.dev は GitHub Actions ランナーからの接続を断続的に拒否し、
+  # リトライを緩めても解消しないため、到達性検証の対象から除外する。
+  '^https://scorecard\.dev/',
 ]
