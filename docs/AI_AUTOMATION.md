@@ -284,9 +284,9 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 ### 30. AI Issue Summarizer (AIによるIssue/PR議論の自動要約)
 
-- **目的**: Issue や Pull Request のコメントで `/summarize` コマンドが実行されると、AI がタイトル・本文・コメント全体を読み込みます。議論の要約・合意事項・未解決の課題・Next Action を整理して返信し、長大化したスレッドの現状把握を容易にします。
+- **目的**: Issue や Pull Request のコメントで `/summarize` コマンドが実行されると、AI がタイトル・本文・直近のコメント（Bot以外の最新50件）を読み込みます。議論の要約・合意事項・未解決の課題・Next Action を整理して返信し、長大化したスレッドの現状把握を容易にします。
 - **設定ファイル**: `.github/workflows/ai-issue-summarizer.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して要約を生成します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料で利用できます。プロンプトインジェクション対策として、ユーザー入力は `<issue_data>` タグで分離して処理します。
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して要約を生成します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料で利用できます。プロンプトインジェクション対策として、信頼できない外部入力（Issueタイトル・本文・コメント）は `system-prompt.txt`（信頼できる指示）とは別ファイルの `prompt.txt` に分離して渡します。
 - **事前設定**:
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
