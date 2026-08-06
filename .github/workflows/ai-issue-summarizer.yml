@@ -150,7 +150,7 @@ jobs:
           ${AI_RESPONSE}
 
           ---
-          *Triggered by @${{ github.event.comment.user.login }} in comment ${COMMENT_ID}*
+          *Triggered by @${{ github.event.comment.user.login }} in ${TRIGGER_LINK}*
           "
 
           gh issue comment "${ISSUE_NUMBER}" --repo "${REPO}" --body "${COMMENT_BODY}"
