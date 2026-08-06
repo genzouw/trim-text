@@ -284,7 +284,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 ### 30. AI Issue Summarizer (AIによるIssue/PR議論の自動要約)
 
-- **目的**: Issue や Pull Request のコメントで `/summarize` コマンドが実行された際に、それまでの議論の文脈（タイトル、本文、全コメント）をAIが読み込み、議論の要約、合意事項、未解決の課題・Next Action を整理して返信します。長大化したスレッドの現状把握を容易にします。
+- **目的**: Issue や Pull Request のコメントで `/summarize` コマンドが実行されると、AI がタイトル・本文・コメント全体を読み込みます。議論の要約・合意事項・未解決の課題・Next Action を整理して返信し、長大化したスレッドの現状把握を容易にします。
 - **設定ファイル**: `.github/workflows/ai-issue-summarizer.yml`
 - **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して要約を生成します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料で利用できます。プロンプトインジェクション対策として、ユーザー入力は `<issue_data>` タグで分離して処理します。
 - **事前設定**:
