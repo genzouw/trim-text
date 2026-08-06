@@ -57,7 +57,7 @@ jobs:
           # コメント一覧を取得
           COMMENTS_DATA=$(gh issue view "${ISSUE_NUMBER}" --repo "${REPO}" --json comments --jq '.comments | map({author: .author.login, body: .body})')
 
-          # Write to files to avoid shell escape issues with large multi-line text
+          # 大きな複数行テキストでのシェルエスケープ問題を避けるためファイルに書き出す
           printf '%s\n' "${ISSUE_TITLE}" > issue_title.txt
 
           printf '%s\n' "${ISSUE_BODY}" > issue_body.txt
