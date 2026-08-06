@@ -37,8 +37,13 @@ jobs:
           ISSUE_TITLE=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" --jq '.title')
           ISSUE_BODY=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" --jq '.body')
 
-          # 全コメントを取得
-          COMMENTS=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" --paginate --jq 'map(select(.user.type != "Bot")) | map(.user.login + ": " + .body) | join("\n\n---\n\n")')
+          # 全コメントを取得（GITHUB_OUTPUT の 1MiB 上限を超えないよう直近 COMMENTS_LIMIT 件のみ使用する）
+          # --paginate はページ単位で --jq を適用するため、ページをまたいだ join が崩れる。
+          # --slurp で全ページを 1 つの配列にまとめてから外部の jq で処理する。
+          COMMENTS_LIMIT=50
+          COMMENTS=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" --paginate --slurp \
+            | jq -r --argjson limit "${COMMENTS_LIMIT}" \
+              '[.[][] | select(.user.type != "Bot")] | .[-$limit:] | map(.user.login + ": " + .body) | join("\n\n---\n\n")')
 
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           {
@@ -49,7 +54,7 @@ jobs:
             echo "【Issue 本文】"
             echo "${ISSUE_BODY}"
             echo ""
-            echo "【コメント一覧】"
+            echo "【コメント一覧（直近${COMMENTS_LIMIT}件）】"
             echo "${COMMENTS}"
             echo "$EOF"
           } >> "$GITHUB_OUTPUT"
