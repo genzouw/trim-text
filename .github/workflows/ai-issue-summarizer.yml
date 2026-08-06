@@ -84,7 +84,10 @@ jobs:
           printf '%s\n' "${COMMENTS_DATA}" > issue_comments.json
 
           # プロンプトを構築
-          cat << 'PROMPT_EOF' > prompt.txt
+          # （個別リダイレクトの代わりに1つのブロックにまとめてprompt.txtへ
+          # まとめて書き出す。shellcheck SC2129 対応）
+          {
+          cat << 'PROMPT_EOF'
           あなたは経験豊富なテクニカルプロジェクトマネージャーです。
           以下のGitHub Issue（またはPull Request）のタイトル、本文、およびコメントのやり取りを読み、議論の要約を作成してください。
 
@@ -102,26 +105,27 @@ jobs:
           【タイトル】
           PROMPT_EOF
 
-          printf '%s\n' "${ISSUE_TITLE}" >> prompt.txt
+          printf '%s\n' "${ISSUE_TITLE}"
 
-          cat << 'PROMPT_EOF' >> prompt.txt
+          cat << 'PROMPT_EOF'
 
           【本文】
           PROMPT_EOF
 
-          cat issue_body.txt >> prompt.txt
+          cat issue_body.txt
 
-          cat << 'PROMPT_EOF' >> prompt.txt
+          cat << 'PROMPT_EOF'
 
           【コメント一覧】
           PROMPT_EOF
 
           # 簡易的にJSONのフォーマットをテキストっぽく変換して追記
-          jq -r '.[] | "### @" + .author + "\n" + .body + "\n---"' issue_comments.json >> prompt.txt
+          jq -r '.[] | "### @" + .author + "\n" + .body + "\n---"' issue_comments.json
 
-          cat << 'PROMPT_EOF' >> prompt.txt
+          cat << 'PROMPT_EOF'
           </issue_data>
           PROMPT_EOF
+          } > prompt.txt
 
       - name: Check for existing summary comment
         id: check_existing
