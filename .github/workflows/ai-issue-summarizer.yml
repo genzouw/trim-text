@@ -37,6 +37,7 @@ jobs:
           COMMENT_ID: ${{ github.event.comment.id }}
           REPO: ${{ github.repository }}
         run: |
+          set -euo pipefail
           gh api -X POST "repos/${REPO}/issues/comments/${COMMENT_ID}/reactions" -f content="eyes"
 
       - name: Fetch Issue/PR Data
@@ -46,6 +47,8 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
+          set -euo pipefail
+
           # Issue/PR のタイトルと本文を取得
           ISSUE_DATA=$(gh issue view "${ISSUE_NUMBER}" --repo "${REPO}" --json title,body)
           ISSUE_TITLE=$(echo "${ISSUE_DATA}" | jq -r .title)
@@ -120,6 +123,8 @@ jobs:
           AI_RESPONSE: ${{ steps.inference.outputs.response }}
           COMMENT_ID: ${{ github.event.comment.id }}
         run: |
+          set -euo pipefail
+
           MARKER="<!-- ai-issue-summarizer -->"
           TRIGGER_LINK="[${COMMENT_ID}](#issuecomment-${COMMENT_ID})"
           COMMENT_BODY="${MARKER}
