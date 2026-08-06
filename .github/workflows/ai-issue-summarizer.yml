@@ -46,17 +46,20 @@ jobs:
               '[.[][] | select(.user.type != "Bot")] | .[-$limit:] | map(.user.login + ": " + .body) | join("\n\n---\n\n")')
 
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
+          # echo はオプション・エスケープの解釈が実装依存のため printf '%s\n' を使う
+          # （Issueタイトル・本文・コメントは信頼できない外部入力であり、"-n" 始まりや
+          #   "\" を含む値でも入力をそのまま書き出す必要がある）
           {
-            echo "issue_context<<$EOF"
-            echo "【Issue タイトル】"
-            echo "${ISSUE_TITLE}"
-            echo ""
-            echo "【Issue 本文】"
-            echo "${ISSUE_BODY}"
-            echo ""
-            echo "【コメント一覧（直近${COMMENTS_LIMIT}件）】"
-            echo "${COMMENTS}"
-            echo "$EOF"
+            printf '%s\n' "issue_context<<$EOF"
+            printf '%s\n' "【Issue タイトル】"
+            printf '%s\n' "${ISSUE_TITLE}"
+            printf '\n'
+            printf '%s\n' "【Issue 本文】"
+            printf '%s\n' "${ISSUE_BODY}"
+            printf '\n'
+            printf '%s\n' "【コメント一覧（直近${COMMENTS_LIMIT}件）】"
+            printf '%s\n' "${COMMENTS}"
+            printf '%s\n' "$EOF"
           } >> "$GITHUB_OUTPUT"
 
       - name: Create Prompt File
