@@ -93,7 +93,7 @@ jobs:
           【タイトル】
           PROMPT_EOF
 
-          echo "${ISSUE_TITLE}" >> prompt.txt
+          printf '%s\n' "${ISSUE_TITLE}" >> prompt.txt
 
           cat << 'PROMPT_EOF' >> prompt.txt
 
