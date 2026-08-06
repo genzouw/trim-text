@@ -33,11 +33,11 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Fetch issue title and body
+          # Issueのタイトルと本文を取得
           ISSUE_TITLE=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" --jq '.title')
           ISSUE_BODY=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" --jq '.body')
 
-          # Fetch all comments
+          # 全コメントを取得
           COMMENTS=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" --paginate --jq 'map(select(.user.type != "Bot")) | map(.user.login + ": " + .body) | join("\n\n---\n\n")')
 
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
