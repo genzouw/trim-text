@@ -123,8 +123,29 @@ jobs:
           </issue_data>
           PROMPT_EOF
 
+      - name: Check for existing summary comment
+        id: check_existing
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          REPO: ${{ github.repository }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+        run: |
+          set -euo pipefail
+
+          # concurrency は実行中・保留中のジョブしか制御できないため、ワーク
+          # フローの再実行や遅延イベント処理により、完了済みの要約コメント
+          # がある状態でも再度推論・投稿が走りうる。ここでトリガーコメント
+          # ID を含むマーカーを既存コメントから検索し、既に要約済みなら以降
+          # の推論・投稿ステップをスキップする
+          MARKER="<!-- ai-issue-summarizer:${COMMENT_ID} -->"
+          EXISTS=$(gh issue view "${ISSUE_NUMBER}" --repo "${REPO}" --json comments \
+            --jq ".comments | any(.body | contains(\"${MARKER}\"))")
+          echo "exists=${EXISTS}" >> "$GITHUB_OUTPUT"
+
       - name: Run AI Inference
         id: inference
+        if: steps.check_existing.outputs.exists == 'false'
         continue-on-error: true
         uses: actions/ai-inference@a7805884c80886efc241e94a5351df715968a0ad # v2.1.1
         with:
@@ -144,7 +165,7 @@ jobs:
         run: |
           set -euo pipefail
 
-          MARKER="<!-- ai-issue-summarizer -->"
+          MARKER="<!-- ai-issue-summarizer:${COMMENT_ID} -->"
           TRIGGER_LINK="[${COMMENT_ID}](#issuecomment-${COMMENT_ID})"
           COMMENT_BODY="${MARKER}
           ### 🤖 AI Discussion Summary
@@ -165,6 +186,7 @@ jobs:
           REPO: ${{ github.repository }}
           EYES_REACTION_ID: ${{ steps.add_reaction.outputs.reaction_id }}
           INFERENCE_OUTCOME: ${{ steps.inference.outcome }}
+          ALREADY_SUMMARIZED: ${{ steps.check_existing.outputs.exists }}
         run: |
           set -euo pipefail
 
@@ -175,7 +197,11 @@ jobs:
             gh api -X DELETE "repos/${REPO}/issues/comments/${COMMENT_ID}/reactions/${EYES_REACTION_ID}" || true
           fi
 
-          if [ "${INFERENCE_OUTCOME}" = "success" ]; then
+          # 既に要約済みで推論ステップ自体をスキップした場合、その
+          # inference.outcome は success ではなく skipped になるため、
+          # 失敗（confused）と誤判定しないよう ALREADY_SUMMARIZED も
+          # 成功条件に含める
+          if [ "${INFERENCE_OUTCOME}" = "success" ] || [ "${ALREADY_SUMMARIZED}" = "true" ]; then
             gh api -X POST "repos/${REPO}/issues/comments/${COMMENT_ID}/reactions" -f content="rocket"
           else
             gh api -X POST "repos/${REPO}/issues/comments/${COMMENT_ID}/reactions" -f content="confused"
