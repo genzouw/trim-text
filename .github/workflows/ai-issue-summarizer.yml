@@ -11,8 +11,11 @@ permissions:
 
 jobs:
   summarize:
-    # コメントが /summarize から始まる場合のみ実行
-    if: startsWith(github.event.comment.body, '/summarize')
+    # コメントが /summarize から始まり、かつ信頼済みロール（OWNER/MEMBER/COLLABORATOR）
+    # による投稿の場合のみ実行する（第三者による無制限トリガーを防止）
+    if: >-
+      startsWith(github.event.comment.body, '/summarize') &&
+      contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association)
     name: Generate AI Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
