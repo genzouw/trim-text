@@ -38,17 +38,26 @@ jobs:
         run: |
           set -euo pipefail
 
-          # Issueのタイトルと本文を取得
-          ISSUE_TITLE=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" --jq '.title')
-          ISSUE_BODY=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" --jq '.body')
+          # GITHUB_OUTPUT の 1MiB 上限やモデルの入力上限を超えないよう、
+          # 件数（COMMENTS_LIMIT）に加えて各フィールドの文字数も上限で切り詰める。
+          TITLE_LIMIT=1024
+          BODY_LIMIT=8192
+          COMMENTS_LIMIT=50
+          COMMENT_LIMIT=2048
 
-          # 全コメントを取得（GITHUB_OUTPUT の 1MiB 上限を超えないよう直近 COMMENTS_LIMIT 件のみ使用する）
+          # Issueのタイトルと本文を取得
+          ISSUE_TITLE=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" --jq ".title[0:${TITLE_LIMIT}]")
+          ISSUE_BODY=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" --jq ".body[0:${BODY_LIMIT}]")
+
+          # 全コメントを取得（GITHUB_OUTPUT の 1MiB 上限を超えないよう直近 COMMENTS_LIMIT 件のみ使用し、
+          # 各コメント本文も COMMENT_LIMIT 文字までに切り詰める）
           # --paginate はページ単位で --jq を適用するため、ページをまたいだ join が崩れる。
           # --slurp で全ページを 1 つの配列にまとめてから外部の jq で処理する。
-          COMMENTS_LIMIT=50
           COMMENTS=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" --paginate --slurp \
-            | jq -r --argjson limit "${COMMENTS_LIMIT}" \
-              '[.[][] | select(.user.type != "Bot")] | .[-$limit:] | map(.user.login + ": " + .body) | join("\n\n---\n\n")')
+            | jq -r --argjson limit "${COMMENTS_LIMIT}" --argjson body_limit "${COMMENT_LIMIT}" \
+              '[.[][] | select(.user.type != "Bot")] | .[-$limit:] |
+               map(.user.login + ": " + (.body[0:$body_limit])) |
+               join("\n\n---\n\n")')
 
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           # echo はオプション・エスケープの解釈が実装依存のため printf '%s\n' を使う
