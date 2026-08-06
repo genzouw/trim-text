@@ -39,13 +39,15 @@ jobs:
           egress-policy: audit
 
       - name: Add reaction to comment
+        id: add_reaction
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           COMMENT_ID: ${{ github.event.comment.id }}
           REPO: ${{ github.repository }}
         run: |
           set -euo pipefail
-          gh api -X POST "repos/${REPO}/issues/comments/${COMMENT_ID}/reactions" -f content="eyes"
+          REACTION_ID=$(gh api -X POST "repos/${REPO}/issues/comments/${COMMENT_ID}/reactions" -f content="eyes" --jq '.id')
+          echo "reaction_id=${REACTION_ID}" >> "$GITHUB_OUTPUT"
 
       - name: Fetch Issue/PR Data
         id: fetch_data
@@ -81,7 +83,7 @@ jobs:
 
           printf '%s\n' "${COMMENTS_DATA}" > issue_comments.json
 
-          # Construct prompt
+          # プロンプトを構築
           cat << 'PROMPT_EOF' > prompt.txt
           あなたは経験豊富なテクニカルプロジェクトマネージャーです。
           以下のGitHub Issue（またはPull Request）のタイトル、本文、およびコメントのやり取りを読み、議論の要約を作成してください。
@@ -154,3 +156,27 @@ jobs:
           "
 
           gh issue comment "${ISSUE_NUMBER}" --repo "${REPO}" --body "${COMMENT_BODY}"
+
+      - name: Update reaction based on result
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          COMMENT_ID: ${{ github.event.comment.id }}
+          REPO: ${{ github.repository }}
+          EYES_REACTION_ID: ${{ steps.add_reaction.outputs.reaction_id }}
+          INFERENCE_OUTCOME: ${{ steps.inference.outcome }}
+        run: |
+          set -euo pipefail
+
+          # 「処理中」を示す eyes リアクションを、処理結果を示すリアクションに
+          # 差し替える（先に付けた eyes を残したままにすると処理中のように
+          # 見え続けてしまうため削除してから付け直す）
+          if [ -n "${EYES_REACTION_ID}" ]; then
+            gh api -X DELETE "repos/${REPO}/issues/comments/${COMMENT_ID}/reactions/${EYES_REACTION_ID}" || true
+          fi
+
+          if [ "${INFERENCE_OUTCOME}" = "success" ]; then
+            gh api -X POST "repos/${REPO}/issues/comments/${COMMENT_ID}/reactions" -f content="rocket"
+          else
+            gh api -X POST "repos/${REPO}/issues/comments/${COMMENT_ID}/reactions" -f content="confused"
+          fi
