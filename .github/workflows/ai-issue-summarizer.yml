@@ -46,12 +46,12 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
         run: |
-          # Fetch issue title and body
+          # Issue/PR のタイトルと本文を取得
           ISSUE_DATA=$(gh issue view "${ISSUE_NUMBER}" --repo "${REPO}" --json title,body)
           ISSUE_TITLE=$(echo "${ISSUE_DATA}" | jq -r .title)
           ISSUE_BODY=$(echo "${ISSUE_DATA}" | jq -r .body)
 
-          # Fetch comments (excluding the trigger comment itself to avoid self-loop logic in summary, though optional)
+          # コメント一覧を取得
           COMMENTS_DATA=$(gh issue view "${ISSUE_NUMBER}" --repo "${REPO}" --json comments --jq '.comments | map({author: .author.login, body: .body})')
 
           # Write to files to avoid shell escape issues with large multi-line text
