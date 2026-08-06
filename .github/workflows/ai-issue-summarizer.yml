@@ -18,6 +18,13 @@ jobs:
     name: Generate AI Summary
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # 同一トリガーコメントに対するワークフローの再実行・重複配信で要約
+    # コメントが多重投稿されるのを防ぐ（トリガーコメントIDでグループ化する
+    # ため、ユーザーが別途 /summarize を投稿した場合は別グループとして扱われ、
+    # 複数回の要約取得という意図された動作は妨げない）
+    concurrency:
+      group: ai-issue-summarizer-${{ github.event.issue.number }}-${{ github.event.comment.id }}
+      cancel-in-progress: true
     # ジョブ単位でも明示的に最小権限を宣言する。gh issue comment / gh api の
     # reactions・comments 操作は issues API のみで完結し、pull-requests への
     # 書き込みは不要なため付与しない（Issue にも Pull Request にも同じ
