@@ -162,6 +162,7 @@ jobs:
           REPO: ${{ github.repository }}
           AI_RESPONSE: ${{ steps.inference.outputs.response }}
           COMMENT_ID: ${{ github.event.comment.id }}
+          COMMENT_AUTHOR: ${{ github.event.comment.user.login }}
         run: |
           set -euo pipefail
 
@@ -173,7 +174,7 @@ jobs:
           ${AI_RESPONSE}
 
           ---
-          *Triggered by @${{ github.event.comment.user.login }} in ${TRIGGER_LINK}*
+          *Triggered by @${COMMENT_AUTHOR} in ${TRIGGER_LINK}*
           "
 
           gh issue comment "${ISSUE_NUMBER}" --repo "${REPO}" --body "${COMMENT_BODY}"
