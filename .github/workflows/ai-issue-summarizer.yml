@@ -46,6 +46,7 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
+          COMMENT_ID: ${{ github.event.comment.id }}
         run: |
           set -euo pipefail
 
@@ -55,12 +56,21 @@ jobs:
           ISSUE_BODY=$(echo "${ISSUE_DATA}" | jq -r .body)
 
           # コメント一覧を取得
-          COMMENTS_DATA=$(gh issue view "${ISSUE_NUMBER}" --repo "${REPO}" --json comments --jq '.comments | map({author: .author.login, body: .body})')
+          # - トリガーとなった /summarize コメント自体は要約対象から除外する
+          #   （gh issue view の comments[].id はGraphQLノードIDでREST APIの
+          #   COMMENT_ID と一致しないため、コメントURL末尾の issuecomment-<ID>
+          #   で判定する）
+          # - プロンプト肥大化によるモデルへの過大入力・失敗を防ぐため、直近50件
+          #   に絞り込み、各コメント本文は2000文字までに切り詰める
+          TRIGGER_SUFFIX="issuecomment-${COMMENT_ID}"
+          COMMENTS_DATA=$(gh issue view "${ISSUE_NUMBER}" --repo "${REPO}" --json comments --jq \
+            ".comments | map(select((.url | endswith(\"${TRIGGER_SUFFIX}\")) | not)) | .[-50:] | map({author: .author.login, body: .body[0:2000]})")
 
           # 大きな複数行テキストでのシェルエスケープ問題を避けるためファイルに書き出す
+          # （本文もプロンプト肥大化防止のため8000文字までに切り詰める）
           printf '%s\n' "${ISSUE_TITLE}" > issue_title.txt
 
-          printf '%s\n' "${ISSUE_BODY}" > issue_body.txt
+          printf '%s\n' "${ISSUE_BODY}" | head -c 8000 > issue_body.txt
 
           printf '%s\n' "${COMMENTS_DATA}" > issue_comments.json
 
