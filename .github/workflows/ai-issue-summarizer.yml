@@ -10,7 +10,6 @@ concurrency:
 
 permissions:
   issues: write
-  pull-requests: write
   models: read
 
 jobs:
@@ -19,6 +18,9 @@ jobs:
     if: ${{ !github.event.sender.bot && startsWith(github.event.comment.body, '/summarize') }}
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      issues: write
+      models: read
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
