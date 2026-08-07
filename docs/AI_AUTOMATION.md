@@ -298,12 +298,3 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **特徴**: `editorconfig-checker` をローカルにダウンロードして実行し、結果を `reviewdog` を通じて PR にコメントとして通知します。外部 SaaS や API キーへの依存がなく、公開リポジトリで完全に無料で動作します。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
-
-### 31. AI Issue Summarizer (AIによるIssue/PR議論の自動要約)
-
-- **目的**: Issue や Pull Request で長く続いた議論を、`/summarize` というコメントをトリガーにして AI が自動的に要約し、概要・決定事項・未解決課題・Next Steps をまとめます。
-- **設定ファイル**: `.github/workflows/ai-issue-summarizer.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して、議論全体を解析します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料で動作します。また、プロンプトインジェクションのリスクを低減するため、タイトル・本文・コメントデータは独立したファイル・セクションとして構築しています。
-- **事前設定**:
-  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
-  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
