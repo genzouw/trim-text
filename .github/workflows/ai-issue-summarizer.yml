@@ -45,19 +45,42 @@ jobs:
           COMMENTS_LIMIT=50
           COMMENT_LIMIT=2048
 
-          # Issueのタイトルと本文を取得
-          ISSUE_TITLE=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" --jq ".title[0:${TITLE_LIMIT}]")
-          ISSUE_BODY=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}" --jq ".body[0:${BODY_LIMIT}]")
+          # Issueのタイトル・本文・コメント総数を取得
+          ISSUE_JSON=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}")
+          ISSUE_TITLE=$(jq -r ".title[0:${TITLE_LIMIT}]" <<< "${ISSUE_JSON}")
+          ISSUE_BODY=$(jq -r ".body[0:${BODY_LIMIT}]" <<< "${ISSUE_JSON}")
+          TOTAL_COMMENTS=$(jq -r ".comments" <<< "${ISSUE_JSON}")
 
-          # 全コメントを取得（GITHUB_OUTPUT の 1MiB 上限を超えないよう直近 COMMENTS_LIMIT 件のみ使用し、
-          # 各コメント本文も COMMENT_LIMIT 文字までに切り詰める）
-          # --paginate はページ単位で --jq を適用するため、ページをまたいだ join が崩れる。
-          # --slurp で全ページを 1 つの配列にまとめてから外部の jq で処理する。
-          COMMENTS=$(gh api "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" --paginate --slurp \
-            | jq -r --argjson limit "${COMMENTS_LIMIT}" --argjson body_limit "${COMMENT_LIMIT}" \
-              '[.[][] | select(.user.type != "Bot")] | .[-$limit:] |
-               map(.user.login + ": " + (.body[0:$body_limit])) |
-               join("\n\n---\n\n")')
+          # 直近 COMMENTS_LIMIT 件（Bot除く）のみを使うため、末尾ページから逆順に取得し、
+          # 必要件数が集まった時点で以降のページ取得を打ち切る。
+          # このAPIは sort/direction パラメータをサポートしないため新しい順の直接取得はできず、
+          # 総件数（TOTAL_COMMENTS）から最終ページ番号を算出して末尾側から遡る。
+          PER_PAGE=100
+          LAST_PAGE=$(( (TOTAL_COMMENTS + PER_PAGE - 1) / PER_PAGE ))
+          if [ "${LAST_PAGE}" -lt 1 ]; then
+            LAST_PAGE=1
+          fi
+
+          # ページ取得直後に本文を COMMENT_LIMIT 文字へ切り詰めてから貯めることで、
+          # --argjson に渡すJSONサイズ（引数長）を各ページ分だけに抑える。
+          COMMENTS_JSON="[]"
+          PAGE="${LAST_PAGE}"
+          while [ "${PAGE}" -ge 1 ]; do
+            PAGE_TRIMMED=$(gh api -X GET "repos/${GITHUB_REPOSITORY}/issues/${ISSUE_NUMBER}/comments" \
+              -f per_page="${PER_PAGE}" -f page="${PAGE}" \
+              | jq -c --argjson body_limit "${COMMENT_LIMIT}" \
+                '[.[] | select(.user.type != "Bot") | {login: .user.login, body: (.body[0:$body_limit])}]')
+            COMMENTS_JSON=$(jq -cn --argjson page "${PAGE_TRIMMED}" --argjson acc "${COMMENTS_JSON}" '$page + $acc')
+            CUR_LEN=$(jq -r "length" <<< "${COMMENTS_JSON}")
+            if [ "${CUR_LEN}" -ge "${COMMENTS_LIMIT}" ]; then
+              break
+            fi
+            PAGE=$((PAGE - 1))
+          done
+
+          COMMENTS=$(jq -r --argjson limit "${COMMENTS_LIMIT}" \
+            '.[-$limit:] | map(.login + ": " + .body) | join("\n\n---\n\n")' \
+            <<< "${COMMENTS_JSON}")
 
           EOF=$(dd if=/dev/urandom bs=15 count=1 status=none | base64)
           # echo はオプション・エスケープの解釈が実装依存のため printf '%s\n' を使う
