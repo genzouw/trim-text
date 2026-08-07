@@ -16,7 +16,7 @@ jobs:
   summarize:
     name: Summarize Issue
     if: >-
-      ${{ !github.event.sender.bot &&
+      ${{ github.event.comment.user.type != 'Bot' &&
       startsWith(github.event.comment.body, '/summarize') &&
       contains(fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'), github.event.comment.author_association) }}
     runs-on: ubuntu-latest
