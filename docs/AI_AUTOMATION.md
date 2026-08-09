@@ -298,3 +298,12 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
+### 32. AI Release Translator (AIによるリリースノート自動翻訳)
+
+- **目的**: GitHub Releases で自動生成されたリリースノートが日本語以外（主に英語）で記述されている場合に、AI を用いて自動的に日本語へ翻訳・フォーマットし、リリースノートを更新します。これにより、日本語ユーザーにとって読みやすい更新履歴を提供します。
+- **設定ファイル**: `.github/workflows/ai-release-translator.yml`
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料でリリースノートの日本語化を実現します。
+- **事前設定**:
+  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
+  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。

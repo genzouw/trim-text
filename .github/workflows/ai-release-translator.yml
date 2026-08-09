@@ -1,0 +1,83 @@
+name: AI Release Translator
+
+on:
+  release:
+    types: [published]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.release.tag_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: write
+  models: read
+
+jobs:
+  translate:
+    name: Translate Release Notes
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
+        with:
+          egress-policy: audit
+
+      - name: Create Prompt Files
+        env:
+          RELEASE_BODY: ${{ github.event.release.body }}
+        run: |
+          set -euo pipefail
+
+          cat << 'AI_RELEASE_TRANSLATOR_SYSTEM_PROMPT_EOF' > system-prompt.txt
+          あなたはリリースノートを翻訳・整形するアシスタントです。
+          後続のユーザーメッセージで渡される【リリースノート原文】が日本語以外の言語（主に英語）で書かれている場合、
+          自然で読みやすい日本語に翻訳し、フォーマットを整えてください。
+          もし原文がすでに日本語である場合（大部分が日本語の場合）は、何も出力しないでください。
+
+          【指示】
+          1. 翻訳後のリリースノートのみを出力してください。元の英語を残す必要はありません（ただし、技術用語、モジュール名、変数名、ユーザー名などはそのままにしてください）。
+          2. Conventional Commitsベースの自動生成テキスト（例: "Features", "Bug Fixes", "Documentation" など）は適切な日本語見出し（例: "新機能", "バグ修正", "ドキュメント" など）に翻訳してください。
+          3. 見出しやリストのMarkdownフォーマットは維持してください。
+          4. 翻訳テキストの末尾に以下の文言を追加してください：
+
+          ---
+          *Note: This Japanese release note was automatically translated by AI.*
+          AI_RELEASE_TRANSLATOR_SYSTEM_PROMPT_EOF
+
+          # リリースノート原文はシェル展開を伴わない形で書き出す
+          {
+            printf '%s\n' "【リリースノート原文】"
+            printf '%s\n' "${RELEASE_BODY}"
+          } > prompt.txt
+
+      - name: Run AI Inference
+        id: inference
+        continue-on-error: true
+        uses: actions/ai-inference@a7805884c80886efc241e94a5351df715968a0ad # v2.1.1
+        with:
+          model: openai/gpt-4o-mini
+          max-completion-tokens: 4096
+          system-prompt-file: system-prompt.txt
+          prompt-file: prompt.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Update Release Notes
+        if: steps.inference.outcome == 'success'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          TAG_NAME: ${{ github.event.release.tag_name }}
+          AI_RESPONSE: ${{ steps.inference.outputs.response }}
+        run: |
+          set -euo pipefail
+
+          # 翻訳が必要ないと判定された場合（レスポンスが空の場合）はそのまま終了
+          if [ -z "$(printf '%s\n' "${AI_RESPONSE}" | tr -d '[:space:]')" ]; then
+            echo "Release notes are already in Japanese or no translation needed."
+          else
+            # 翻訳された内容を一時ファイルに保存
+            printf '%s\n' "${AI_RESPONSE}" > translated_notes.md
+
+            # リリースを更新
+            gh release edit "${TAG_NAME}" --repo "${GITHUB_REPOSITORY}" --notes-file translated_notes.md
+          fi
