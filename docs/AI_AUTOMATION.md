@@ -220,6 +220,15 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
+### 32. AI Release Translator (AIによるRelease自動翻訳)
+
+- **目的**: 公開された GitHub Release のリリースノートが日本語以外（英語など）で記述されている場合に、AI を用いて自動的に日本語へ翻訳し、追記します。
+- **設定ファイル**: `.github/workflows/ai-release-translator.yml`
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、完全無料で Release の多言語サポートを実現します。
+- **事前設定**:
+  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
+  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
 ### 23. AI PR Policy Checker (AIによるポリシー要件チェック)
 
 - **目的**: プロジェクトで要求されている厳格な PR ポリシー（目的、無料の証明、重複確認、セットアップ手順などの6つの必須セクション）が PR タイトルおよび説明文で満たされているか、LLM を用いて自動的にチェックし、不足している場合は PR コメントとしてフィードバックします。
