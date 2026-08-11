@@ -44,7 +44,7 @@ jobs:
           1. 翻訳後のリリースノートのみを出力してください。元の英語を残す必要はありません（ただし、技術用語、モジュール名、変数名、ユーザー名などはそのままにしてください）。
           2. Conventional Commitsベースの自動生成テキスト（例: "Features", "Bug Fixes", "Documentation" など）は適切な日本語見出し（例: "新機能", "バグ修正", "ドキュメント" など）に翻訳してください。
           3. 見出しやリストのMarkdownフォーマットは維持してください。
-          4. 翻訳テキストの末尾に以下の文言を追加してください：
+          4. 翻訳テキストの末尾に必ず以下の文言を追加してください（この文言は翻訳が最後まで完了したことを示すマーカーとしても使用されるため、省略・改変しないでください）：
 
           ---
           *Note: This Japanese release note was automatically translated by AI.*
@@ -80,9 +80,17 @@ jobs:
         run: |
           set -euo pipefail
 
+          COMPLETION_MARKER='This Japanese release note was automatically translated by AI.'
+
           # 翻訳が必要ないと判定された場合（レスポンスが空の場合）はそのまま終了
           if [ -z "$(printf '%s\n' "${AI_RESPONSE}" | tr -d '[:space:]')" ]; then
             echo "Release notes are already in Japanese or no translation needed."
+          elif ! printf '%s' "${AI_RESPONSE}" | grep -qF "${COMPLETION_MARKER}"; then
+            # 完了マーカー（system prompt で必ず末尾に付与するよう指示している文言）が
+            # 含まれない場合、max-completion-tokens 上限などにより出力が途中で
+            # 切れている可能性がある。不完全な内容で公開リリースノートを上書き
+            # しないよう、更新をスキップして元の本文を保持する。
+            echo "::warning::AI response is missing the completion marker and may be truncated. Skipping release notes update to avoid publishing incomplete content."
           else
             # 翻訳された内容を一時ファイルに保存
             printf '%s\n' "${AI_RESPONSE}" > translated_notes.md
