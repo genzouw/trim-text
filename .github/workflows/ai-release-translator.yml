@@ -108,3 +108,13 @@ jobs:
             # リリースを更新
             gh release edit "${TAG_NAME}" --repo "${GITHUB_REPOSITORY}" --notes-file translated_notes.md
           fi
+
+      - name: Fail on Inference Failure
+        # continue-on-error: true により推論失敗時もジョブ自体は継続するが、
+        # そのまま何もせず正常終了すると翻訳が行われなかったことに誰も気づけない。
+        # 空本文によるスキップ（skipped）は正常系のため対象外とし、実際に
+        # 推論が失敗した場合（failure）のみジョブを失敗させ、可視化する。
+        if: steps.inference.outcome == 'failure'
+        run: |
+          echo "::error::AI inference failed; release notes were not translated. Please re-run the workflow or translate the release notes manually."
+          exit 1
