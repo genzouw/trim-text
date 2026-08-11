@@ -93,7 +93,8 @@ jobs:
           set -euo pipefail
 
           # 翻訳が必要ないと判定された場合（レスポンスが空の場合）はそのまま終了
-          if [ -z "$(echo "${AI_RESPONSE}" | tr -d '[:space:]')" ]; then
+          # echo はオプション・エスケープの解釈が実装依存のため printf '%s\n' を使う
+          if [ -z "$(printf '%s\n' "${AI_RESPONSE}" | tr -d '[:space:]')" ]; then
             echo "Release is already in Japanese or no translation needed."
           else
             MARKER="<!-- ai-release-translator -->"
@@ -101,7 +102,16 @@ jobs:
             if grep -q "${MARKER}" <<< "${ORIGINAL_BODY}"; then
               echo "Release note has already been translated."
             else
-              printf '%s\n\n%s\n%s\n' "${ORIGINAL_BODY}" "${MARKER}" "${AI_RESPONSE}" > new_release_body.md
-              gh release edit "${RELEASE_TAG}" --repo "${REPO}" --notes-file new_release_body.md || echo "Failed to update release notes"
+              # ORIGINAL_BODY はイベント発生時点のスナップショット。推論中に
+              # リリースが編集されていると、そのまま全置換した場合に手動編集
+              # を上書きしてしまう。更新直前に現在の本文を再取得し、イベント
+              # 時点から変化していないことを確認してから更新する。
+              CURRENT_BODY=$(gh release view "${RELEASE_TAG}" --repo "${REPO}" --json body --jq .body)
+              if [ "${CURRENT_BODY}" != "${ORIGINAL_BODY}" ]; then
+                echo "::warning::Release body has changed since translation started. Skipping update to avoid overwriting manual edits."
+              else
+                printf '%s\n\n%s\n%s\n' "${ORIGINAL_BODY}" "${MARKER}" "${AI_RESPONSE}" > new_release_body.md
+                gh release edit "${RELEASE_TAG}" --repo "${REPO}" --notes-file new_release_body.md
+              fi
             fi
           fi
