@@ -17,6 +17,12 @@ jobs:
     name: Translate Release Notes
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    # ジョブ単位でも明示的に最小権限を宣言する（ai-issue-summarizer.yml と同様の方針）。
+    # gh release edit は contents: write、actions/ai-inference は models: read のみで
+    # 完結するため、それ以外の権限は付与しない。
+    permissions:
+      contents: write
+      models: read
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@bf7454d06d71f1098171f2acdf0cd4708d7b5920 # v2.20.0
