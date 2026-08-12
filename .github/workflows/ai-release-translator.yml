@@ -91,8 +91,12 @@ jobs:
           # あわせて、信頼できない Release 入力によるプロンプト肥大化・モデルへの
           # 過大入力を防ぐため、上限文字数までに切り詰める
           # （ai-issue-summarizer.yml の既存パターンに合わせる）
-          printf '%s\n' "${RELEASE_NAME}" | head -c 500 > release_name.txt
-          printf '%s\n' "${RELEASE_BODY}" | head -c 8000 > release_body.txt
+          # head -c はバイト数で切り詰めるため、日本語・中国語などのマルチバイト
+          # UTF-8 文字列の途中でバイト列を分断し、不正な UTF-8 を生成するおそれが
+          # ある。cut -c は（UTF-8 ロケール下では）文字単位で切り詰めるため、
+          # 明示的に LC_ALL=C.UTF-8 を指定して文字境界を尊重して切り詰める。
+          printf '%s\n' "${RELEASE_NAME}" | LC_ALL=C.UTF-8 cut -c1-500 > release_name.txt
+          printf '%s\n' "${RELEASE_BODY}" | LC_ALL=C.UTF-8 cut -c1-8000 > release_body.txt
 
           # 実行時に生成したランダムなタグで明示的に区切ることで、原文中の指示文や
           # 偽の閉じタグによってプロンプトインジェクションが行われるリスクを低減する
