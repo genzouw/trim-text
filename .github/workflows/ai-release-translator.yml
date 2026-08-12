@@ -122,7 +122,12 @@ jobs:
         run: |
           set -euo pipefail
 
-          COMPLETION_MARKER='This Japanese release note was automatically translated by AI.'
+          # system prompt が翻訳テキストの末尾に必ず出力するよう指示している脚注行と
+          # 完全に一致する文字列。grep -qF による部分一致（containment）ではなく、
+          # 末尾の非空行がこの文字列と完全一致することを検証することで、マーカーの
+          # 後ろに想定外のテキスト（出力の途中切れ、あるいはプロンプトインジェクション
+          # による付加テキスト）が付与された応答を確実に検知できるようにする。
+          COMPLETION_MARKER='*Note: This Japanese release note was automatically translated by AI.*'
 
           # 翻訳結果が空の場合はそのまま終了。空本文のためAI推論自体をスキップした
           # ケース（Run AI Inference ステップの if 条件）とは異なり、こちらは
@@ -132,15 +137,11 @@ jobs:
           if [ -z "$(printf '%s\n' "${AI_RESPONSE}" | tr -d '[:space:]')" ]; then
             echo "翻訳結果が空だったため、元のリリースノートを保持します。"
           else
-            # 完了マーカー（system prompt で必ず末尾に付与するよう指示している文言）は
-            # 翻訳テキストの末尾に単独行として現れる想定。grep -qF による部分一致
-            # だけでは、マーカーが出力の途中に現れた場合も一致してしまい、マーカー
-            # 以降に付加された想定外のテキスト（出力の途中切れ、あるいはプロンプト
-            # インジェクションによる付加テキスト）を見逃すおそれがあるため、
-            # 「末尾の非空行がマーカーで終わっているか」を厳密に検証する。
+            # 完了マーカーは翻訳テキストの末尾に単独行として現れる想定のため、
+            # 末尾の非空行を取得し、COMPLETION_MARKER と完全一致するかを検証する。
             LAST_NON_EMPTY_LINE="$(printf '%s\n' "${AI_RESPONSE}" | grep -v '^[[:space:]]*$' | tail -n 1 || true)"
 
-            if [ -z "${LAST_NON_EMPTY_LINE}" ] || ! printf '%s' "${LAST_NON_EMPTY_LINE}" | grep -qF "${COMPLETION_MARKER}"; then
+            if [ "${LAST_NON_EMPTY_LINE}" != "${COMPLETION_MARKER}" ]; then
               echo "::warning::AIの応答の最終行に完了マーカーが見つかりません。出力が途中で切れているか改ざんされている可能性があるため、不完全または想定外の内容の公開を避けてリリースノートの更新をスキップします。"
             else
               # ORIGINAL_BODY はイベント発生時点のスナップショット。推論中にリリースが
