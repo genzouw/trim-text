@@ -88,8 +88,8 @@ jobs:
         if: steps.inference.outcome == 'success'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
           RELEASE_TAG: ${{ github.event.release.tag_name }}
-          RELEASE_BODY: ${{ github.event.release.body }}
           AI_RESPONSE: ${{ steps.inference.outputs.response }}
         run: |
           set -euo pipefail
@@ -97,18 +97,34 @@ jobs:
           # 翻訳が必要ないと判定された場合（レスポンスが空の場合）はそのまま終了
           if [ -z "$(printf '%s\n' "${AI_RESPONSE}" | tr -d '[:space:]')" ]; then
             echo "Release is already in Japanese or no translation needed."
-          else
-            MARKER="<!-- ai-release-translator -->"
+            exit 0
+          fi
 
-            # 既存の本文にマーカーが含まれていなければ追記
-            if ! printf '%s\n' "${RELEASE_BODY}" | grep -qF "${MARKER}"; then
-              {
-                printf '%s\n\n' "${RELEASE_BODY}"
-                printf '%s\n' "${MARKER}"
-                printf '%s\n' "${AI_RESPONSE}"
-              } > new_body.md
-              gh release edit "${RELEASE_TAG}" --notes-file new_body.md
-            else
-              echo "Translation already exists in the release notes."
-            fi
+          # モデル出力が要求フォーマットに従っていない場合、そのまま Release
+          # ノートへ書き込むと公開済みノートの内容を汚染してしまうため、
+          # 想定する見出しが含まれていることを確認できない出力は破棄する
+          if ! printf '%s\n' "${AI_RESPONSE}" | grep -qF '【AIによる自動翻訳 / AI Auto Translation】'; then
+            echo "::warning::AI response does not match the expected format. Skipping release update."
+            exit 0
+          fi
+
+          MARKER="<!-- ai-release-translator -->"
+
+          # github.event.release.body はイベント発火時点のスナップショットで
+          # あり、推論完了までの間に手動編集やワークフロー再実行で古くなって
+          # いる可能性がある。gh release edit --notes-file は本文全体を置換
+          # するため、更新直前に最新の本文を取得し直し、それを土台にすること
+          # で手動編集の消失を防ぐ
+          CURRENT_BODY=$(gh release view "${RELEASE_TAG}" --repo "${REPO}" --json body --jq .body)
+
+          # 既存の本文にマーカーが含まれていなければ追記
+          if ! printf '%s\n' "${CURRENT_BODY}" | grep -qF "${MARKER}"; then
+            {
+              printf '%s\n\n' "${CURRENT_BODY}"
+              printf '%s\n' "${MARKER}"
+              printf '%s\n' "${AI_RESPONSE}"
+            } > new_body.md
+            gh release edit "${RELEASE_TAG}" --repo "${REPO}" --notes-file new_body.md
+          else
+            echo "Translation already exists in the release notes."
           fi
