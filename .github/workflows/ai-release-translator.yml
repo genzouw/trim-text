@@ -136,7 +136,7 @@ jobs:
           # になり、後続の Update Release Notes も outcome == 'success' の条件で
           # 実行されないため、何も起きずに静かに終了してしまう。原因調査が
           # できるよう、失敗（またはスキップ）した事実をログとサマリーに残す
-          echo "::warning::AI inference did not succeed (outcome: ${INFERENCE_OUTCOME}). Release translation was skipped."
+          echo "::warning::AI 推論が成功しなかったため、Release ノートの自動翻訳をスキップしました（outcome: ${INFERENCE_OUTCOME}）。"
           {
             echo "### ⚠️ AI Release Translator"
             echo ""
