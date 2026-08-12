@@ -106,9 +106,13 @@ jobs:
 
           COMPLETION_MARKER='This Japanese release note was automatically translated by AI.'
 
-          # 翻訳が必要ないと判定された場合（レスポンスが空の場合）はそのまま終了
+          # 翻訳結果が空の場合はそのまま終了。空本文のためAI推論自体をスキップした
+          # ケース（Run AI Inference ステップの if 条件）とは異なり、こちらは
+          # 「翻訳は実行されたが結果が空だった」ケースであるため、原文を保持した旨を
+          # 明示的に記録する（英語本文で翻訳結果が空になった場合を、日本語判定の
+          # 成功と混同しないようにするため）
           if [ -z "$(printf '%s\n' "${AI_RESPONSE}" | tr -d '[:space:]')" ]; then
-            echo "Release notes are already in Japanese or no translation needed."
+            echo "Translation result was empty; keeping the original release notes."
           else
             # 完了マーカー（system prompt で必ず末尾に付与するよう指示している文言）は
             # 翻訳テキストの末尾に単独行として現れる想定。grep -qF による部分一致
