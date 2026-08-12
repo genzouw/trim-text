@@ -84,16 +84,29 @@ jobs:
           *Note: This Japanese release note was automatically translated by AI.*
           AI_RELEASE_TRANSLATOR_SYSTEM_PROMPT_EOF
 
-          # リリースのタイトル・本文はシェル展開を伴わない形で書き出し、実行時に生成した
-          # ランダムなタグで明示的に区切ることで、原文中の指示文や偽の閉じタグに
-          # よってプロンプトインジェクションが行われるリスクを低減する
+          # Release タイトル・本文はシェル展開を伴わない形で書き出す
+          # （heredoc への直接埋め込みはコマンド置換によるインジェクションを招くため避ける）
+          # echo はオプション・エスケープの解釈が実装依存のため printf '%s\n' を使う
+          # （"-n" 始まりや "\" を含む値でも入力をそのまま書き出せる）
+          # あわせて、信頼できない Release 入力によるプロンプト肥大化・モデルへの
+          # 過大入力を防ぐため、上限文字数までに切り詰める
+          # （ai-issue-summarizer.yml の既存パターンに合わせる）
+          # head -c はバイト数で切り詰めるため、日本語・中国語などのマルチバイト
+          # UTF-8 文字列の途中でバイト列を分断し、不正な UTF-8 を生成するおそれが
+          # ある。cut -c は（UTF-8 ロケール下では）文字単位で切り詰めるため、
+          # 明示的に LC_ALL=C.UTF-8 を指定して文字境界を尊重して切り詰める。
+          printf '%s\n' "${RELEASE_NAME}" | LC_ALL=C.UTF-8 cut -c1-500 > release_name.txt
+          printf '%s\n' "${RELEASE_BODY}" | LC_ALL=C.UTF-8 cut -c1-8000 > release_body.txt
+
+          # 実行時に生成したランダムなタグで明示的に区切ることで、原文中の指示文や
+          # 偽の閉じタグによってプロンプトインジェクションが行われるリスクを低減する
           {
             printf '%s\n' "<${BOUNDARY_TAG}>"
             printf '%s\n' "【Release Name】"
-            printf '%s\n' "${RELEASE_NAME}"
+            cat release_name.txt
             printf '\n'
             printf '%s\n' "【Release Notes】"
-            printf '%s\n' "${RELEASE_BODY}"
+            cat release_body.txt
             printf '%s\n' "</${BOUNDARY_TAG}>"
           } > prompt.txt
 
@@ -111,6 +124,24 @@ jobs:
           system-prompt-file: system-prompt.txt
           prompt-file: prompt.txt
           token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Report Inference Failure
+        if: steps.inference.outcome != 'success'
+        env:
+          INFERENCE_OUTCOME: ${{ steps.inference.outcome }}
+        run: |
+          set -euo pipefail
+
+          # continue-on-error: true により推論失敗時もジョブ自体は成功扱い
+          # になり、後続の Update Release Notes も outcome == 'success' の条件で
+          # 実行されないため、何も起きずに静かに終了してしまう。原因調査が
+          # できるよう、失敗（またはスキップ）した事実をログとサマリーに残す
+          echo "::warning::AI 推論が成功しなかったため、Release ノートの自動翻訳をスキップしました（outcome: ${INFERENCE_OUTCOME}）。"
+          {
+            echo "### ⚠️ AI Release Translator"
+            echo ""
+            echo "AI 推論が成功しなかったため、Release ノートの自動翻訳をスキップしました（outcome: \`${INFERENCE_OUTCOME}\`）。"
+          } >> "$GITHUB_STEP_SUMMARY"
 
       - name: Update Release Notes
         if: steps.inference.outcome == 'success'
