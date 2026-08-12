@@ -45,7 +45,7 @@ jobs:
           # 極めて低確率だが、生成したタグ名と同一の文字列がリリース本文に偶然
           # 含まれていた場合は境界を破られる可能性があるため、安全側に倒して処理を中断する
           if printf '%s' "${RELEASE_BODY}" | grep -qF "${BOUNDARY_TAG}"; then
-            echo "::error::Release body unexpectedly contains the generated boundary tag; aborting to avoid a prompt boundary bypass."
+            echo "::error::リリース本文に生成された境界タグが偶然含まれているため、プロンプト境界の破壊を避けて処理を中断します。"
             exit 1
           fi
 
@@ -112,7 +112,7 @@ jobs:
           # 明示的に記録する（英語本文で翻訳結果が空になった場合を、日本語判定の
           # 成功と混同しないようにするため）
           if [ -z "$(printf '%s\n' "${AI_RESPONSE}" | tr -d '[:space:]')" ]; then
-            echo "Translation result was empty; keeping the original release notes."
+            echo "翻訳結果が空だったため、元のリリースノートを保持します。"
           else
             # 完了マーカー（system prompt で必ず末尾に付与するよう指示している文言）は
             # 翻訳テキストの末尾に単独行として現れる想定。grep -qF による部分一致
@@ -123,7 +123,7 @@ jobs:
             LAST_NON_EMPTY_LINE="$(printf '%s\n' "${AI_RESPONSE}" | grep -v '^[[:space:]]*$' | tail -n 1 || true)"
 
             if [ -z "${LAST_NON_EMPTY_LINE}" ] || ! printf '%s' "${LAST_NON_EMPTY_LINE}" | grep -qF "${COMPLETION_MARKER}"; then
-              echo "::warning::AI response is missing the completion marker on its final line and may be truncated or tampered with. Skipping release notes update to avoid publishing incomplete or unexpected content."
+              echo "::warning::AIの応答の最終行に完了マーカーが見つかりません。出力が途中で切れているか改ざんされている可能性があるため、不完全または想定外の内容の公開を避けてリリースノートの更新をスキップします。"
             else
               # 翻訳された内容を一時ファイルに保存
               printf '%s\n' "${AI_RESPONSE}" > translated_notes.md
@@ -140,5 +140,5 @@ jobs:
         # 推論が失敗した場合（failure）のみジョブを失敗させ、可視化する。
         if: steps.inference.outcome == 'failure'
         run: |
-          echo "::error::AI inference failed; release notes were not translated. Please re-run the workflow or translate the release notes manually."
+          echo "::error::AI推論に失敗したため、リリースノートは翻訳されませんでした。ワークフローを再実行するか、手動で翻訳してください。"
           exit 1
