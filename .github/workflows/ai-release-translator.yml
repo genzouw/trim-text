@@ -84,6 +84,22 @@ jobs:
           prompt-file: prompt.txt
           token: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: Report Inference Failure
+        if: steps.inference.outcome != 'success'
+        run: |
+          set -euo pipefail
+
+          # continue-on-error: true により推論失敗時もジョブ自体は成功扱い
+          # になり、後続の Update Release も outcome == 'success' の条件で
+          # 実行されないため、何も起きずに静かに終了してしまう。原因調査が
+          # できるよう、失敗（またはスキップ）した事実をログとサマリーに残す
+          echo "::warning::AI inference did not succeed (outcome: ${{ steps.inference.outcome }}). Release translation was skipped."
+          {
+            echo "### ⚠️ AI Release Translator"
+            echo ""
+            echo "AI 推論が成功しなかったため、Release ノートの自動翻訳をスキップしました（outcome: \`${{ steps.inference.outcome }}\`）。"
+          } >> "$GITHUB_STEP_SUMMARY"
+
       - name: Update Release
         if: steps.inference.outcome == 'success'
         env:
