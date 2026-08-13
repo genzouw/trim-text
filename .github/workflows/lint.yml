@@ -48,6 +48,7 @@ jobs:
           filters: |
             sh:
               - '**/*.sh'
+              - '**/*.bats'
               - 'tt'
             dockerfile:
               - '**/Dockerfile'
@@ -98,7 +99,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          shellcheck -f checkstyle tt | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="shellcheck" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          git ls-files -z -- 'tt' '**/*.bats' '**/*.sh' | xargs -0 shellcheck -f checkstyle | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="shellcheck" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   shfmt:
     needs: changes
@@ -131,7 +132,7 @@ jobs:
 
       - name: Run shfmt
         run: |
-          "${RUNNER_TEMP}/shfmt" -d -i 2 -ci tt
+          git ls-files -z -- 'tt' '**/*.bats' '**/*.sh' | xargs -0 "${RUNNER_TEMP}/shfmt" -d -i 2 -ci
 
   hadolint:
     needs: changes
