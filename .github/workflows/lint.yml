@@ -69,6 +69,7 @@ jobs:
               - '**/*.md'
               - '.textlintrc.json'
               - '.github/textlint/**'
+              - '.markdownlint-cli2.jsonc'
 
   shellcheck:
     needs: changes
@@ -395,6 +396,49 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           .github/textlint/node_modules/.bin/textlint -f checkstyle "**/*.md" | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="textlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+
+  # reviewdog の github-pr-review reporter は push イベントでも失敗しない。
+  # 「reviewdog: this is not PullRequest build.」を出力して終了コード 0 で抜けるため、
+  # 本ファイルの他 7 ジョブと同様に単一ジョブ + github-pr-review で統一する。
+  markdownlint:
+    needs: changes
+    # ワークフロー/ローカルActionの変更でも自身のロジック変化を検知できるよう gha も対象にする
+    if: ${{ needs.changes.outputs.md == 'true' || needs.changes.outputs.gha == 'true' }}
+    name: markdownlint
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup Node.js
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: .github/markdownlint/package-lock.json
+
+      - name: Install markdownlint-cli2
+        # package-lock.json による再現可能なインストールのため npm ci を使用する。
+        working-directory: .github/markdownlint
+        run: npm ci
+
+      - name: Setup reviewdog
+        uses: ./.github/actions/setup-reviewdog
+        with:
+          version: ${{ env.REVIEWDOG_VERSION }}
+          sha256: ${{ env.REVIEWDOG_SHA256 }}
+
+      - name: Run markdownlint-cli2 with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          .github/markdownlint/node_modules/.bin/markdownlint-cli2 2>&1 | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c %m" -efm="%f:%l %m" -name="markdownlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   cspell:
     # 全ファイルが対象のため changes job による選別は行わず常に実行する。
