@@ -402,7 +402,8 @@ jobs:
   # 本ファイルの他 7 ジョブと同様に単一ジョブ + github-pr-review で統一する。
   markdownlint:
     needs: changes
-    if: ${{ needs.changes.outputs.md == 'true' }}
+    # ワークフロー/ローカルActionの変更でも自身のロジック変化を検知できるよう gha も対象にする
+    if: ${{ needs.changes.outputs.md == 'true' || needs.changes.outputs.gha == 'true' }}
     name: markdownlint
     runs-on: ubuntu-latest
     timeout-minutes: 5
