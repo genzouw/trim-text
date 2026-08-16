@@ -69,6 +69,7 @@ jobs:
               - '**/*.md'
               - '.textlintrc.json'
               - '.github/textlint/**'
+              - '.markdownlint-cli2.jsonc'
 
   shellcheck:
     needs: changes
