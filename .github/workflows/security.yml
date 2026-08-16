@@ -109,3 +109,20 @@ jobs:
             --exit-code 1 \
             --no-progress \
             trim-text:ci
+
+  zizmor:
+    name: zizmor (GitHub Actions security analysis)
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup zizmor
+        uses: woodruffw/zizmor-action@bbbe62fb1655060dc5a54d682494191d83a1bde5 # v1
+        with:
+          project: .
