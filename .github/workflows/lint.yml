@@ -438,7 +438,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          npx markdownlint-cli2 "**/*.md" 2>&1 | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c %m" -efm="%f:%l %m" -name="markdownlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          .github/markdownlint/node_modules/.bin/markdownlint-cli2 2>&1 | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c %m" -efm="%f:%l %m" -name="markdownlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   cspell:
     # 全ファイルが対象のため changes job による選別は行わず常に実行する。
