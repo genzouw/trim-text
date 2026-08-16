@@ -76,6 +76,51 @@ updates:
     cooldown:
       default-days: 7
 
+  # CI の textlint 用依存ファイル (.github/textlint/package.json) の更新。
+  # package-lock.json + npm ci でバージョンを固定しているため、dependabot に
+  # 追従させないと固定されたまま古くなり、セキュリティ修正が取り込まれなくなる。
+  - package-ecosystem: npm
+    directory: /.github/textlint
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    reviewers:
+      - genzouw
+    labels:
+      - dependencies
+    commit-message:
+      prefix: ci
+      include: scope
+    pull-request-branch-name:
+      separator: /
+    cooldown:
+      default-days: 7
+
+  # CI の markdownlint 用依存ファイル (.github/markdownlint/package.json) の更新。
+  # textlint と同じ理由でバージョンを固定しているため、追従対象に含める。
+  - package-ecosystem: npm
+    directory: /.github/markdownlint
+    schedule:
+      interval: weekly
+      day: monday
+      time: "09:00"
+      timezone: Asia/Tokyo
+    open-pull-requests-limit: 5
+    reviewers:
+      - genzouw
+    labels:
+      - dependencies
+    commit-message:
+      prefix: ci
+      include: scope
+    pull-request-branch-name:
+      separator: /
+    cooldown:
+      default-days: 7
+
   # Dockerfile のベースイメージ更新 (alpine など)
   - package-ecosystem: docker
     directory: /

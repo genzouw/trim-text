@@ -1,0 +1,8 @@
+{
+  "name": "lint-yml-markdownlint",
+  "private": true,
+  "description": "lint.yml の markdownlint ジョブ専用の依存関係。package-lock.json による再現可能なインストールのために分離している。",
+  "dependencies": {
+    "markdownlint-cli2": "0.23.2"
+  }
+}
