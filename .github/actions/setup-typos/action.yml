@@ -43,3 +43,4 @@ runs:
         tar xzf typos.tar.gz ./typos
         chmod +x typos
         rm typos.tar.gz
+        ./typos --version
