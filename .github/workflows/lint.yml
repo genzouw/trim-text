@@ -494,4 +494,6 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          "${RUNNER_TEMP}/typos" --format brief | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="typos" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          # typos 側にはレポート用の書き込みトークンを渡さない（最小権限）。
+          # env: 経由でシークレットを供給しつつ、パイプ左側のプロセスだけ env -u で除外する。
+          env -u REVIEWDOG_GITHUB_API_TOKEN "${RUNNER_TEMP}/typos" --format brief | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="typos" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
