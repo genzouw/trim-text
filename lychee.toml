@@ -9,4 +9,7 @@ exclude = [
   # scorecard.dev は GitHub Actions ランナーからの接続を断続的に拒否し、
   # リトライを緩めても解消しないため、到達性検証の対象から除外する。
   '^https://scorecard\.dev/',
+  # devin.ai は GitHub Actions ランナーからのリクエストに対して継続的に
+  # HTTP 429 を返すため、到達性検証の対象から除外する。
+  '^https://devin\.ai/',
 ]
