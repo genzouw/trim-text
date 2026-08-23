@@ -1,0 +1,57 @@
+[default]
+extend-ignore-re = [
+  "(?Rm)^.*(#|//) typos:ignore.*$",
+]
+
+[default.extend-words]
+# Project specific dictionary, imported from cspell.json
+genzouw = "genzouw"
+coreutils = "coreutils"
+shfmt = "shfmt"
+hadolint = "hadolint"
+actionlint = "actionlint"
+shellcheck = "shellcheck"
+sonarcloud = "sonarcloud"
+sonarqube = "sonarqube"
+dependabot = "dependabot"
+gitleaks = "gitleaks"
+trivy = "trivy"
+codeql = "codeql"
+reviewdog = "reviewdog"
+bloopignore = "bloopignore"
+cursorrules = "cursorrules"
+windsurfrules = "windsurfrules"
+CodeRabbit = "CodeRabbit"
+Bloop = "Bloop"
+Codeium = "Codeium"
+lychee = "lychee"
+lycheeverse = "lycheeverse"
+yamllint = "yamllint"
+dockle = "dockle"
+goodwithtech = "goodwithtech"
+RooVeterinaryInc = "RooVeterinaryInc"
+tt = "tt"
+
+[files]
+extend-exclude = [
+  "node_modules",
+  "dist",
+  "build",
+  "coverage",
+  ".git",
+  "*.lock",
+  "package-lock.json",
+  "yarn.lock",
+  "pnpm-lock.yaml",
+  "*.log",
+  "*.png",
+  "*.jpg",
+  "*.jpeg",
+  "*.gif",
+  "*.svg",
+  "*.ico",
+  "*.pdf",
+  "*.ttf",
+  "*.woff",
+  "*.woff2"
+]

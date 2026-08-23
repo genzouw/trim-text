@@ -461,3 +461,37 @@ jobs:
           config: cspell.json
           inline: warning
           strict: false
+
+  typos:
+    name: typos
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: write
+    env:
+      TYPOS_VERSION: "1.49.0"
+      TYPOS_SHA256: "48bd2d58e02ce713b8c0f1aa239e68ee4f7d8c551013135806e6aed3938d9e10"
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup typos
+        uses: ./.github/actions/setup-typos
+        with:
+          version: ${{ env.TYPOS_VERSION }}
+          sha256: ${{ env.TYPOS_SHA256 }}
+
+      - name: Setup reviewdog
+        uses: ./.github/actions/setup-reviewdog
+        with:
+          version: ${{ env.REVIEWDOG_VERSION }}
+          sha256: ${{ env.REVIEWDOG_SHA256 }}
+
+      - name: Run typos with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          "${RUNNER_TEMP}/typos" --format brief | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="typos" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
