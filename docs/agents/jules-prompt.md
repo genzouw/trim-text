@@ -78,14 +78,14 @@ Jules の管理画面に貼り付けてご利用ください。
 
 本リポジトリで既に有効化されている AI / 品質 / セキュリティ系の自動化です。これらと機能が重複する PR は MUST NOT 提出してください。詳細は [`docs/AI_AUTOMATION.md`](../AI_AUTOMATION.md) を参照してください。
 
-| 種別                 | ツール                                                                  | 役割                                |
-| :------------------- | :---------------------------------------------------------------------- | :---------------------------------- |
-| AI コードレビュー    | [CodeRabbit](https://github.com/apps/coderabbitai)                      | プルリクエストの AI レビュー        |
-| AI コードレビュー    | [PR-Agent (Qodo Merge)](https://github.com/apps/qodo-merge)             | PR スコアリング / 自動要約          |
-| LLM コンテキスト生成 | Repomix (`.github/workflows/repomix.yml`)                               | `llms.txt` 規格の Markdown 自動生成 |
-| 静的解析             | Codacy / SonarCloud                                                     | 静的コード解析                      |
-| セキュリティスキャン | CodeQL / Gitleaks / Trivy / OSV-Scanner / zizmor / GitGuardian          | 脆弱性・秘密情報スキャン            |
-| Lint                 | actionlint / shellcheck / shfmt / hadolint / markdownlint-cli2 / cspell | 静的な書式・規約チェック            |
+| 種別                 | ツール                                                                 | 役割                                |
+| :------------------- | :--------------------------------------------------------------------- | :---------------------------------- |
+| AI コードレビュー    | [CodeRabbit](https://github.com/apps/coderabbitai)                     | プルリクエストの AI レビュー        |
+| AI コードレビュー    | [PR-Agent (Qodo Merge)](https://github.com/apps/qodo-merge)            | PR スコアリング / 自動要約          |
+| LLM コンテキスト生成 | Repomix (`.github/workflows/repomix.yml`)                              | `llms.txt` 規格の Markdown 自動生成 |
+| 静的解析             | Codacy / SonarCloud                                                    | 静的コード解析                      |
+| セキュリティスキャン | CodeQL / Gitleaks / Trivy / OSV-Scanner / zizmor / GitGuardian         | 脆弱性・秘密情報スキャン            |
+| Lint                 | actionlint / shellcheck / shfmt / hadolint / markdownlint-cli2 / typos | 静的な書式・規約チェック            |
 
 新しい AI コードレビューや、新しい AI コード補助は **すでに導入済みなので追加しないでください**。
 
