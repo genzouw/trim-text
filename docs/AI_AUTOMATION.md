@@ -307,3 +307,11 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+
+### 33. typos (高速スペルチェッカー)
+
+- **目的**: リポジトリ全体のドキュメントやコードに含まれるスペルミスを高速に検知します。Rust 製のバイナリとして提供されるため、依存関係のインストールが不要で CI の実行時間を短縮できます。
+- **設定ファイル**: `.typos.toml`
+- **特徴**: `crate-ci/typos` を利用し、`reviewdog` と連携して PR に自動でインラインコメントを投稿します。cspell のような「辞書に無い語を全て疑う」方式ではなく、既知の誤字→正字の対応表に載った語だけを指摘する方式のため、未知の識別子や固有名詞を誤検知しにくく、許可リストの管理コストがほぼ不要です。偽陽性を1行だけ抑制したい場合は該当行末に `# typos:ignore`（または `// typos:ignore`）を付けます。ファイル単位で除外したい場合は `.typos.toml` の `[files]` セクションの `extend-exclude` に対象を追加します。
+- **事前設定**:
+  1. 特に追加の設定は不要です。`.github/workflows/lint.yml` の `typos` ジョブを通じて GitHub Actions 上で自動実行されます（組み込みの `GITHUB_TOKEN` を使用します）。

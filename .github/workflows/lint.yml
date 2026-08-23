@@ -440,24 +440,40 @@ jobs:
         run: |
           .github/markdownlint/node_modules/.bin/markdownlint-cli2 2>&1 | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c %m" -efm="%f:%l %m" -name="markdownlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
-  cspell:
-    # 全ファイルが対象のため changes job による選別は行わず常に実行する。
-    name: Check Spelling
+  typos:
+    name: typos
     runs-on: ubuntu-latest
     timeout-minutes: 5
-    # PRへのコメント投稿は行わず、Actionsのアノテーションのみのため書き込み権限は不要。
     permissions:
       contents: read
+      pull-requests: write
+    env:
+      TYPOS_VERSION: "1.49.0"
+      TYPOS_SHA256: "48bd2d58e02ce713b8c0f1aa239e68ee4f7d8c551013135806e6aed3938d9e10"
     steps:
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
 
-      - name: Spell Check
-        uses: streetsidesoftware/cspell-action@de2a73e963e7443969755b648a1008f77033c5b2 # v8.4.0
+      - name: Setup typos
+        uses: ./.github/actions/setup-typos
         with:
-          config: cspell.json
-          inline: warning
-          strict: false
+          version: ${{ env.TYPOS_VERSION }}
+          sha256: ${{ env.TYPOS_SHA256 }}
+
+      - name: Setup reviewdog
+        uses: ./.github/actions/setup-reviewdog
+        with:
+          version: ${{ env.REVIEWDOG_VERSION }}
+          sha256: ${{ env.REVIEWDOG_SHA256 }}
+
+      - name: Run typos with reviewdog
+        env:
+          REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -o pipefail
+          # typos 側にはレポート用の書き込みトークンを渡さない（最小権限）。
+          # env: 経由でシークレットを供給しつつ、パイプ左側のプロセスだけ env -u で除外する。
+          # pipefail により typos 自体の異常終了（設定ミス等）を偽のグリーンにせず検知する。
+          env -u REVIEWDOG_GITHUB_API_TOKEN "${RUNNER_TEMP}/typos" --format brief | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: error: %m" -name="typos" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
