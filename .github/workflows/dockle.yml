@@ -26,6 +26,11 @@ jobs:
       # https://github.com/goodwithtech/dockle/releases/tag/v0.4.15
       DOCKLE_SHA256: 8bfc9183d1d3d67800edb45bea4bb63ddf1d28bec5f89944075a07007d79caad
     steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
       - name: Checkout repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
