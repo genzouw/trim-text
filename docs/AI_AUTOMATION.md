@@ -315,3 +315,11 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **特徴**: `crate-ci/typos` を利用し、`reviewdog` と連携して PR に自動でインラインコメントを投稿します。cspell のような「辞書に無い語を全て疑う」方式ではなく、既知の誤字→正字の対応表に載った語だけを指摘する方式のため、未知の識別子や固有名詞を誤検知しにくく、許可リストの管理コストがほぼ不要です。偽陽性を1行だけ抑制したい場合は該当行末に `# typos:ignore`（または `// typos:ignore`）を付けます。ファイル単位で除外したい場合は `.typos.toml` の `[files]` セクションの `extend-exclude` に対象を追加します。
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/lint.yml` の `typos` ジョブを通じて GitHub Actions 上で自動実行されます（組み込みの `GITHUB_TOKEN` を使用します）。
+
+### 34. GitHub Actions Cache Cleanup (キャッシュクリーンアップ)
+
+- **目的**: プルリクエストがクローズ（マージまたは破棄）された際に、そのプルリクエストに関連づけられた不要な GitHub Actions キャッシュを自動的に削除し、リポジトリのキャッシュ容量（10GB）の圧迫やメインブランチのキャッシュの意図せぬ eviction を防ぎます。
+- **設定ファイル**: `.github/workflows/cleanup-caches.yml`
+- **特徴**: GitHub CLI (`gh cache delete`) を使用して実行されます。外部の有料 LLM API キーなどを必要とせず、完全無料で動作します。認証には組み込みの `GITHUB_TOKEN` を使用します。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
