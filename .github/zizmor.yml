@@ -19,3 +19,10 @@ rules:
       # ことでスクリプトインジェクションを防いでおり、PR 由来のコードを
       # 実行しない安全な構成のため抑止する。
       - ai-pr-translator.yml
+      # cleanup-caches.yml はフォーク PR クローズ時に Actions キャッシュを
+      # 削除するため、書き込み権限（actions: write）を持つ pull_request_target
+      # が必須（pull_request イベントではフォーク PR に対する GITHUB_TOKEN が
+      # 読み取り専用になり削除できない）。チェックアウトは行わず、フォーク由来の
+      # head.ref はベースリポジトリと同一の PR の場合のみ使用するようガード
+      # 済みのため抑止する。
+      - cleanup-caches.yml
