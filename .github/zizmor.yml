@@ -22,8 +22,8 @@ rules:
       # cleanup-caches.yml はフォーク PR のキャッシュも削除できるよう
       # pull_request_target が必須（pull_request では GITHUB_TOKEN が
       # 読み取り専用になり actions: write 権限が付与されない）。
-      # チェックアウトを行わず、PR 由来のコードは実行しない。
-      # env に渡す値も github.event.pull_request.number（数値）と
-      # github.repository のみで、スクリプトインジェクションのリスクが
-      # ない安全な構成のため抑止する。
+      # チェックアウトを行わず、PR 由来のコードは実行しない。フォーク由来の
+      # head.ref はベースリポジトリと同一の PR の場合のみ使用するようガード
+      # 済みであり、スクリプトインジェクションのリスクがない安全な構成の
+      # ため抑止する。
       - cleanup-caches.yml
