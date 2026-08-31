@@ -23,14 +23,11 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
-          IS_SAME_REPO_PR: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
         run: |
-          # Delete PR merge ref cache
+          # Delete PR merge ref cache only. Deleting the head branch ref
+          # cache was avoided because a single head branch can be the source
+          # of multiple PRs targeting different base branches; closing one
+          # of them would then delete caches still in use by another open
+          # PR. Branch-scoped caches are naturally reclaimed by GitHub's
+          # automatic eviction (unused for 7+ days, or storage limit).
           gh cache delete --all --ref "refs/pull/${PR_NUMBER}/merge" --succeed-on-no-caches
-          # Delete PR branch ref cache (same-repo PRs only; PR_HEAD_REF is
-          # attacker-controlled for fork PRs and could otherwise reference an
-          # arbitrary branch in the base repository)
-          if [ "${IS_SAME_REPO_PR}" = "true" ]; then
-            gh cache delete --all --ref "refs/heads/${PR_HEAD_REF}" --succeed-on-no-caches
-          fi
