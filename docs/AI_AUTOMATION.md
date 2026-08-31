@@ -316,10 +316,10 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/lint.yml` の `typos` ジョブを通じて GitHub Actions 上で自動実行されます（組み込みの `GITHUB_TOKEN` を使用します）。
 
-### 34. Cleanup PR Caches (PRキャッシュの自動クリーンアップ)
+### 34. GitHub Actions Cache Cleanup (PRキャッシュの自動クリーンアップ)
 
-- **目的**: プルリクエスト（PR）がクローズまたはマージされた際に、その PR 固有のキャッシュを自動的に削除し、リポジトリのキャッシュ容量制限（10GB）の超過を防ぎます。
+- **目的**: プルリクエストがクローズ（マージまたは破棄）された際に、そのプルリクエストに関連づけられた不要な GitHub Actions キャッシュを自動的に削除します。これにより、リポジトリのキャッシュ容量（既定の無償容量10GB。リポジトリや組織の設定で変更可能）の圧迫やメインブランチのキャッシュの意図せぬ eviction を防ぎます。
 - **設定ファイル**: `.github/workflows/cleanup-caches.yml`
-- **特徴**: `pull_request_target` イベントの `closed` をトリガーとして動作し、GitHub CLI (`gh cache delete`) を使用してキャッシュを削除します。組み込みの `GITHUB_TOKEN` のみを使用し、外部 SaaS や外部 API キーに依存しないため完全無料で利用可能です。
+- **特徴**: `pull_request_target` イベントの `closed` をトリガーとして動作し、GitHub CLI (`gh cache delete`) を使用してキャッシュを削除します。外部の有料 LLM API キーなどを必要とせず、完全無料で動作します。認証には組み込みの `GITHUB_TOKEN` を使用します。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
