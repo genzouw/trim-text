@@ -1,0 +1,40 @@
+name: Cleanup PR Caches
+
+on:
+  pull_request_target:
+    types:
+      - closed
+
+permissions:
+  actions: write
+
+jobs:
+  cleanup:
+    name: Cleanup PR caches
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Cleanup caches
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          PR_HEAD_REF: ${{ github.event.pull_request.head.ref }}
+          IS_SAME_REPO_PR: ${{ github.event.pull_request.head.repo.full_name == github.repository }}
+        run: |
+          set -x
+          # Delete PR merge ref cache
+          gh cache delete --all --ref "refs/pull/${PR_NUMBER}/merge" --succeed-on-no-caches \
+            || echo "::warning::Failed to delete cache for refs/pull/${PR_NUMBER}/merge"
+          # Delete PR branch ref cache (same-repo PRs only; PR_HEAD_REF is
+          # attacker-controlled for fork PRs and could otherwise reference an
+          # arbitrary branch in the base repository)
+          if [ "${IS_SAME_REPO_PR}" = "true" ]; then
+            gh cache delete --all --ref "refs/heads/${PR_HEAD_REF}" --succeed-on-no-caches \
+              || echo "::warning::Failed to delete cache for refs/heads/${PR_HEAD_REF}"
+          fi
