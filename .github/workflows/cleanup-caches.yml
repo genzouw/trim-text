@@ -29,10 +29,12 @@ jobs:
         run: |
           set -x
           # Delete PR merge ref cache
-          gh cache delete --all --ref "refs/pull/${PR_NUMBER}/merge" || true
+          gh cache delete --all --ref "refs/pull/${PR_NUMBER}/merge" --succeed-on-no-caches \
+            || echo "::warning::Failed to delete cache for refs/pull/${PR_NUMBER}/merge"
           # Delete PR branch ref cache (same-repo PRs only; PR_HEAD_REF is
           # attacker-controlled for fork PRs and could otherwise reference an
           # arbitrary branch in the base repository)
           if [ "${IS_SAME_REPO_PR}" = "true" ]; then
-            gh cache delete --all --ref "refs/heads/${PR_HEAD_REF}" || true
+            gh cache delete --all --ref "refs/heads/${PR_HEAD_REF}" --succeed-on-no-caches \
+              || echo "::warning::Failed to delete cache for refs/heads/${PR_HEAD_REF}"
           fi
