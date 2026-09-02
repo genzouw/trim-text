@@ -1,0 +1,29 @@
+name: First Interaction
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  welcome:
+    name: Welcome first-time contributor
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Greet Contributor
+        uses: actions/first-interaction@1c4688942c71f71d4f5502a26ea67c331730fa4d # v3.1.0
+        with:
+          repo-token: ${{ secrets.GITHUB_TOKEN }}
+          issue-message: '初めての Issue 作成ありがとうございます！🎉 メンテナーが確認するまで少々お待ちください。'
+          pr-message: '初めての Pull Request ありがとうございます！🎉 レビューまで少々お待ちください。'

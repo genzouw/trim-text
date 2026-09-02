@@ -323,3 +323,11 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **特徴**: `pull_request_target` イベントの `closed` をトリガーとして動作し、GitHub CLI (`gh cache delete`) を使用してキャッシュを削除します。外部の有料 LLM API キーなどを必要とせず、完全無料で動作します。認証には組み込みの `GITHUB_TOKEN` を使用します。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
+
+### 35. actions/first-interaction (初回コントリビュータへの自動挨拶)
+
+- **目的**: はじめて Issue や Pull Request を作成したコントリビュータに対して、感謝のメッセージ（日本語）を自動的に投稿します。コミュニティへの参加を歓迎し、円滑なコミュニケーションを促進します。
+- **設定ファイル**: `.github/workflows/first-interaction.yml`
+- **特徴**: GitHub 公式が提供する `actions/first-interaction` を利用しています。組み込みの `GITHUB_TOKEN` を使用し、外部サービスや API キーに依存しないため、公開 OSS リポジトリで完全に無料で利用可能です。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
