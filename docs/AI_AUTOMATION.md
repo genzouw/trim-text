@@ -324,10 +324,10 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
 
-### 35. actions/first-interaction (初回コントリビュータへの自動挨拶)
+### 35. 初回コントリビュータへの自動挨拶
 
 - **目的**: はじめて Issue や Pull Request を作成したコントリビュータに対して、感謝のメッセージ（日本語）を自動的に投稿します。コミュニティへの参加を歓迎し、円滑なコミュニケーションを促進します。
 - **設定ファイル**: `.github/workflows/first-interaction.yml`
-- **特徴**: GitHub 公式が提供する `actions/first-interaction` を利用しています。組み込みの `GITHUB_TOKEN` を使用し、外部サービスや API キーに依存しないため、公開 OSS リポジトリで完全に無料で利用可能です。
+- **特徴**: 当初は GitHub 公式の [`actions/first-interaction`](https://github.com/actions/first-interaction) の利用を検討しました。しかし固定 SHA 時点の実装には、`with:` 入力キーの区切り文字の不一致により常に失敗する不具合がありました。加えて、PR の初回判定が投稿者を区別しない未修正の上流バグ（[actions/first-interaction#402](https://github.com/actions/first-interaction/pull/402)）もありました。そのため採用を見送り、GitHub CLI (`gh api` / `gh issue comment` / `gh pr comment`) で投稿者ごとの Issue/PR 件数を数える最小実装に置き換えています。組み込みの `GITHUB_TOKEN` のみを使用し、外部サービスや API キーに依存しません。そのため [GitHub Actions の料金プラン](https://docs.github.com/en/billing/concepts/product-billing/github-actions)上、公開 OSS リポジトリで完全に無料で利用可能です。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
