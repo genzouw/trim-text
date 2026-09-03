@@ -62,7 +62,8 @@ jobs:
           REPO: ${{ github.repository }}
           AUTHOR: ${{ github.event.pull_request.user.login }}
         run: |
-          count=$(gh api "search/issues?q=repo:${REPO}+type:pr+author:${AUTHOR}" --jq '.total_count')
+          count=$(gh api "repos/${REPO}/pulls?state=all&per_page=100" --paginate \
+            | jq -s --arg author "$AUTHOR" '[.[][] | select(.user.login == $author)] | length')
           echo "count=${count}" >> "$GITHUB_OUTPUT"
 
       - name: Greet first-time PR contributor
