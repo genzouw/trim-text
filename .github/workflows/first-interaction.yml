@@ -1,0 +1,76 @@
+name: First Interaction
+
+on:
+  issues:
+    types: [opened]
+  pull_request_target:
+    types: [opened]
+
+permissions:
+  issues: write
+  pull-requests: write
+
+jobs:
+  welcome:
+    name: Welcome first-time contributor
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      # actions/first-interaction@v3.1.0 (SHA: 1c4688942c71f71d4f5502a26ea67c331730fa4d) は
+      # 以下の2点が壊れているため利用しない:
+      #   1. with: の入力キーがハイフン区切り (repo-token 等) だが、固定 SHA の実装は
+      #      core.getInput('repo_token', ...) のようにアンダースコア区切りで読み取るため、
+      #      ランナーが生成する環境変数名 (INPUT_REPO-TOKEN) と一致せず、required な入力が
+      #      見つからず常にジョブが失敗する。
+      #   2. isFirstPullRequest() がリポジトリ全体の PR 番号のみで判定しており、投稿者で
+      #      絞り込んでいないため、リポジトリの最初の PR より後は誰の初回 PR でも
+      #      「初回ではない」と誤判定される（isFirstIssue() は creator で絞り込んでおり
+      #      問題ない）。
+      # 上記はいずれも本記事執筆時点の最新版 (v3.1.0) でも未修正の上流バグのため、
+      # gh CLI で直接投稿者ごとの件数を数える最小実装に置き換える。
+      - name: Count contributor's prior issues
+        if: github.event_name == 'issues'
+        id: issue_history
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          AUTHOR: ${{ github.event.issue.user.login }}
+        run: |
+          count=$(gh api "repos/${REPO}/issues?creator=${AUTHOR}&state=all&per_page=100" --paginate \
+            | jq -s '[.[][] | select(.pull_request == null)] | length')
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+
+      - name: Greet first-time issue author
+        if: github.event_name == 'issues' && steps.issue_history.outputs.count == '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        run: |
+          gh issue comment "${ISSUE_NUMBER}" --body '初めての Issue 作成ありがとうございます！🎉 メンテナーが確認するまで少々お待ちください。'
+
+      - name: Count contributor's prior pull requests
+        if: github.event_name == 'pull_request_target'
+        id: pr_history
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          AUTHOR: ${{ github.event.pull_request.user.login }}
+        run: |
+          count=$(gh api "repos/${REPO}/pulls?state=all&per_page=100" --paginate \
+            | jq -s --arg author "$AUTHOR" '[.[][] | select(.user.login == $author)] | length')
+          echo "count=${count}" >> "$GITHUB_OUTPUT"
+
+      - name: Greet first-time PR contributor
+        if: github.event_name == 'pull_request_target' && steps.pr_history.outputs.count == '1'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: |
+          gh pr comment "${PR_NUMBER}" --body '初めての Pull Request ありがとうございます！🎉 レビューまで少々お待ちください。'

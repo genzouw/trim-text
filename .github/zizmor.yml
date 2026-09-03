@@ -28,3 +28,11 @@ rules:
       # あり、スクリプトインジェクションのリスクがない安全な構成の
       # ため抑止する。
       - cleanup-caches.yml
+      # first-interaction.yml は初回 Issue/PR 作成者へ挨拶コメントを投稿するため
+      # pull_request_target が必須（pull_request では GITHUB_TOKEN が読み取り専用に
+      # なり issues/pull-requests への write 権限が付与されず、フォーク PR に
+      # コメントできない）。チェックアウトを行わず、PR 由来のコードは実行しない。
+      # gh api / gh issue comment / gh pr comment に渡す投稿者名・番号はすべて
+      # env 経由で受け渡し、run スクリプトへの直接埋め込みを避けているため、
+      # PR 由来のコードを実行しない安全な構成のため抑止する。
+      - first-interaction.yml
