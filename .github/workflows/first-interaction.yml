@@ -49,6 +49,7 @@ jobs:
         if: github.event_name == 'issues' && steps.issue_history.outputs.count == '1'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           ISSUE_NUMBER: ${{ github.event.issue.number }}
         run: |
           gh issue comment "${ISSUE_NUMBER}" --body '初めての Issue 作成ありがとうございます！🎉 メンテナーが確認するまで少々お待ちください。'
@@ -68,6 +69,7 @@ jobs:
         if: github.event_name == 'pull_request_target' && steps.pr_history.outputs.count == '1'
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           gh pr comment "${PR_NUMBER}" --body '初めての Pull Request ありがとうございます！🎉 レビューまで少々お待ちください。'
