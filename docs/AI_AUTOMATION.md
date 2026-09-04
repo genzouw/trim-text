@@ -334,7 +334,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 ### 36. テスト結果のPRインライン表示 (Publish Unit Test Results)
 
-- **目的**: CI (bats) で実行したユニットテストの結果を JUnit 形式で出力し、その結果を GitHub Actions の UI や Pull Request のコメントとして分かりやすく表示します。これにより、開発者が CI ログを深く追うことなく、テストの成功・失敗・スキップの詳細を即座に把握できるようになります。
+- **目的**: CI (bats) で実行したユニットテストの結果を JUnit 形式で出力し、その結果を GitHub Actions の UI や Pull Request のコメントとして分かりやすく表示します。そのため、開発者が CI ログを深く追うことなく、テストの成功・失敗・スキップの詳細を即座に把握できます。
 - **設定ファイル**: `.github/workflows/test.yml`
 - **特徴**: GitHub Actions のエコシステムで広く使われている [EnricoMi/publish-unit-test-result-action](https://github.com/EnricoMi/publish-unit-test-result-action) を利用しています。この Action は外部サービスへのデータ送信や外部APIキーを必要とせず、組み込みの `GITHUB_TOKEN` ( `checks: write`, `pull-requests: write` 権限 ) を使用して GitHub 上に直接結果を書き込みます。完全無料で動作し、既存のコード品質チェックツールやPR要約ツールと機能が重複することなく、純粋にテスト結果の可視化を担います。
 - **事前設定**:
