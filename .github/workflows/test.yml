@@ -12,16 +12,15 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-  checks: write
-  pull-requests: write
-
 jobs:
   bats:
     name: bats (tt の境界値・ランダム入力テスト)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
+      checks: write
+      pull-requests: write
     env:
       BATS_VERSION: 1.11.0
       # bats-core v1.11.0 tar.gz の公式 SHA256
