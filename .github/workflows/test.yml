@@ -14,6 +14,8 @@ concurrency:
 
 permissions:
   contents: read
+  checks: write
+  pull-requests: write
 
 jobs:
   bats:
@@ -43,4 +45,13 @@ jobs:
           sha256: ${{ env.BATS_SHA256 }}
 
       - name: Run bats
-        run: bats tests/
+        run: |
+          mkdir -p test-results
+          # --report-formatter junit is required to generate the report file correctly in the specified output directory.
+          bats --report-formatter junit --output test-results/ tests/
+
+      - name: Publish Test Results
+        uses: EnricoMi/publish-unit-test-result-action@170bf24d20d201b842d7a52403b73ed297e6645b # v2.18.0
+        if: always()
+        with:
+          files: "test-results/**/*.xml"
