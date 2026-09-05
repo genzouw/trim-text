@@ -12,14 +12,13 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-permissions:
-  contents: read
-
 jobs:
   bats:
     name: bats (tt の境界値・ランダム入力テスト)
     runs-on: ubuntu-latest
     timeout-minutes: 5
+    permissions:
+      contents: read
     env:
       BATS_VERSION: 1.11.0
       # bats-core v1.11.0 tar.gz の公式 SHA256
@@ -43,4 +42,26 @@ jobs:
           sha256: ${{ env.BATS_SHA256 }}
 
       - name: Run bats
-        run: bats tests/
+        run: |
+          mkdir -p test-results
+          # --report-formatter junit is required to generate the report file correctly in the specified output directory.
+          bats --report-formatter junit --output test-results/ tests/
+
+      # フォーク PR / Dependabot PR は読み取り専用の GITHUB_TOKEN しか持たず、
+      # この job で直接 Publish Test Results を実行すると
+      # Resource not accessible by integration で失敗する。
+      # 結果と event file を artifact として保存し、書き込み権限を持つ
+      # test-results.yml (workflow_run トリガー) 側で公開する。
+      - name: Upload event file
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Event File
+          path: ${{ github.event_path }}
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: Test Results
+          path: test-results/**/*.xml
