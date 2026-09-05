@@ -12,7 +12,7 @@ runs:
   steps:
     - name: Cache taplo
       id: cache-taplo
-      uses: actions/cache@v4
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
       with:
         path: ${{ runner.temp }}/taplo
         key: taplo-${{ runner.os }}-${{ inputs.version }}-${{ inputs.sha256 }}
@@ -20,14 +20,26 @@ runs:
     - name: Download and install taplo
       if: steps.cache-taplo.outputs.cache-hit != 'true'
       shell: bash
+      env:
+        TAPLO_VERSION: ${{ inputs.version }}
+        TAPLO_SHA256: ${{ inputs.sha256 }}
       run: |
         set -euo pipefail
-        TAPLO_URL="https://github.com/tamasfe/taplo/releases/download/${{ inputs.version }}/taplo-full-linux-x86_64.gz"
+        if ! [[ "${TAPLO_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+          echo "::error::Invalid taplo version format"
+          exit 1
+        fi
+        if ! [[ "${TAPLO_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
+          echo "::error::Invalid SHA256 format"
+          exit 1
+        fi
+
+        TAPLO_URL="https://github.com/tamasfe/taplo/releases/download/${TAPLO_VERSION}/taplo-full-linux-x86_64.gz"
         echo "Downloading taplo from ${TAPLO_URL}"
         curl -sL "${TAPLO_URL}" | gzip -d > "${RUNNER_TEMP}/taplo"
 
         echo "Verifying checksum..."
-        echo "${{ inputs.sha256 }}  ${RUNNER_TEMP}/taplo" > "${RUNNER_TEMP}/taplo.sha256"
+        echo "${TAPLO_SHA256}  ${RUNNER_TEMP}/taplo" > "${RUNNER_TEMP}/taplo.sha256"
         sha256sum -c "${RUNNER_TEMP}/taplo.sha256"
 
         chmod +x "${RUNNER_TEMP}/taplo"
