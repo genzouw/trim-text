@@ -13,8 +13,11 @@ concurrency:
   cancel-in-progress: true
 
 permissions:
+  # NOTE: buildx の type=gha キャッシュは ACTIONS_RUNTIME_TOKEN と Cache service API
+  # を使うため、GITHUB_TOKEN のスコープを制御する permissions とは別経路。
+  # actions: write はキャッシュ書き込みには不要（必要なのは gh cache delete 等の
+  # Actions 管理 API 操作時のみ）。詳細は #144。
   contents: read
-  actions: write
 
 jobs:
   build:
