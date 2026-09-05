@@ -22,6 +22,15 @@ env:
 permissions:
   contents: read
 
+# reviewdog 各ステップの規約:
+# REVIEWDOG_GITHUB_API_TOKEN は step の env: で供給するが、env: はステップの
+# シェルプロセス全体に効くため、パイプ左側の linter プロセスにも
+# pull-requests: write 権限のトークンが渡ってしまう。linter 本体はトークンを
+# 必要としない（レポート送信を行うのは reviewdog のみ）ので、linter 側は
+# `env -u REVIEWDOG_GITHUB_API_TOKEN` を前置して除外する（最小権限）。
+# secrets を run: 本文へ直接展開する方法は、ランナー上の一時スクリプトファイルへ
+# 平文で書き出されるため採用しない。
+
 jobs:
   changes:
     name: Detect File Changes
@@ -110,7 +119,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git ls-files -z -- 'tt' '**/*.bats' '**/*.sh' | xargs -0 shellcheck -f checkstyle | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="shellcheck" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          git ls-files -z -- 'tt' '**/*.bats' '**/*.sh' | env -u REVIEWDOG_GITHUB_API_TOKEN xargs -0 shellcheck -f checkstyle | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="shellcheck" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   shfmt:
     needs: changes
@@ -210,7 +219,7 @@ jobs:
         run: |
           mapfile -t dockerfiles <<<"${DOCKERFILES}"
           printf 'hadolint target: %s\n' "${dockerfiles[@]}"
-          "${RUNNER_TEMP}/hadolint" -f tty "${dockerfiles[@]}" | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l %m" -name="hadolint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          env -u REVIEWDOG_GITHUB_API_TOKEN "${RUNNER_TEMP}/hadolint" -f tty "${dockerfiles[@]}" | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l %m" -name="hadolint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   actionlint:
     needs: changes
@@ -255,7 +264,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          "${RUNNER_TEMP}/actionlint" -oneline -ignore 'unknown permission scope "models"' | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="actionlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          env -u REVIEWDOG_GITHUB_API_TOKEN "${RUNNER_TEMP}/actionlint" -oneline -ignore 'unknown permission scope "models"' | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="actionlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
       - name: Verify action pins resolve to commit SHAs
         env:
@@ -305,7 +314,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          "${RUNNER_TEMP}/editorconfig-checker/bin/ec-linux-amd64" -format gcc | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="editorconfig" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          env -u REVIEWDOG_GITHUB_API_TOKEN "${RUNNER_TEMP}/editorconfig-checker/bin/ec-linux-amd64" -format gcc | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="editorconfig" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   yamllint:
     needs: changes
@@ -347,7 +356,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          python3 -m yamllint -f parsable . | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="yamllint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          env -u REVIEWDOG_GITHUB_API_TOKEN python3 -m yamllint -f parsable . | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: %m" -name="yamllint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   woke:
     # 全ファイルが対象のため changes job による選別は行わず常に実行する。
@@ -388,7 +397,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          "${RUNNER_TEMP}/woke" -o checkstyle . | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="woke" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          env -u REVIEWDOG_GITHUB_API_TOKEN "${RUNNER_TEMP}/woke" -o checkstyle . | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="woke" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   textlint:
     needs: changes
@@ -435,7 +444,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          .github/textlint/node_modules/.bin/textlint -f checkstyle "**/*.md" | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="textlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          env -u REVIEWDOG_GITHUB_API_TOKEN .github/textlint/node_modules/.bin/textlint -f checkstyle "**/*.md" | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="textlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   # reviewdog の github-pr-review reporter は push イベントでも失敗しない。
   # 「reviewdog: this is not PullRequest build.」を出力して終了コード 0 で抜けるため、
@@ -483,7 +492,7 @@ jobs:
         env:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          .github/markdownlint/node_modules/.bin/markdownlint-cli2 2>&1 | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c %m" -efm="%f:%l %m" -name="markdownlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          env -u REVIEWDOG_GITHUB_API_TOKEN .github/markdownlint/node_modules/.bin/markdownlint-cli2 2>&1 | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c %m" -efm="%f:%l %m" -name="markdownlint" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   typos:
     name: typos
@@ -523,7 +532,6 @@ jobs:
           REVIEWDOG_GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -o pipefail
-          # typos 側にはレポート用の書き込みトークンを渡さない（最小権限）。
-          # env: 経由でシークレットを供給しつつ、パイプ左側のプロセスだけ env -u で除外する。
+          # env -u の意図はファイル冒頭の「reviewdog 各ステップの規約」を参照。
           # pipefail により typos 自体の異常終了（設定ミス等）を偽のグリーンにせず検知する。
           env -u REVIEWDOG_GITHUB_API_TOKEN "${RUNNER_TEMP}/typos" --format brief | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: error: %m" -name="typos" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
