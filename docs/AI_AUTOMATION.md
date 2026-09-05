@@ -228,8 +228,8 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 - **目的**: 投稿または更新された GitHub Issue の内容を解析し、最適なラベルを AI (GitHub Models) を使用して自動的に割り当てます。
 - **設定ファイル**: `.github/workflows/issue-labeller.yml`
-- **特徴**: 外部の有料 LLM API キーを必要とせず、GitHub Models の推論 API と組み込みの `GITHUB_TOKEN` を利用して動作します。これにより、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Issue の自動分類を実現し、リポジトリ管理者の負担を軽減します。
-- **事前設定**:
+- **特徴**: 外部の有料 LLM API キーを必要とせず、GitHub Models の推論 API と組み込みの `GITHUB_TOKEN` を利用して動作します。これにより、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Issue の自動分類を実現し、リポジトリ管理者の負担を軽減します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
+- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
@@ -237,8 +237,8 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 - **目的**: プロジェクトで要求されている厳格な PR ポリシー（目的、無料の証明、重複確認、セットアップ手順などの6つの必須セクション）が PR タイトルおよび説明文で満たされているか、LLM を用いて自動的にチェックし、不足している場合は PR コメントとしてフィードバックします。
 - **設定ファイル**: `.github/workflows/pr-policy-checker.yml`
-- **特徴**: `actions/ai-inference` アクションを使用します。推論には GitHub Models の推論 API を利用し、モデルはワークフロー定義（`.github/workflows/pr-policy-checker.yml` の `model:`）を参照します。認証には組み込みの `GITHUB_TOKEN` を利用します。外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なくチェックを実現します。
-- **事前設定**:
+- **特徴**: `actions/ai-inference` アクションを使用します。推論には GitHub Models の推論 API を利用し、モデルはワークフロー定義（`.github/workflows/pr-policy-checker.yml` の `model:`）を参照します。認証には組み込みの `GITHUB_TOKEN` を利用します。外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なくチェックを実現します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
+- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
@@ -246,8 +246,8 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 - **目的**: CI (Test, Lint, Docker Buildなど) が失敗した際に、エラーログを自動的に解析し、失敗の原因と修正案をPRコメントとして提示します。
 - **設定ファイル**: `.github/workflows/ai-ci-failure-explainer.yml`
-- **特徴**: `actions/ai-inference` アクションを使用します。推論には GitHub Models の推論 API を利用し、認証には組み込みの `GITHUB_TOKEN` を利用します。外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なくチェックを実現します。
-- **事前設定**:
+- **特徴**: `actions/ai-inference` アクションを使用します。推論には GitHub Models の推論 API を利用し、認証には組み込みの `GITHUB_TOKEN` を利用します。外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なくチェックを実現します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
+- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
@@ -255,8 +255,8 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 - **目的**: 投稿または更新された GitHub Issue が日本語以外（英語など）で記述されている場合に、AI を用いて自動的に日本語へ翻訳し、コメントとして投稿します。
 - **設定ファイル**: `.github/workflows/ai-issue-translator.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Issue の多言語サポートを実現します。
-- **事前設定**:
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Issue の多言語サポートを実現します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
+- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
@@ -264,8 +264,8 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 - **目的**: 投稿または更新された GitHub Pull Request のタイトルと本文が日本語以外（英語など）で記述されている場合に、AI を用いて自動的に日本語へ翻訳し、コメントとして投稿します。これにより、海外コントリビュータとのやり取りを円滑にします。
 - **設定ファイル**: `.github/workflows/ai-pr-translator.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Pull Request の多言語サポートを実現します。Fork されたリポジトリからの PR にも対応するため、`pull_request_target` イベントを使用しています。翻訳指示は system prompt に分離し、PR タイトル・本文は翻訳対象データとして受け渡すことでプロンプトインジェクションのリスクを低減します。
-- **事前設定**:
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Pull Request の多言語サポートを実現します。Fork されたリポジトリからの PR にも対応するため、`pull_request_target` イベントを使用しています。翻訳指示は system prompt に分離し、PR タイトル・本文は翻訳対象データとして受け渡すことでプロンプトインジェクションのリスクを低減します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
+- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
@@ -290,8 +290,8 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 - **目的**: 新規に作成された GitHub Issue に対して、AI を用いて自動的に挨拶や状況整理（バグ再現手順の追加依頼など）の初期応答をします。
 - **設定ファイル**: `.github/workflows/ai-issue-responder.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して、日本語で初回返信を生成しIssueコメントとして投稿します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Issue の一次対応を自動化し、メンテナーの負担を軽減します。Issue タイトル・本文は `<issue_data>` タグでデータとして分離し、その内容に含まれる命令には従わないようプロンプトで明示することで、プロンプトインジェクションのリスクを低減します。
-- **事前設定**:
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して、日本語で初回返信を生成しIssueコメントとして投稿します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Issue の一次対応を自動化し、メンテナーの負担を軽減します。Issue タイトル・本文は `<issue_data>` タグでデータとして分離し、その内容に含まれる命令には従わないようプロンプトで明示することで、プロンプトインジェクションのリスクを低減します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
+- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
@@ -307,8 +307,8 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 - **目的**: Issue や Pull Request で長く続いた議論を、`/summarize` というコメントをトリガーにして AI が自動的に要約し、概要・決定事項・未解決課題・Next Steps をまとめます。
 - **設定ファイル**: `.github/workflows/ai-issue-summarizer.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して、議論全体を解析します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく動作します。また、プロンプトインジェクションのリスクを低減するため、タイトル・本文・コメントデータは独立したファイル・セクションとして構築しています。
-- **事前設定**:
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して、議論全体を解析します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく動作します。また、プロンプトインジェクションのリスクを低減するため、タイトル・本文・コメントデータは独立したファイル・セクションとして構築しています。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
+- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
@@ -316,8 +316,8 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 - **目的**: GitHub Release が公開（published）または編集（edited）された際に、そのタイトルと本文が日本語以外（主に英語）で記述されている場合に、AI を用いて自動的に日本語へ翻訳・フォーマットし、リリースノートを更新します。これにより、日本語ユーザーにとって読みやすい更新履歴を提供します。
 - **設定ファイル**: `.github/workflows/ai-release-translator.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なくリリースノートの日本語化を実現します。既に日本語の場合は翻訳をスキップするため、`edited` イベントで再実行されても重複翻訳は発生しません。
-- **事前設定**:
+- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なくリリースノートの日本語化を実現します。既に日本語の場合は翻訳をスキップするため、`edited` イベントで再実行されても重複翻訳は発生しません。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
+- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
   1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
   2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
 
