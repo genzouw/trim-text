@@ -551,7 +551,6 @@ jobs:
     timeout-minutes: 5
     permissions:
       contents: read
-      pull-requests: write
     env:
       TAPLO_VERSION: 0.8.1
       # taplo v0.8.1 linux-x86_64
