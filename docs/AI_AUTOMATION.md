@@ -355,7 +355,7 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 
 ### 37. Taplo (TOML Linter)
 
-- **目的**: プロジェクト内の `.toml` ファイル (例: `.pr_agent.toml`, `.typos.toml` など) の構文エラーやフォーマットの問題を静的解析します。
+- **目的**: プロジェクト内の `.toml` ファイル (例: `.pr_agent.toml`, `.typos.toml` など) の構文エラーを静的解析します。
 - **設定ファイル**: `.github/workflows/lint.yml`, `.github/actions/setup-taplo/action.yml`
 - **特徴**: オープンソースで Rust 製の TOML ツールキットである [tamasfe/taplo](https://github.com/tamasfe/taplo) (MIT License) を利用します。外部の SaaS や API キーへの依存がなく、公開リポジトリで完全に無料で動作します。
 - **事前設定**:
