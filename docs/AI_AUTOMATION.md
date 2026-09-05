@@ -20,7 +20,7 @@
 本ドキュメントで「GitHub Models の推論 API を利用する」と記載しているツールは、いずれも GitHub Models の**無料枠内での利用**を前提としています。GitHub Models は組織で有料利用（paid usage）を有効化している場合、無料枠を超えた分が従量課金の対象になります。本リポジトリは有料利用を有効化していないため、無料枠を超えた時点で推論が実行されなくなります（課金は発生しません）。
 
 > [!WARNING]
-> GitHub Models の推論 API は退役の段階（retirement brownout）に入っており、現在は 410 を返します。そのため `actions/ai-inference` を使うワークフローは実際には推論を実行できていません。代替推論プロバイダへの移行は #157 で追跡しています。
+> GitHub Models の推論 API は 2026年7月30日付けで完全に retired（廃止）されており、現在は 410 を返します。そのため `actions/ai-inference` を使うワークフローは実際には推論を実行できていません。代替推論プロバイダへの移行は #157 で追跡しています。
 >
 > ```text
 > ##[error]simpleInference: chatCompletion failed: Error: 410 GitHub Models is temporarily unavailable as part of a scheduled retirement brownout.
