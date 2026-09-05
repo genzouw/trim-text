@@ -84,9 +84,9 @@ jobs:
     name: Trivy (Docker image vulnerability scan)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    permissions:
-      contents: read
-      actions: write
+    # NOTE: buildx の type=gha キャッシュ書き込みに actions: write は不要なため
+    # 削除した（詳細は #144）。残る contents: read はトップレベル定義と同じなので
+    # ジョブレベルの permissions ブロックごと省略している。
     env:
       TRIVY_VERSION: 0.70.0
     steps:
