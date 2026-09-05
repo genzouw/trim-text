@@ -44,6 +44,7 @@ jobs:
       gha: ${{ steps.filter.outputs.gha }}
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
       md: ${{ steps.filter.outputs.md }}
+      toml: ${{ steps.filter.outputs.toml }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
@@ -84,6 +85,8 @@ jobs:
               - '.textlintrc.json'
               - '.github/textlint/**'
               - '.markdownlint-cli2.jsonc'
+            toml:
+              - '**/*.toml'
 
   shellcheck:
     needs: changes
@@ -539,3 +542,38 @@ jobs:
           # env -u の意図はファイル冒頭の「reviewdog 各ステップの規約」を参照。
           # pipefail により typos 自体の異常終了（設定ミス等）を偽のグリーンにせず検知する。
           env -u REVIEWDOG_GITHUB_API_TOKEN "${RUNNER_TEMP}/typos" --format brief | "${RUNNER_TEMP}/reviewdog" -efm="%f:%l:%c: error: %m" -name="typos" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+
+  taplo:
+    needs: changes
+    if: ${{ needs.changes.outputs.toml == 'true' || needs.changes.outputs.gha == 'true' }}
+    name: Taplo (TOML linter)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      TAPLO_VERSION: 0.8.1
+      # taplo v0.8.1 linux-x86_64
+      # From: https://github.com/tamasfe/taplo/releases/download/0.8.1/taplo-full-linux-x86_64.gz
+      TAPLO_SHA256: c62baa73c9d7c1572047b1a502ca805e1372e5db7c9a935532f702f12d6115ce
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup taplo
+        uses: ./.github/actions/setup-taplo
+        with:
+          version: ${{ env.TAPLO_VERSION }}
+          sha256: ${{ env.TAPLO_SHA256 }}
+
+      - name: Run taplo
+        run: |
+          # taplo errors are printed directly to stdout/stderr in a human-readable format.
+          "${RUNNER_TEMP}/taplo" lint
