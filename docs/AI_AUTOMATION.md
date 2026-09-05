@@ -25,6 +25,8 @@
 > ```text
 > ##[error]simpleInference: chatCompletion failed: Error: 410 GitHub Models is temporarily unavailable as part of a scheduled retirement brownout.
 > ```
+>
+> 上記のエラーメッセージ本文は GitHub 側の文言のまま引用しており "temporarily" と記載されていますが、公式アナウンス（#157 参照）上は恒久的な廃止です。
 
 以下に、現在導入されている主要な自動化ツール（AI ツールおよび従来の CI/CD ツールを含む）とその目的、および機能させるために必要な手動の事前設定手順を記載します。
 
