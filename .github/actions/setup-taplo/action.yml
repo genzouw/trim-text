@@ -1,0 +1,33 @@
+name: "Setup taplo"
+description: "Downloads and installs taplo in the runner temp directory"
+inputs:
+  version:
+    description: "taplo version to install (e.g. 0.8.1)"
+    required: true
+  sha256:
+    description: "Expected SHA256 checksum for the taplo binary"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Cache taplo
+      id: cache-taplo
+      uses: actions/cache@v4
+      with:
+        path: ${{ runner.temp }}/taplo
+        key: taplo-${{ runner.os }}-${{ inputs.version }}-${{ inputs.sha256 }}
+
+    - name: Download and install taplo
+      if: steps.cache-taplo.outputs.cache-hit != 'true'
+      shell: bash
+      run: |
+        set -euo pipefail
+        TAPLO_URL="https://github.com/tamasfe/taplo/releases/download/${{ inputs.version }}/taplo-full-linux-x86_64.gz"
+        echo "Downloading taplo from ${TAPLO_URL}"
+        curl -sL "${TAPLO_URL}" | gzip -d > "${RUNNER_TEMP}/taplo"
+
+        echo "Verifying checksum..."
+        echo "${{ inputs.sha256 }}  ${RUNNER_TEMP}/taplo" > "${RUNNER_TEMP}/taplo.sha256"
+        sha256sum -c "${RUNNER_TEMP}/taplo.sha256"
+
+        chmod +x "${RUNNER_TEMP}/taplo"

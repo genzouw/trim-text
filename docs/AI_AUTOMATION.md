@@ -339,3 +339,11 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **特徴**: GitHub Actions のエコシステムで広く使われている [EnricoMi/publish-unit-test-result-action](https://github.com/EnricoMi/publish-unit-test-result-action) を利用しています。この Action は外部サービスへのデータ送信や外部APIキーを必要とせず、組み込みの `GITHUB_TOKEN` ( `checks: write`, `pull-requests: write` 権限 ) を使用して GitHub 上に直接結果を書き込みます。完全無料で動作し、既存のコード品質チェックツールやPR要約ツールと機能が重複することなく、純粋にテスト結果の可視化を担います。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
+
+### 37. Taplo (TOML Linter)
+
+- **目的**: プロジェクト内の `.toml` ファイル (例: `.pr_agent.toml`, `.typos.toml` など) の構文エラーやフォーマットの問題を静的解析します。
+- **設定ファイル**: `.github/workflows/lint.yml`, `.github/actions/setup-taplo/action.yml`
+- **特徴**: オープンソースで Rust 製の TOML ツールキットである [tamasfe/taplo](https://github.com/tamasfe/taplo) (MIT License) を利用します。外部の SaaS や API キーへの依存がなく、公開リポジトリで完全に無料で動作します。
+- **事前設定**:
+  1. 特に追加の設定は不要です。`.github/workflows/lint.yml` の `taplo` ジョブを通じて GitHub Actions 上で自動実行されます。
