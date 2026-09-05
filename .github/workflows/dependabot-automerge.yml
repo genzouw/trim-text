@@ -38,9 +38,11 @@ jobs:
       - name: Enable auto-merge for Dependabot PRs
         # CI (他のチェック) が通った後に自動マージされるように設定
         if: steps.metadata.outputs.update-type == 'version-update:semver-patch' || steps.metadata.outputs.update-type == 'version-update:semver-minor'
+        # GITHUB_TOKEN では自リポジトリの PR を approve できない (GitHub 側の仕様上の
+        # 制限であり pull-requests: write を与えても解消しない)。approve はメンテナーの
+        # 手動レビューに委ね、ここでは auto-merge の予約のみを行う。
+        # 同方針は genzouw/hyakuninissyu の dependabot-auto-merge.yml でも採用している。
         run: |
-          # ブランチ保護ルールでレビューが必須になっている場合に対処するため、先に Approve する
-          gh pr review --approve "$PR_URL" || echo "Already approved"
           # リポジトリ設定で allow_merge_commit=false / required_linear_history=true のため
           # --merge ではなく --squash を使う（dependabot PR は通常 1 commit のため見た目は同じ）
           gh pr merge --auto --squash "$PR_URL"
