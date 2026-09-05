@@ -331,3 +331,11 @@ Dependabot や Renovate によるマイナー・パッチバージョンの更�
 - **特徴**: 当初は GitHub 公式の [`actions/first-interaction`](https://github.com/actions/first-interaction) の利用を検討しました。しかし固定 SHA 時点の実装には、`with:` 入力キーの区切り文字の不一致により常に失敗する不具合がありました。加えて、PR の初回判定が投稿者を区別しない未修正の上流バグ（[actions/first-interaction#402](https://github.com/actions/first-interaction/pull/402)）もありました。そのため採用を見送り、GitHub CLI ([`gh api`](https://cli.github.com/manual/gh_api) / [`gh issue comment`](https://cli.github.com/manual/gh_issue_comment) / [`gh pr comment`](https://cli.github.com/manual/gh_pr_comment)) で投稿者ごとの Issue/PR 件数を数える最小実装に置き換えています。組み込みの `GITHUB_TOKEN` のみを使用し、外部サービスや API キーに依存しません。そのため [GitHub Actions の料金プラン](https://docs.github.com/en/billing/concepts/product-billing/github-actions)上、公開 OSS リポジトリで完全に無料で利用可能です。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
+
+### 36. テスト結果のPRインライン表示 (Publish Unit Test Results)
+
+- **目的**: CI (bats) で実行したユニットテストの結果を JUnit 形式で出力し、その結果を GitHub Actions の UI や Pull Request のコメントとして分かりやすく表示します。そのため、開発者が CI ログを深く追うことなく、テストの成功・失敗・スキップの詳細を即座に把握できます。
+- **設定ファイル**: `.github/workflows/test.yml`, `.github/workflows/test-results.yml`
+- **特徴**: GitHub Actions のエコシステムで広く使われている [EnricoMi/publish-unit-test-result-action](https://github.com/EnricoMi/publish-unit-test-result-action) を利用しています。この Action は外部サービスへのデータ送信や外部APIキーを必要とせず、組み込みの `GITHUB_TOKEN` ( `checks: write`, `pull-requests: write` 権限 ) を使用して GitHub 上に直接結果を書き込みます。完全無料で動作し、既存のコード品質チェックツールやPR要約ツールと機能が重複することなく、純粋にテスト結果の可視化を担います。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
