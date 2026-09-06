@@ -553,8 +553,8 @@ jobs:
       contents: read
     env:
       TAPLO_VERSION: 0.8.1
-      # taplo v0.8.1 linux-x86_64
-      # From: https://github.com/tamasfe/taplo/releases/download/0.8.1/taplo-full-linux-x86_64.gz
+      # taplo v0.8.1 linux-x86_64 の公式 SHA256（展開後の taplo バイナリのハッシュ。
+      # ダウンロード元 .gz: https://github.com/tamasfe/taplo/releases/download/0.8.1/taplo-full-linux-x86_64.gz を展開して算出）
       TAPLO_SHA256: c62baa73c9d7c1572047b1a502ca805e1372e5db7c9a935532f702f12d6115ce
     steps:
       - name: Harden Runner
