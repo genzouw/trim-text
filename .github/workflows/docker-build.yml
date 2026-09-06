@@ -7,6 +7,11 @@ on:
   pull_request:
     branches:
       - main
+  schedule:
+    # 毎週月曜 09:00 JST (= 00:00 UTC) にイメージを再ビルドしてスキャンし、
+    # ベースイメージ側で新規に公表された CVE を検出する。
+    # (security.yml の trivy-image ジョブから移設。詳細は #139)
+    - cron: "0 0 * * 1"
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -21,9 +26,20 @@ permissions:
 
 jobs:
   build:
-    name: docker build (smoke test)
+    # NOTE: ワークフロー / ジョブをまたぐと --load したローカルイメージを共有できず、
+    # 同じ trim-text:ci を何度もビルドすることになるため、イメージを必要とする検証
+    # (Dockle / Trivy image / スモークテスト) は 1 ジョブ 1 ビルドに集約している。
+    # 分割したくなった場合も、ビルド回数が増える点を必ず考慮すること。詳細は #139。
+    name: docker build (image scan & smoke test)
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 20
+    env:
+      TRIVY_VERSION: 0.70.0
+      # Dockle のバージョンは再現性確保のため固定する。
+      DOCKLE_VERSION: 0.4.15
+      # Dockle v0.4.15 Linux-64bit の公式 SHA256
+      # https://github.com/goodwithtech/dockle/releases/tag/v0.4.15
+      DOCKLE_SHA256: 8bfc9183d1d3d67800edb45bea4bb63ddf1d28bec5f89944075a07007d79caad
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@05e31511f85b41b11d1cf0ef85d0992719546e2c # v2.21.0
@@ -44,8 +60,40 @@ jobs:
         uses: docker/setup-buildx-action@37fe631027851001ddb9b187196cc803df7f5f0e # v4.3.0
 
       - name: Build image
-        # docker buildx と gha キャッシュを利用し、同一 PR の後続ジョブや再実行でのビルドを高速化
-        run: docker buildx build --load --cache-to type=gha,mode=max --cache-from type=gha -t trim-text:ci .
+        # docker buildx と gha キャッシュを利用し、同一 PR の後続ジョブや再実行でのビルドを高速化。
+        # レジストリ側の一時的な失敗に備えてリトライする。
+        run: |
+          for i in 1 2 3; do
+            docker buildx build --load --cache-to type=gha,mode=max --cache-from type=gha -t trim-text:ci . && break
+            [ $i -lt 3 ] && sleep $((i * 15))
+          done
+
+      # NOTE: スキャン系をスモークテストより前に置いている。逆順にすると、コード変更
+      # 起因のスモークテスト失敗のたびにスキャン結果が得られず、セキュリティ上の問題を
+      # 見落とすため。
+      - name: Setup Trivy
+        uses: ./.github/actions/setup-trivy
+        with:
+          version: ${{ env.TRIVY_VERSION }}
+
+      - name: Run Trivy image scan
+        run: |
+          "${RUNNER_TEMP}/trivy" image \
+            --severity CRITICAL,HIGH \
+            --ignore-unfixed \
+            --exit-code 1 \
+            --no-progress \
+            trim-text:ci
+
+      - name: Setup Dockle
+        uses: ./.github/actions/setup-dockle
+        with:
+          version: ${{ env.DOCKLE_VERSION }}
+          sha256: ${{ env.DOCKLE_SHA256 }}
+
+      - name: Run Dockle
+        run: |
+          "${RUNNER_TEMP}/dockle" --no-color --exit-code 1 --exit-level fatal trim-text:ci
 
       - name: Smoke test (trim 1 char from each side)
         run: |
