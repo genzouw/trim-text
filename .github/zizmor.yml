@@ -48,15 +48,34 @@ rules:
   # 書き換えると必須CIチェック自体が失敗する（サポートPR rhysd/actionlint#732 は
   # 未マージ）。actionlint が対応するまでは動作が保証されている
   # workspace-relative 形式 (./...) を維持し、zizmor 側を抑止する。
-  # 参照先はいずれも自リポジトリ内の複合Actionで、外部リポジトリの混入余地はない。
+  # ファイル名だけの指定は対象ファイル全体の self-repository 監査を無効化して
+  # しまうため、`zizmor --no-ignores` で検出した実在の ./ 参照の行番号のみを
+  # 個別に列挙する。参照先はいずれも自リポジトリ内の複合Actionで、外部リポジトリ
+  # の混入余地はない。
   self-repository:
     ignore:
       - dockle.yml
-      - lint.yml
-      - lychee.yml
-      - security.yml
-      - test.yml
-      # 現時点の main では ./... 参照を持たないが、PR #198 で dockle.yml の
-      # ビルド処理を集約する際に setup-dockle / setup-trivy 参照が移動し、
-      # 同じ理由の指摘 (アラート #101 / #102) が既に出ているため先に登録する。
-      - docker-build.yml
+      - lint.yml:116
+      - lint.yml:160
+      - lint.yml:196
+      - lint.yml:201
+      - lint.yml:259
+      - lint.yml:265
+      - lint.yml:309
+      - lint.yml:315
+      - lint.yml:357
+      - lint.yml:392
+      - lint.yml:398
+      - lint.yml:445
+      - lint.yml:493
+      - lint.yml:526
+      - lint.yml:532
+      - lint.yml:571
+      - lychee.yml:55
+      - security.yml:43
+      - security.yml:70
+      - test.yml:39
+      # PR #198 (docker-build.yml へのビルド集約) のマージ後、setup-trivy /
+      # setup-dockle 参照がここへ移動済み。
+      - docker-build.yml:75
+      - docker-build.yml:89
