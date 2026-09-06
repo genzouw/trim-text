@@ -36,3 +36,27 @@ rules:
       # env 経由で受け渡し、run スクリプトへの直接埋め込みを避けているため、
       # PR 由来のコードを実行しない安全な構成のため抑止する。
       - first-interaction.yml
+
+  # zizmor は同一リポジトリ内の複合Action参照に self-repository 構文 ($/...) を
+  # 求めるが、本リポジトリで pin している actionlint（v1.7.7 / 最新の v1.7.12 とも）
+  # が $/ を有効なローカルアクション参照として認識できない。
+  #
+  #   specifying action "$/.github/actions/setup-trivy" in invalid format
+  #   because ref is missing.
+  #
+  # lint.yml の actionlint ジョブは -fail-on-error="true" で運用しているため、
+  # 書き換えると必須CIチェック自体が失敗する（サポートPR rhysd/actionlint#732 は
+  # 未マージ）。actionlint が対応するまでは動作が保証されている
+  # workspace-relative 形式 (./...) を維持し、zizmor 側を抑止する。
+  # 参照先はいずれも自リポジトリ内の複合Actionで、外部リポジトリの混入余地はない。
+  self-repository:
+    ignore:
+      - dockle.yml
+      - lint.yml
+      - lychee.yml
+      - security.yml
+      - test.yml
+      # 現時点の main では ./... 参照を持たないが、PR #198 で dockle.yml の
+      # ビルド処理を集約する際に setup-dockle / setup-trivy 参照が移動し、
+      # 同じ理由の指摘 (アラート #101 / #102) が既に出ているため先に登録する。
+      - docker-build.yml
