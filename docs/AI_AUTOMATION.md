@@ -272,10 +272,10 @@ Dependabot によるマイナー・パッチバージョンの更新などは、
 ### 27. Dockle (コンテナイメージ Linter)
 
 - **目的**: Dockerイメージに対して、CIS（Center for Internet Security）ベンチマークなどのベストプラクティスに基づいた静的解析し、セキュリティリスク（rootユーザーでの実行、不必要な権限、不要なポートの公開など）を検出します。
-- **設定ファイル**: `.github/workflows/dockle.yml`
+- **設定ファイル**: `.github/workflows/docker-build.yml`
 - **特徴**: HadolintがDockerfileの構文やベストプラクティスをチェックし、Trivyが脆弱性をスキャンするのに対して、Dockleはビルドされた「イメージそのもの」の構成やセキュリティベストプラクティスをチェックします。本体の [goodwithtech/dockle](https://github.com/goodwithtech/dockle)（Apache License 2.0）は公開OSSであり、外部のSaaSや有料APIキーを必要とせず、課金も発生しません。公式リリースのバイナリを SHA256 検証したうえで直接実行します（`.github/actions/setup-dockle`）。
 - **事前設定**:
-  1. 特に追加の設定は不要です。`.github/workflows/dockle.yml` を通じて GitHub Actions 上で自動実行されます。
+  1. 特に追加の設定は不要です。`.github/workflows/docker-build.yml` の `build` ジョブを通じて GitHub Actions 上で自動実行されます（イメージビルドの重複を避けるため、スモークテストや Trivy のイメージスキャンと同一ジョブに集約しています）。
 
 ### 28. actions/stale (Stale Issue/PRの自動クローズ)
 
