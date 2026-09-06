@@ -54,7 +54,6 @@ rules:
   # の混入余地はない。
   self-repository:
     ignore:
-      - dockle.yml
       - lint.yml:116
       - lint.yml:160
       - lint.yml:196
