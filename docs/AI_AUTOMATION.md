@@ -101,13 +101,13 @@
   1. GitHub App として [DeepSource](https://github.com/apps/deepsource-io) をインストールしてください（公開 OSS リポジトリは無料）。
   2. プロジェクトのダッシュボードからリポジトリを連携し、初期設定してください。
 
-### 8. Mend Renovate (高度な依存関係管理)
+### 8. Mend Renovate (非導入 / Dependabot に一本化)
 
-- **目的**: Dependabot よりさらに高度な依存関係の自動更新・グルーピング・マージ制御をします。
-- **設定ファイル**: `renovate.json`
-- **特徴**: パッチ・マイナーバージョンの自動マージなど、柔軟なルール設定によりメンテナンスコストを削減します。
-- **事前設定**:
+- **状況**: **導入していません。** 設定ファイル `renovate.json` は配置されていましたが、GitHub App がインストールされておらず Renovate は一度も稼働していませんでした（Renovate 由来の PR・ブランチが 0 件）。設定と実態の乖離が保守の混乱を招くため、`renovate.json` を削除しています。
+- **代替**: 依存関係の自動更新は Dependabot (`.github/dependabot.yml`) に一本化しています。GitHub Actions / pip / npm / Docker の各エコシステムを週次で更新し、パッチ・マイナーは `.github/workflows/dependabot-automerge.yml` で自動マージします。
+- **再導入する場合**:
   1. GitHub App として [Mend Renovate](https://github.com/apps/renovate) をインストールしてください（公開リポジトリは無料）。
+  2. Dependabot と併用すると同一の依存に対して重複した更新 PR が作られるため、どちらへ寄せるかを先に決めてください。
 
 ### 9. Release Please (リリース自動化)
 
@@ -193,7 +193,7 @@
 
 ## CI/CD との連携
 
-Dependabot や Renovate によるマイナー・パッチバージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。
+Dependabot によるマイナー・パッチバージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。
 さらに、pre-commit.ci によるコードの自動フォーマットや、Release Please によるリリースPRの自動作成など、CI/CD における様々な自動化が導入されています。
 
 ## プルリクエスト作成時の注意事項
