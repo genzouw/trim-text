@@ -36,7 +36,12 @@ runs:
 
         TAPLO_URL="https://github.com/tamasfe/taplo/releases/download/${TAPLO_VERSION}/taplo-full-linux-x86_64.gz"
         echo "Downloading taplo from ${TAPLO_URL}"
-        curl -sL "${TAPLO_URL}" | gzip -d > "${RUNNER_TEMP}/taplo"
+        curl --fail --silent --show-error --location \
+          --retry 3 --retry-all-errors --retry-delay 2 \
+          --connect-timeout 10 --max-time 120 \
+          -o "${RUNNER_TEMP}/taplo.gz" \
+          "${TAPLO_URL}"
+        gzip -d "${RUNNER_TEMP}/taplo.gz"
 
         echo "Verifying checksum..."
         echo "${TAPLO_SHA256}  ${RUNNER_TEMP}/taplo" > "${RUNNER_TEMP}/taplo.sha256"
