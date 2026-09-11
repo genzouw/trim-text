@@ -98,9 +98,13 @@ jobs:
               '.[] | select(.body != "") | {author: (.user.login // "[deleted]"), body, ts: .submitted_at}' \
               | jq -s '.')
 
-            # インラインレビューコメント（差分行への指摘）
-            INLINE_DATA=$(gh api "repos/${REPO}/pulls/${ISSUE_NUMBER}/comments" --paginate --jq \
-              '.[] | {author: .user.login, body, ts: .created_at}' \
+            # インラインレビューコメント（差分行への指摘）。
+            # --paginate で全件取得すると件数の多い PR で入力サイズ・実行
+            # 時間が肥大化するため、API側で作成日時の降順に最新50件のみを
+            # 取得する（後段の全体マージ時にも直近50件へ絞り込むため、
+            # ここで先に絞っても最終結果は変わらない）
+            INLINE_DATA=$(gh api "repos/${REPO}/pulls/${ISSUE_NUMBER}/comments?sort=created&direction=desc&per_page=50" --jq \
+              '.[] | {author: (.user.login // "[deleted]"), body, ts: .created_at}' \
               | jq -s '.')
           fi
 
