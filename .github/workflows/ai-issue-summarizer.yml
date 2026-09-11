@@ -80,7 +80,7 @@ jobs:
           #   1件ずつ出力し、後段で jq -s によりまとめて配列化する
           TRIGGER_SUFFIX="issuecomment-${COMMENT_ID}"
           COMMENTS_DATA=$(gh issue view "${ISSUE_NUMBER}" --repo "${REPO}" --json comments --jq \
-            ".comments[] | select((.url | endswith(\"${TRIGGER_SUFFIX}\")) | not) | {author: .author.login, body, ts: .createdAt}" \
+            ".comments[] | select((.url | endswith(\"${TRIGGER_SUFFIX}\")) | not) | {author: (.author.login // \"[deleted]\"), body, ts: .createdAt}" \
             | jq -s '.')
 
           # 対象が Pull Request の場合のみ、レビュー本文とインラインレビュー
