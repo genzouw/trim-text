@@ -6,6 +6,7 @@ on:
 
 permissions:
   issues: write
+  pull-requests: read
   models: read
 
 jobs:
@@ -26,11 +27,14 @@ jobs:
       group: ai-issue-summarizer-${{ github.event.issue.number }}-${{ github.event.comment.id }}
       cancel-in-progress: true
     # ジョブ単位でも明示的に最小権限を宣言する。gh issue comment / gh api の
-    # reactions・comments 操作は issues API のみで完結し、pull-requests への
-    # 書き込みは不要なため付与しない（Issue にも Pull Request にも同じ
-    # issues エンドポイントが使われるため issues: write のみで動作する）
+    # reactions・comments 投稿は issues API のみで完結し、pull-requests への
+    # 書き込みは不要なため issues: write のみを付与する。一方、対象が Pull
+    # Request の場合はレビュー本文・インラインレビューコメントの取得
+    # （gh pr view --json reviews, gh api pulls/.../comments）に
+    # pull-requests: read が必要なため読み取り専用で追加する
     permissions:
       issues: write
+      pull-requests: read
       models: read
     steps:
       - name: Harden Runner
@@ -56,6 +60,9 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           REPO: ${{ github.repository }}
           COMMENT_ID: ${{ github.event.comment.id }}
+          # issue_comment イベントは Issue・PR の両方で発火するため、
+          # github.event.issue.pull_request の有無で対象を判定する
+          IS_PR: ${{ github.event.issue.pull_request && 'true' || 'false' }}
         run: |
           set -euo pipefail
 
@@ -64,16 +71,35 @@ jobs:
           ISSUE_TITLE=$(echo "${ISSUE_DATA}" | jq -r .title)
           ISSUE_BODY=$(echo "${ISSUE_DATA}" | jq -r .body)
 
-          # コメント一覧を取得
+          # 会話コメント一覧を取得（Issue/PRどちらも同じ conversation コメント）
           # - トリガーとなった /summarize コメント自体は要約対象から除外する
           #   （gh issue view の comments[].id はGraphQLノードIDでREST APIの
           #   COMMENT_ID と一致しないため、コメントURL末尾の issuecomment-<ID>
           #   で判定する）
-          # - プロンプト肥大化によるモデルへの過大入力・失敗を防ぐため、直近50件
-          #   に絞り込み、各コメント本文は2000文字までに切り詰める
+          # - 各データソースの author/body/ts（作成日時）に正規化した上で
+          #   1件ずつ出力し、後段で jq -s によりまとめて配列化する
           TRIGGER_SUFFIX="issuecomment-${COMMENT_ID}"
           COMMENTS_DATA=$(gh issue view "${ISSUE_NUMBER}" --repo "${REPO}" --json comments --jq \
-            ".comments | map(select((.url | endswith(\"${TRIGGER_SUFFIX}\")) | not)) | .[-50:] | map({author: .author.login, body: .body[0:2000]})")
+            ".comments[] | select((.url | endswith(\"${TRIGGER_SUFFIX}\")) | not) | {author: .author.login, body, ts: .createdAt}" \
+            | jq -s '.')
+
+          # 対象が Pull Request の場合のみ、レビュー本文とインラインレビュー
+          # コメントも要約対象に含める（Issue の場合は空配列のまま）。
+          # gh issue view の comments では conversation コメントしか取得でき
+          # ず、レビュー本文・差分行への指摘は含まれないため個別に取得する
+          REVIEWS_DATA='[]'
+          INLINE_DATA='[]'
+          if [ "${IS_PR}" = "true" ]; then
+            # レビュー本文（コメント無しの Approve/Request changes は除外）
+            REVIEWS_DATA=$(gh pr view "${ISSUE_NUMBER}" --repo "${REPO}" --json reviews --jq \
+              '.reviews[] | select(.body != "") | {author: .author.login, body, ts: .submittedAt}' \
+              | jq -s '.')
+
+            # インラインレビューコメント（差分行への指摘）
+            INLINE_DATA=$(gh api "repos/${REPO}/pulls/${ISSUE_NUMBER}/comments" --paginate --jq \
+              '.[] | {author: .user.login, body, ts: .created_at}' \
+              | jq -s '.')
+          fi
 
           # 大きな複数行テキストでのシェルエスケープ問題を避けるためファイルに書き出す
           # （本文もプロンプト肥大化防止のため8000文字までに切り詰める）
@@ -81,7 +107,15 @@ jobs:
 
           printf '%s\n' "${ISSUE_BODY}" | head -c 8000 > issue_body.txt
 
-          printf '%s\n' "${COMMENTS_DATA}" > issue_comments.json
+          printf '%s\n' "${COMMENTS_DATA}" > _comments.json
+          printf '%s\n' "${REVIEWS_DATA}" > _reviews.json
+          printf '%s\n' "${INLINE_DATA}" > _inline.json
+
+          # 3種のデータソースを時系列（ts）でマージし、プロンプト肥大化による
+          # モデルへの過大入力・失敗を防ぐため、直近50件に絞り込んだ上で
+          # 各本文は2000文字までに切り詰める
+          jq -s 'add | sort_by(.ts) | .[-50:] | map({author, body: .body[0:2000]})' \
+            _comments.json _reviews.json _inline.json > issue_comments.json
 
           # プロンプトを構築
           # （個別リダイレクトの代わりに1つのブロックにまとめてprompt.txtへ
