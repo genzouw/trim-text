@@ -90,9 +90,12 @@ jobs:
           REVIEWS_DATA='[]'
           INLINE_DATA='[]'
           if [ "${IS_PR}" = "true" ]; then
-            # レビュー本文（コメント無しの Approve/Request changes は除外）
-            REVIEWS_DATA=$(gh pr view "${ISSUE_NUMBER}" --repo "${REPO}" --json reviews --jq \
-              '.reviews[] | select(.body != "") | {author: .author.login, body, ts: .submittedAt}' \
+            # レビュー本文（コメント無しの Approve/Request changes は除外）。
+            # gh pr view --json reviews は単一ページのみ返し、レビュー数が
+            # 多い PR で古いレビューが欠落するため、REST API を --paginate
+            # で全ページ取得する
+            REVIEWS_DATA=$(gh api "repos/${REPO}/pulls/${ISSUE_NUMBER}/reviews" --paginate --jq \
+              '.[] | select(.body != "") | {author: (.user.login // "[deleted]"), body, ts: .submitted_at}' \
               | jq -s '.')
 
             # インラインレビューコメント（差分行への指摘）
