@@ -93,10 +93,15 @@ jobs:
             # レビュー本文（コメント無しの Approve/Request changes は除外）。
             # gh pr view --json reviews は単一ページのみ返し、レビュー数が
             # 多い PR で古いレビューが欠落するため、REST API を --paginate
-            # で全ページ取得する
+            # で全ページ取得する。同エンドポイントは sort/direction パラ
+            # メータを持たず（時系列昇順で返る）、INLINE_DATA のようにAPI
+            # 側で直近50件に絞れないため、取得直後に本文を2000文字へ切り詰
+            # めた上で JSON Lines 化し、tail -n 50 で直近50件のみを残す
+            # （レビュー数・本文サイズの多い PR でのメモリ肥大化・タイム
+            # アウトを防ぐ）
             REVIEWS_DATA=$(gh api "repos/${REPO}/pulls/${ISSUE_NUMBER}/reviews" --paginate --jq \
-              '.[] | select(.body != "") | {author: (.user.login // "[deleted]"), body, ts: .submitted_at}' \
-              | jq -s '.')
+              '.[] | select(.body != "") | {author: (.user.login // "[deleted]"), body: .body[0:2000], ts: .submitted_at}' \
+              | jq -c . | tail -n 50 | jq -s '.')
 
             # インラインレビューコメント（差分行への指摘）。
             # --paginate で全件取得すると件数の多い PR で入力サイズ・実行
