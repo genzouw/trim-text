@@ -39,7 +39,7 @@ GitHub Models の推論 API は 2026年7月30日付けで完全に retired（廃
 | `ai-issue-translator.yml` / `ai-pr-translator.yml` / `ai-release-translator.yml` | 削除しました。翻訳は各自の翻訳ツールで代替します                                  |
 | `ai-ci-failure-explainer.yml`                                                    | 削除しました。CI ログと reviewdog のインラインコメントで代替します                |
 | `issue-labeller.yml`                                                             | 削除しました。Issue のラベルは手動で付与します                                    |
-| `pr-policy-checker.yml`                                                          | LLM 推論を使わない決定的な実装へ置き換えます（#157）                              |
+| `pr-policy-checker.yml`                                                          | LLM 推論を使わない決定的な実装へ置き換えました（後述の 23 を参照）                |
 
 AI によるコードレビューは、GitHub App として稼働している CodeRabbit と PR-Agent が引き続き担当します。
 
@@ -251,11 +251,18 @@ Dependabot によるマイナー・パッチバージョンの更新などは、
 - **削除の理由**: 2 つの理由が重なり、このワークフローは一度も成功していませんでした。1 つ目は、利用していた `pelikhan/action-genai-issue-labeller` がサードパーティ製で「Allowed actions」の許可リストに登録されておらず、ジョブが起動しないまま `startup_failure` で終了し続けていたことです。2 つ目は、ラベルの推定が GitHub Models の推論 API に依存していたことです。
 - **代替**: Pull Request のラベル付けは `actions/labeler`（`.github/workflows/labeler.yml`）が担当します。Issue のラベルは手動で付与してください。
 
-### 23. AI PR Policy Checker (決定的な実装へ置換予定)
+### 23. PR Policy Checker (PR 説明文のポリシー検査)
 
-- **目的**: プロジェクトで要求されている PR ポリシー（目的、無料の証明、重複確認、セットアップ手順などの必須セクション）が PR タイトルおよび説明文で満たされているかをチェックし、不足している場合は PR コメントとしてフィードバックします。
-- **設定ファイル**: `.github/workflows/pr-policy-checker.yml`
-- **状況**: 現行の実装は `actions/ai-inference` 経由で GitHub Models の推論 API を利用しているため、本ドキュメント冒頭の注記のとおり動作していません。チェック項目はいずれも文字列の有無で判定できるため、LLM 推論を使わない決定的な実装へ置き換えます（#157）。
+- **目的**: Pull Request の説明文が `.github/PULL_REQUEST_TEMPLATE.md` の必須項目を満たしているかを検査し、不足があれば PR コメントとジョブサマリで指摘します。
+- **設定ファイル**: `.github/workflows/pr-policy-checker.yml`, `.github/scripts/check-pr-policy.sh`, `tests/check-pr-policy.bats`
+- **特徴**: 判定はすべて文字列一致・正規表現による決定的な処理で、LLM 推論を使いません（`AGENTS.md` 4.1）。検査するのは次の項目です。
+  - 必須（不足するとジョブが失敗します）
+    1. 「概要 (Summary)」「変更内容 (Changes)」「検証手順 (Verification Steps)」の各節に、テンプレートの記入例コメントを除いた記述があること。
+    2. 「コスト方針のセルフチェック (公開 OSS)」の全項目がチェック済みであること。
+    3. `.github/workflows` および `.github/actions` への追加行で、`AGENTS.md` 5.1 が禁止する LLM プロバイダの API キーを参照していないこと。テストのフィクスチャやドキュメント中の記述を誤検知させないため、検査対象をこの 2 つのディレクトリに限定しています。
+  - 警告（ジョブは失敗しません）
+    1. 新規のワークフローを追加する PR に、無料利用の根拠となる URL が本文に記載されていること。
+- **注意**: Dependabot などの Bot が作成する PR はテンプレートに沿わないため、検査の対象外です。また、フォークからの PR では `GITHUB_TOKEN` が読み取り専用になりコメントを投稿できないため、結果はジョブサマリにのみ出力します。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
 

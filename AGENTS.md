@@ -67,8 +67,6 @@
 - AI によるコードレビューは、既に GitHub App として稼働している CodeRabbit と PR-Agent へ寄せてください。自前のワークフローで重複して実装しないでください。
 - `continue-on-error: true` を付けたステップの後段を `steps.<id>.outcome == 'success'` で条件分岐する構成は、サイレント障害を生むため避けてください。ステップの `conclusion` は `success` になる一方で `outcome` は `failure` のままなので、後続ステップは `skipped` となり、ジョブ全体は `success` で終わります。失敗を許容するステップを置く場合は、`if: always()` でジョブサマリへ結果を出力するなど、失敗が可視化される手段を用意してください。
 
-**一時例外**: `.github/workflows/pr-policy-checker.yml` は、本節が定める上記 2 項目（LLM 推論の不使用、`outcome == 'success'` による分岐の禁止）の両方に、本節施行時点で抵触したまま残っています。決定的な実装への置換（追跡 Issue: #157）が完了するまでの一時的な例外とし、置換完了後はこの一時例外の記載を削除してください。他のワークフローへ本例外の適用範囲を広げないでください。
-
 ## 5. Constraints / 禁止事項 (MUST NOT — DO NOT submit such PRs)
 
 以下に該当する PR は **作成しないでください**。作成しても自動的にクローズされます。これは絶対的な境界条件 (boundary) です。
