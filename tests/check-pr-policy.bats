@@ -39,7 +39,7 @@ write_valid_body() {
 ## コスト方針のセルフチェック (公開 OSS)
 
 - [x] LLM プロバイダや従量課金 API のキーを GitHub Secrets へ追加していない
-- [x] 追加した SaaS / GitHub App / Action は公開 OSS リポジトリで完全無料である
+- [x] 追加した SaaS / GitHub App / Action は公開 OSS リポジトリで完全無料であり、その根拠 URL を本文に記載した（外部サービスを追加していない場合はチェック可）
 - [x] リポジトリオーナーへ新規 Secret の登録を依頼していない
 - [x] `AGENTS.md` のポリシーに違反していないことを確認した
 EOF
@@ -285,6 +285,31 @@ EOF
   while IFS= read -r key; do
     [[ "${forbidden_keys}" =~ (^|\|)${key}(\||$) ]]
   done <<<"${agents_keys}"
+}
+
+# ---------- PULL_REQUEST_TEMPLATE.md との同期 ----------
+
+# cost_required_patterns はテンプレートの文言に対する部分一致で判定するため、
+# 双方の文言がずれると「テンプレートどおりに記入しても必ず落ちる」状態になり、
+# しかもフィクスチャだけを見ているテストでは検出できない。実物のテンプレートを
+# 入力に使い、正しく記入した PR が確実に通過することを保証する。
+@test "PULL_REQUEST_TEMPLATE.md をそのまま記入した本文が通過する" {
+  local template="${BATS_TEST_DIRNAME}/../.github/PULL_REQUEST_TEMPLATE.md"
+  [ -f "${template}" ]
+
+  # 記入例の HTML コメントを除去し、各節に本文を補い、チェックボックスを全て付ける
+  # = 「テンプレートに沿って正しく記入した PR 本文」を再現する。
+  # 置換に改行を含むため sed は使わない (BSD sed は RHS の \n を改行として
+  # 解釈せず、macOS と CI で結果が変わる)。
+  perl -0777 -pe '
+    s/<!--.*?-->//gs;
+    s/^- \[ \]/- [x]/gm;
+    s/^(## .*)$/$1\n\n記入済みの本文。/gm;
+  ' "${template}" >"${BODY}"
+
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 0 ]
+  [[ "${output}" == *"要件を満たしています"* ]]
 }
 
 # ---------- 引数の扱い ----------
