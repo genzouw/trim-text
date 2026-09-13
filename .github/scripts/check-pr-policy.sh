@@ -149,14 +149,30 @@ check_section '## 概要 (Summary)' 'この変更で何を解決するかを記�
 check_section '## 変更内容 (Changes)' '変更した箇所を箇条書きで列挙してください。'
 check_section '## 検証手順 (Verification Steps)' 'レビュアーが変更を確認する手順を記述してください。'
 
-# コスト方針のセルフチェックは全項目が [x] であること (AGENTS.md 11 章)。
+# コスト方針のセルフチェックは、テンプレートの必須 4 項目それぞれが
+# 存在し [x] であることを個別に検証する (AGENTS.md 11 章)。単に未チェック行
+# (- [ ]) が 0 件であることだけを見ると、項目を丸ごと削除して無関係な文章や
+# チェック済みの 1 行だけを残しても通過してしまうため、項目名ごとに照合する。
 cost_section='## コスト方針のセルフチェック'
+declare -a cost_required_patterns=(
+  'LLM プロバイダや従量課金 API のキー'
+  '公開 OSS リポジトリで完全無料である'
+  'リポジトリオーナーへ新規 Secret の登録を依頼していない'
+  'AGENTS\.md.*のポリシーに違反していないことを確認した'
+)
 if section_has_content "${cost_section}"; then
-  unchecked="$(section_lines "${cost_section}" | grep -cE '^[[:space:]]*- \[[[:space:]]\]' || true)"
-  if [[ "${unchecked}" -eq 0 ]]; then
+  cost_lines="$(section_lines "${cost_section}")"
+  missing=()
+  for pattern in "${cost_required_patterns[@]}"; do
+    if ! grep -qE "^[[:space:]]*- \[[xX]\].*${pattern}" <<<"${cost_lines}"; then
+      missing+=("${pattern}")
+    fi
+  done
+  if [[ "${#missing[@]}" -eq 0 ]]; then
     record pass "\`${cost_section}\` の全項目がチェック済み" "-"
   else
-    record fail "\`${cost_section}\` の全項目がチェック済み" "未チェックの項目が ${unchecked} 件あります。"
+    record fail "\`${cost_section}\` の全項目がチェック済み" \
+      "未チェックまたは欠落している項目: $(printf '%s / ' "${missing[@]}" | sed 's/ \/ $//')"
   fi
 else
   record fail "\`${cost_section}\` の全項目がチェック済み" 'セクションごと欠落しています。テンプレートを利用してください。'

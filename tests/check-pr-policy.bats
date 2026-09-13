@@ -105,7 +105,31 @@ EOF
   sed -i.bak 's/- \[x\] リポジトリオーナーへ/- [ ] リポジトリオーナーへ/' "${BODY}"
   run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
   [ "${status}" -eq 1 ]
-  [[ "${output}" == *"未チェックの項目が 1 件"* ]]
+  [[ "${output}" == *"未チェックまたは欠落している項目"* ]]
+  [[ "${output}" == *"リポジトリオーナーへ新規 Secret の登録を依頼していない"* ]]
+}
+
+@test "コスト方針の必須項目を全て削除し無関係な文章だけ残すと exit 1 になる" {
+  cat >"${BODY}" <<'EOF'
+## 概要 (Summary)
+
+概要
+
+## 変更内容 (Changes)
+
+- 変更
+
+## 検証手順 (Verification Steps)
+
+手順
+
+## コスト方針のセルフチェック (公開 OSS)
+
+- [x] 関係のない文章だけ残した
+EOF
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"未チェックまたは欠落している項目"* ]]
 }
 
 # ---------- 差分に対する検査 ----------
