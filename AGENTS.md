@@ -1,7 +1,7 @@
 # AGENTS.md
 
-> Version: 1.0.0
-> Last Updated: 2026-06-16
+> Version: 1.1.0
+> Last Updated: 2026-09-13
 > Audience: AI coding agents (GitHub Copilot Agent / Jules / Codex / Claude Code
 > / Aider / Cursor / Cline / Windsurf / Continue.dev / Sweep / PR-Agent / Devin
 > など) and human contributors.
@@ -58,6 +58,14 @@
 ## 4. 大原則 (MUST): CI/CD では「無料サービスのみ」を利用する
 
 本リポジトリの CI/CD (GitHub Actions を含むすべての自動化ワークフロー) では、**公開 OSS リポジトリ向けに無料で利用可能なサービスのみ** を MUST 利用してください。詳細なポリシーは [`docs/AI_AUTOMATION.md` の「CI/CD で利用するサービスのポリシー」](docs/AI_AUTOMATION.md#cicd-で利用するサービスのポリシー) を必ず参照してください。
+
+### 4.1 (MUST) CI の自動化は決定的な実装を優先する
+
+無料で提供されている外部の LLM 推論サービスは、提供終了とともに機能ごと失われます。実例として、本リポジトリの 7 本の AI ワークフローが依存していた GitHub Models の推論 API は 2026年7月30日付けで廃止され、すべて稼働不能になりました（#157 / #159）。この教訓から、以下を MUST 守ってください。
+
+- 正規表現・`gh` CLI・既存の無料 Action で実現できる処理は、LLM 推論に任せないでください。
+- AI によるコードレビューは、既に GitHub App として稼働している CodeRabbit と PR-Agent へ寄せてください。自前のワークフローで重複して実装しないでください。
+- `continue-on-error: true` を付けたステップの後段を `steps.<id>.outcome == 'success'` で条件分岐する構成は、サイレント障害を生むため避けてください。ステップの `conclusion` は `success` になる一方で `outcome` は `failure` のままなので、後続ステップは `skipped` となり、ジョブ全体は `success` で終わります。失敗を許容するステップを置く場合は、`if: always()` でジョブサマリへ結果を出力するなど、失敗が可視化される手段を用意してください。
 
 ## 5. Constraints / 禁止事項 (MUST NOT — DO NOT submit such PRs)
 

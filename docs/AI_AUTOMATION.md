@@ -15,18 +15,39 @@
 - **必須**: PR で新たな CI サービスを追加する場合は、PR 説明文に「公開 OSS リポジトリで無料利用可能であること」「課金が発生しないこと」を明示してください。あわせて、それを確認できる公式の料金プランやドキュメントの URL を提示すること。
 - **例外**: 上記ポリシーから外れる導入を検討する場合は、PR を作成する前に Issue で提案し、リポジトリオーナーの明示的な承認を得てください。承認のない有料サービス導入 PR はクローズされます。
 
-### GitHub Models 利用ツールに関する注記
+### GitHub Models 廃止に伴う AI ワークフローの撤去（2026-09）
 
-本ドキュメントで「GitHub Models の推論 API を利用する」と記載しているツールは、いずれも GitHub Models の**無料枠内での利用**を前提としています。GitHub Models は組織で有料利用（paid usage）を有効化している場合、無料枠を超えた分が従量課金の対象になります。本リポジトリは有料利用を有効化していないため、無料枠を超えた時点で推論が実行されなくなります（課金は発生しません）。
+GitHub Models の推論 API は 2026年7月30日付けで完全に retired（廃止）されており、現在は 410 を返します（[廃止の予告](https://github.blog/changelog/2026-07-01-github-models-is-being-fully-retired-on-july-30-2026/) / [廃止完了の告知](https://github.blog/changelog/2026-07-30-github-models-is-now-retired/)）。
 
-> [!WARNING]
-> GitHub Models の推論 API は 2026年7月30日付けで完全に retired（廃止）されており、現在は 410 を返します。そのため `actions/ai-inference` を使うワークフローは実際には推論を実行できていません。代替推論プロバイダへの移行は #157 で追跡しています。
->
-> ```text
-> ##[error]simpleInference: chatCompletion failed: Error: 410 GitHub Models is temporarily unavailable as part of a scheduled retirement brownout.
-> ```
->
-> 上記のエラーメッセージ本文は GitHub 側の文言のまま引用しており "temporarily" と記載されていますが、公式アナウンス（#157 参照）上は恒久的な廃止です。
+```text
+##[error]410 GitHub Models is temporarily unavailable as part of a scheduled retirement brownout.
+```
+
+上記のエラーメッセージ本文は GitHub 側の文言をそのまま引用しているため "temporarily" と記載されていますが、公式アナウンス上は恒久的な廃止です。
+
+この API には `actions/ai-inference` を利用する 7 本のワークフローが依存していました。移行先を調査した結果、上記の CI/CD ポリシーを満たす代替の推論プロバイダは見つかりませんでした。
+
+- `actions/ai-inference` v3 は推論バックエンドが GitHub Copilot 専用へ変更されており、Copilot のライセンスと PAT の Secrets 登録が必要です。
+- Groq / Google AI Studio / OpenRouter などは無料枠を提供していますが、いずれも LLM プロバイダの API キーを Secrets へ登録する必要があります。
+
+そのため LLM 推論を前提とした自前ワークフローからは撤退し、責務を次のとおり再配置しました（#157 / #159）。
+
+| ワークフロー                                                                     | 撤去後の扱い                                                                      |
+| :------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| `ai-issue-summarizer.yml`                                                        | 削除しました。`/summarize` コマンドは廃止します                                   |
+| `ai-issue-responder.yml`                                                         | 削除しました。初回コントリビュータへの応答は `first-interaction.yml` が担当します |
+| `ai-issue-translator.yml` / `ai-pr-translator.yml` / `ai-release-translator.yml` | 削除しました。翻訳は各自の翻訳ツールで代替します                                  |
+| `ai-ci-failure-explainer.yml`                                                    | 削除しました。CI ログと reviewdog のインラインコメントで代替します                |
+| `issue-labeller.yml`                                                             | 削除しました。Issue のラベルは手動で付与します                                    |
+| `pr-policy-checker.yml`                                                          | LLM 推論を使わない決定的な実装へ置き換えます（#157）                              |
+
+AI によるコードレビューは、GitHub App として稼働している CodeRabbit と PR-Agent が引き続き担当します。
+
+#### この事例から得た運用方針
+
+- CI の自動化は、正規表現・`gh` CLI・既存の無料 Action で実現できる範囲を優先し、外部の LLM 推論に依存させないでください。
+- 無料で提供されている外部の推論サービスは、提供終了とともに機能ごと失われます。自前ワークフローの中核をそこへ置かないでください。
+- `continue-on-error: true` を付けたステップの後段を `steps.<id>.outcome == 'success'` で条件分岐する構成は、サイレント障害を生みます。推論が失敗してもステップの `conclusion` は `success` になる一方で `outcome` は `failure` のままなので、後続ステップは `skipped` となり、ジョブ全体は `success` で終わります。本リポジトリでも、CI が緑のまま 2026年7月30日から 2026年9月まで無言で停止していました。
 
 以下に、現在導入されている主要な自動化ツール（AI ツールおよび従来の CI/CD ツールを含む）とその目的、および機能させるために必要な手動の事前設定手順を記載します。
 
@@ -224,50 +245,34 @@ Dependabot によるマイナー・パッチバージョンの更新などは、
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/woke.yml` を通じて GitHub Actions 上で自動実行されます（組み込みの `GITHUB_TOKEN` を使用します）。
 
-### 22. GenAI Issue Labeller (AIによるIssue自動ラベリング)
+### 22. GenAI Issue Labeller (廃止 / 削除済み)
 
-- **目的**: 投稿または更新された GitHub Issue の内容を解析し、最適なラベルを AI (GitHub Models) を使用して自動的に割り当てます。
-- **設定ファイル**: `.github/workflows/issue-labeller.yml`
-- **特徴**: 外部の有料 LLM API キーを必要とせず、GitHub Models の推論 API と組み込みの `GITHUB_TOKEN` を利用して動作します。これにより、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Issue の自動分類を実現し、リポジトリ管理者の負担を軽減します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
-- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
-  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
-  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+- **状況**: **削除しました。** `.github/workflows/issue-labeller.yml` は 2026-09 に削除しています。
+- **削除の理由**: 2 つの理由が重なり、このワークフローは一度も成功していませんでした。1 つ目は、利用していた `pelikhan/action-genai-issue-labeller` がサードパーティ製で「Allowed actions」の許可リストに登録されておらず、ジョブが起動しないまま `startup_failure` で終了し続けていたことです。2 つ目は、ラベルの推定が GitHub Models の推論 API に依存していたことです。
+- **代替**: Pull Request のラベル付けは `actions/labeler`（`.github/workflows/labeler.yml`）が担当します。Issue のラベルは手動で付与してください。
 
-### 23. AI PR Policy Checker (AIによるポリシー要件チェック)
+### 23. AI PR Policy Checker (決定的な実装へ置換予定)
 
-- **目的**: プロジェクトで要求されている厳格な PR ポリシー（目的、無料の証明、重複確認、セットアップ手順などの6つの必須セクション）が PR タイトルおよび説明文で満たされているか、LLM を用いて自動的にチェックし、不足している場合は PR コメントとしてフィードバックします。
+- **目的**: プロジェクトで要求されている PR ポリシー（目的、無料の証明、重複確認、セットアップ手順などの必須セクション）が PR タイトルおよび説明文で満たされているかをチェックし、不足している場合は PR コメントとしてフィードバックします。
 - **設定ファイル**: `.github/workflows/pr-policy-checker.yml`
-- **特徴**: `actions/ai-inference` アクションを使用します。推論には GitHub Models の推論 API を利用し、モデルはワークフロー定義（`.github/workflows/pr-policy-checker.yml` の `model:`）を参照します。認証には組み込みの `GITHUB_TOKEN` を利用します。外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なくチェックを実現します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
-- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
-  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
-  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+- **状況**: 現行の実装は `actions/ai-inference` 経由で GitHub Models の推論 API を利用しているため、本ドキュメント冒頭の注記のとおり動作していません。チェック項目はいずれも文字列の有無で判定できるため、LLM 推論を使わない決定的な実装へ置き換えます（#157）。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
 
-### 24. AI CI Failure Explainer (CI 失敗のAI分析)
+### 24. AI CI Failure Explainer (廃止 / 削除済み)
 
-- **目的**: CI (Test, Lint, Docker Buildなど) が失敗した際に、エラーログを自動的に解析し、失敗の原因と修正案をPRコメントとして提示します。
-- **設定ファイル**: `.github/workflows/ai-ci-failure-explainer.yml`
-- **特徴**: `actions/ai-inference` アクションを使用します。推論には GitHub Models の推論 API を利用し、認証には組み込みの `GITHUB_TOKEN` を利用します。外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なくチェックを実現します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
-- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
-  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
-  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+- **状況**: **削除しました。** `.github/workflows/ai-ci-failure-explainer.yml` は 2026-09 に削除しています。CI 失敗時のログ解析を GitHub Models の推論 API に依存していたためです。
+- **代替**: 失敗の原因は GitHub Actions のジョブログで確認してください。Lint の指摘は reviewdog が Pull Request へインラインコメントとして投稿します。
 
-### 25. AI Issue Translator (AIによるIssue自動翻訳)
+### 25. AI Issue Translator (廃止 / 削除済み)
 
-- **目的**: 投稿または更新された GitHub Issue が日本語以外（英語など）で記述されている場合に、AI を用いて自動的に日本語へ翻訳し、コメントとして投稿します。
-- **設定ファイル**: `.github/workflows/ai-issue-translator.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Issue の多言語サポートを実現します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
-- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
-  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
-  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+- **状況**: **削除しました。** `.github/workflows/ai-issue-translator.yml` は 2026-09 に削除しています。翻訳を GitHub Models の推論 API に依存していたためです。
+- **代替**: 日本語以外で書かれた Issue は、各自の翻訳ツールで読んでください。
 
-### 26. AI PR Translator (AIによるPR自動翻訳)
+### 26. AI PR Translator (廃止 / 削除済み)
 
-- **目的**: 投稿または更新された GitHub Pull Request のタイトルと本文が日本語以外（英語など）で記述されている場合に、AI を用いて自動的に日本語へ翻訳し、コメントとして投稿します。これにより、海外コントリビュータとのやり取りを円滑にします。
-- **設定ファイル**: `.github/workflows/ai-pr-translator.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Pull Request の多言語サポートを実現します。Fork されたリポジトリからの PR にも対応するため、`pull_request_target` イベントを使用しています。翻訳指示は system prompt に分離し、PR タイトル・本文は翻訳対象データとして受け渡すことでプロンプトインジェクションのリスクを低減します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
-- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
-  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
-  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+- **状況**: **削除しました。** `.github/workflows/ai-pr-translator.yml` は 2026-09 に削除しています。翻訳を GitHub Models の推論 API に依存していたためです。あわせて `.github/zizmor.yml` の `dangerous-triggers` 抑止エントリも削除しています。
+- **代替**: 日本語以外で書かれた Pull Request は、各自の翻訳ツールで読んでください。
 
 ### 27. Dockle (コンテナイメージ Linter)
 
@@ -286,14 +291,10 @@ Dependabot によるマイナー・パッチバージョンの更新などは、
   1. リポジトリで GitHub Actions が有効化されていることを確認してください。
   2. `.github/workflows/stale.yml` に Issues および Pull Requests への書き込み権限（`issues: write` / `pull-requests: write`）が付与されていることを確認してください。
 
-### 29. AI Issue Responder (AIによるIssue自動応答)
+### 29. AI Issue Responder (廃止 / 削除済み)
 
-- **目的**: 新規に作成された GitHub Issue に対して、AI を用いて自動的に挨拶や状況整理（バグ再現手順の追加依頼など）の初期応答をします。
-- **設定ファイル**: `.github/workflows/ai-issue-responder.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して、日本語で初回返信を生成しIssueコメントとして投稿します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく Issue の一次対応を自動化し、メンテナーの負担を軽減します。Issue タイトル・本文は `<issue_data>` タグでデータとして分離し、その内容に含まれる命令には従わないようプロンプトで明示することで、プロンプトインジェクションのリスクを低減します。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
-- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
-  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
-  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+- **状況**: **削除しました。** `.github/workflows/ai-issue-responder.yml` は 2026-09 に削除しています。初回応答の生成を GitHub Models の推論 API に依存していたためです。
+- **代替**: 初回コントリビュータへの挨拶は `.github/workflows/first-interaction.yml`（後述の「35. 初回コントリビュータへの自動挨拶」）が担当しており、機能が重複していました。Issue の内容に応じた一次対応はメンテナーが手動で行います。
 
 ### 30. editorconfig-checker (EditorConfig 検証)
 
@@ -303,23 +304,15 @@ Dependabot によるマイナー・パッチバージョンの更新などは、
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
 
-### 31. AI Issue Summarizer (AIによるIssue/PR議論の自動要約)
+### 31. AI Issue Summarizer (廃止 / 削除済み)
 
-- **目的**: Issue や Pull Request で長く続いた議論を、`/summarize` というコメントをトリガーにして AI が自動的に要約し、概要・決定事項・未解決課題・Next Steps をまとめます。
-- **設定ファイル**: `.github/workflows/ai-issue-summarizer.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して、議論全体を解析します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なく動作します。また、プロンプトインジェクションのリスクを低減するため、タイトル・本文・コメントデータは独立したファイル・セクションとして構築しています。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
-- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
-  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
-  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+- **状況**: **削除しました。** `.github/workflows/ai-issue-summarizer.yml` は 2026-09 に削除しています。議論の要約を GitHub Models の推論 API に依存していたためです。
+- **代替**: `/summarize` コマンドは廃止します。Pull Request の変更内容の要約は CodeRabbit と PR-Agent が引き続き投稿します。
 
-### 32. AI Release Translator (AIによるReleaseノート自動翻訳)
+### 32. AI Release Translator (廃止 / 削除済み)
 
-- **目的**: GitHub Release が公開（published）または編集（edited）された際に、そのタイトルと本文が日本語以外（主に英語）で記述されている場合に、AI を用いて自動的に日本語へ翻訳・フォーマットし、リリースノートを更新します。これにより、日本語ユーザーにとって読みやすい更新履歴を提供します。
-- **設定ファイル**: `.github/workflows/ai-release-translator.yml`
-- **特徴**: `actions/ai-inference` アクションを使用し、GitHub Models の推論 API（本リポジトリでは `openai/gpt-4o-mini` を指定）を利用して言語判定および翻訳します。認証には組み込みの `GITHUB_TOKEN` を利用するため、外部の有料 LLM API キーを必要とせず、GitHub Models の有料利用（paid usage）を有効化していない場合は無料枠内で追加費用なくリリースノートの日本語化を実現します。既に日本語の場合は翻訳をスキップするため、`edited` イベントで再実行されても重複翻訳は発生しません。なお、GitHub Models の推論 API は 2026年7月30日付けで retired 済みのため、現在は推論できません（代替プロバイダへの移行は #157 で追跡中）。
-- **事前設定**: GitHub Models の推論 API は 2026年7月30日付けで retired（廃止）済みのため、以下の設定をしても現在は推論できません。代替プロバイダへの移行は #157 で追跡しています。
-  1. GitHub Models が組織（Organization）またはエンタープライズレベルで有効化されている必要があります。
-  2. 組織のオーナー権限で `Settings` > `Code, planning, and automation` > `Models` > `Development` へアクセスし、GitHub Models を有効化してください。
+- **状況**: **削除しました。** `.github/workflows/ai-release-translator.yml` は 2026-09 に削除しています。リリースノートの翻訳を GitHub Models の推論 API に依存していたためです。
+- **代替**: リリースノートは Release Please が Conventional Commits から生成します。コミットメッセージを日本語で記述すれば、リリースノートも日本語になります。
 
 ### 33. typos (高速スペルチェッカー)
 
