@@ -221,6 +221,9 @@ EOF
   [ -n "${forbidden_keys}" ]
 
   local agents_keys
+  # バッククォートは Markdown コードスパンの区切り文字を抽出する正規表現であり、コマンド置換ではない
+  # （ダブルクォートに変えると実際にコマンド置換されてしまうため、意図的に単一引用符のままにする）
+  # shellcheck disable=SC2016
   agents_keys="$(awk '/^### 5\.1 /{flag=1; next} /^### 5\.2 /{flag=0} flag' "${AGENTS_MD}" |
     grep -oE '`[A-Z0-9_]+_API_KEY`' | tr -d '`' | sed 's/_API_KEY$//' | sort -u)"
   [ -n "${agents_keys}" ]
