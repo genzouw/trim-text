@@ -69,6 +69,7 @@ jobs:
       # フォーク PR でも上のジョブサマリと下の判定ステップで結果は確認できる。
       - name: Comment on PR
         if: always() && github.event.pull_request.head.repo.full_name == github.repository
+        continue-on-error: true
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           GH_REPO: ${{ github.repository }}
