@@ -138,6 +138,21 @@ EOF
   [ "${status}" -eq 0 ]
 }
 
+@test "差分で .github/actions/ への LLM の API キー参照を追加していると exit 1 になる" {
+  write_valid_body
+  cat >"${DIFF}" <<'EOF'
+diff --git a/.github/actions/foo/action.yml b/.github/actions/foo/action.yml
+--- a/.github/actions/foo/action.yml
++++ b/.github/actions/foo/action.yml
+@@ -1,3 +1,4 @@
+         env:
++          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+EOF
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"検出: GEMINI_API_KEY"* ]]
+}
+
 @test "ワークフロー以外のファイルへの追加行は検出しない" {
   write_valid_body
   # テストのフィクスチャやドキュメントに現れる API キー名は誤検知させない
