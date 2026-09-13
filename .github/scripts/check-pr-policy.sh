@@ -166,6 +166,9 @@ fi
 # 差分に対する検査
 # ---------------------------------------------------------------------------
 # AGENTS.md 5.1 で禁止されている LLM プロバイダの API キー。
+# AGENTS.md 5.1 に列挙されている代表例をすべて含めること。5.1 の一覧を更新した
+# 場合はここも合わせて更新し、tests/check-pr-policy.bats のカバレッジ確認テストで
+# 追随漏れがないことを確認する。
 forbidden_keys='GEMINI|OPENAI|ANTHROPIC|CLAUDE|MISTRAL|COHERE|GROQ|DEEPSEEK|PERPLEXITY|TAVILY|HUGGINGFACE|REPLICATE'
 
 if [[ -n "${diff_file}" ]]; then

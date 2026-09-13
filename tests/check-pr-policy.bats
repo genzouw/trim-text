@@ -5,6 +5,7 @@
 
 setup() {
   SCRIPT="${BATS_TEST_DIRNAME}/../.github/scripts/check-pr-policy.sh"
+  AGENTS_MD="${BATS_TEST_DIRNAME}/../AGENTS.md"
   BODY="${BATS_TEST_TMPDIR}/body.md"
   DIFF="${BATS_TEST_TMPDIR}/pr.diff"
   : >"${DIFF}"
@@ -210,6 +211,23 @@ EOF
   [ "${status}" -eq 0 ]
   [[ "${output}" == *"新規ワークフローに根拠 URL が添えられている"* ]]
   [[ "${output}" == *"(警告 0 件)"* ]]
+}
+
+# ---------- forbidden_keys と AGENTS.md 5.1 の同期 ----------
+
+@test "forbidden_keys が AGENTS.md 5.1 に列挙された API キーをすべてカバーしている" {
+  local forbidden_keys
+  forbidden_keys="$(grep -oE "^forbidden_keys='[^']*'" "${SCRIPT}" | sed -E "s/^forbidden_keys='//; s/'\$//")"
+  [ -n "${forbidden_keys}" ]
+
+  local agents_keys
+  agents_keys="$(awk '/^### 5\.1 /{flag=1; next} /^### 5\.2 /{flag=0} flag' "${AGENTS_MD}" |
+    grep -oE '`[A-Z0-9_]+_API_KEY`' | tr -d '`' | sed 's/_API_KEY$//' | sort -u)"
+  [ -n "${agents_keys}" ]
+
+  while IFS= read -r key; do
+    [[ "${forbidden_keys}" =~ (^|\|)${key}(\||$) ]]
+  done <<<"${agents_keys}"
 }
 
 # ---------- 引数の扱い ----------
