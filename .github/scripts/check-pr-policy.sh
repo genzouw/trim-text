@@ -191,6 +191,11 @@ if [[ -n "${diff_file}" ]]; then
   # 禁止されているのは CI へ組み込むこと (AGENTS.md 5.1) なので、検査対象は
   # .github/workflows と .github/actions への追加行に限定する。テストの
   # フィクスチャやドキュメント中の記述を誤検知させないための絞り込み。
+  # GitHub Actions の式では `secrets.KEY` (dot notation) と
+  # `secrets['KEY']` / `secrets["KEY"]` (bracket/index notation) の両方が
+  # 同じ Secret を参照できるため、両方の表記を検出する。
+  secrets_dot_pattern="secrets\\.(${forbidden_keys})[A-Z0-9_]*"
+  secrets_bracket_pattern="secrets\\[[\"'](${forbidden_keys})[A-Z0-9_]*[\"']\\]"
   added_keys="$(awk '
     /^\+\+\+ / {
       path = $2
@@ -200,8 +205,8 @@ if [[ -n "${diff_file}" ]]; then
     }
     in_target && /^\+[^+]/ { print }
   ' "${diff_file}" |
-    grep -oE "secrets\.(${forbidden_keys})[A-Z0-9_]*" |
-    sed 's/^secrets\.//' | sort -u || true)"
+    grep -oE "(${secrets_dot_pattern}|${secrets_bracket_pattern})" |
+    sed -E "s/^secrets\.//; s/^secrets\[[\"']//; s/[\"']\]\$//" | sort -u || true)"
   if [[ -z "${added_keys}" ]]; then
     record pass 'LLM プロバイダの API キー参照を追加していない' "-"
   else

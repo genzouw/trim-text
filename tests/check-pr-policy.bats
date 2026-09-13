@@ -178,6 +178,36 @@ EOF
   [[ "${output}" == *"検出: GEMINI_API_KEY"* ]]
 }
 
+@test "差分で bracket notation (シングルクォート) の API キー参照を追加していると exit 1 になる" {
+  write_valid_body
+  cat >"${DIFF}" <<'EOF'
+diff --git a/.github/workflows/review.yml b/.github/workflows/review.yml
+--- a/.github/workflows/review.yml
++++ b/.github/workflows/review.yml
+@@ -1,3 +1,4 @@
+         env:
++          GEMINI_API_KEY: ${{ secrets['GEMINI_API_KEY'] }}
+EOF
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"検出: GEMINI_API_KEY"* ]]
+}
+
+@test "差分で bracket notation (ダブルクォート) の API キー参照を追加していると exit 1 になる" {
+  write_valid_body
+  cat >"${DIFF}" <<'EOF'
+diff --git a/.github/workflows/review.yml b/.github/workflows/review.yml
+--- a/.github/workflows/review.yml
++++ b/.github/workflows/review.yml
+@@ -1,3 +1,4 @@
+         env:
++          OPENAI_API_KEY: ${{ secrets["OPENAI_API_KEY"] }}
+EOF
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"検出: OPENAI_API_KEY"* ]]
+}
+
 @test "ワークフロー以外のファイルへの追加行は検出しない" {
   write_valid_body
   # テストのフィクスチャやドキュメントに現れる API キー名は誤検知させない
