@@ -300,6 +300,23 @@ EOF
   [ "${status}" -eq 2 ]
 }
 
+@test "--body の値が末尾で欠落していると exit 2 になる (無限ループしない)" {
+  run timeout 5 bash "${SCRIPT}" --body
+  [ "${status}" -eq 2 ]
+}
+
+@test "--diff の値が末尾で欠落していると exit 2 になる (無限ループしない)" {
+  write_valid_body
+  run timeout 5 bash "${SCRIPT}" --body "${BODY}" --diff
+  [ "${status}" -eq 2 ]
+}
+
+@test "--report の値が末尾で欠落していると exit 2 になる (無限ループしない)" {
+  write_valid_body
+  run timeout 5 bash "${SCRIPT}" --body "${BODY}" --report
+  [ "${status}" -eq 2 ]
+}
+
 @test "--report で結果をファイルへ書き出せる" {
   write_valid_body
   run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}" --report "${BATS_TEST_TMPDIR}/report.md"

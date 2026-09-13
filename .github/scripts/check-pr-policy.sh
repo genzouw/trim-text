@@ -29,18 +29,32 @@ diff_file=""
 report_file=""
 
 while [[ $# -gt 0 ]]; do
+  # --body / --diff / --report は値を伴う。値が無いまま (shift 2 が失敗する
+  # 状態のまま) 処理を進めると、shift が実行されず $1 が変化しないため同じ
+  # オプションを永久に処理し続ける無限ループになる。shift 2 の前に値の有無を
+  # 検証し、不足時は終了コード 2 で終了する。
+  case "$1" in
+    --body | --diff | --report)
+      if [[ $# -lt 2 ]]; then
+        printf '%s には値を指定してください。\n' "$1" >&2
+        usage
+        exit 2
+      fi
+      ;;
+  esac
+
   case "$1" in
     --body)
-      body_file="${2:-}"
-      shift 2 || true
+      body_file="$2"
+      shift 2
       ;;
     --diff)
-      diff_file="${2:-}"
-      shift 2 || true
+      diff_file="$2"
+      shift 2
       ;;
     --report)
-      report_file="${2:-}"
-      shift 2 || true
+      report_file="$2"
+      shift 2
       ;;
     -h | --help)
       usage
