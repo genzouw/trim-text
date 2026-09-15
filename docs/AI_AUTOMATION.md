@@ -66,7 +66,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 - **状況**: **撤去しました。** `.pr_agent.toml` は 2026-09 に削除しています。
 - **理由**: 「公開リポジトリは無料」という前提で導入していましたが、これは誤りでした。Qodo には恒久的な無料プランがなく（[公式料金ページ](https://www.qodo.ai/pricing/) の FAQ に `We don't offer a permanent free tier` と明記）、無料で使えるのは 14 日間のトライアルか、審査制の [Qodo for Open Source](https://docs.qodo.ai/open-source-program) のみです。後者の条件は「公開 GitHub リポジトリであること」「star 200 以上、または Organization 内に star 200 以上の公開リポジトリが 1 つ以上あること」「継続的にメンテナンスされていること」「利用ポリシーの遵守」で、本リポジトリは star 数が条件に届いていません。
 - **実際に起きたこと**: トライアル終了後、`qodo-code-review` bot は PR に `Qodo reviews are paused because the subscription is no longer active` とだけ投稿する状態になりました。
-- **自己ホスト版も不可**: OSS 実装の [`The-PR-Agent/pr-agent`](https://github.com/The-PR-Agent/pr-agent) は Qodo のホスト型サービスとは別物で（README にも `It is not the Qodo offering for open-source projects.` と明記）、動作には LLM の API キー（`OPENAI_KEY` 等）が必須です。本リポジトリは従量課金 API キーの CI 組み込みを禁止しているため採用できません。
+- **自己ホスト版も不可**: OSS 実装の [`The-PR-Agent/pr-agent`](https://github.com/The-PR-Agent/pr-agent) は Qodo のホスト型サービスとは別物です。README にも `It is not the Qodo offering for open-source projects.` と明記されています。動作には LLM の API キー（`OPENAI_KEY` 等）が必須です。本リポジトリは従量課金 API キーの CI 組み込みを禁止しているため採用できません。
 - **代替**: AI コードレビューは CodeRabbit に一本化します。
 
 ### 2. CodeRabbit
