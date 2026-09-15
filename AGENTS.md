@@ -3,7 +3,7 @@
 > Version: 1.1.0
 > Last Updated: 2026-09-13
 > Audience: AI coding agents (GitHub Copilot Agent / Jules / Codex / Claude Code
-> / Aider / Cursor / Cline / Windsurf / Continue.dev / Sweep / PR-Agent / Devin
+> / Aider / Cursor / Cline / Windsurf / Continue.dev / Sweep / Devin
 > など) and human contributors.
 
 本ファイルは、本リポジトリ（`trim-text`）でコード変更や PR 作成をするすべての AI コーディングエージェントおよび人間のコントリビュータ向けの最上位ルールを定義します。対象者は作業開始前に必ず本ファイルを読み込んでください。すべての提案・実装・PR 作成において、本ファイルのルールを遵守してください。
@@ -51,7 +51,6 @@
 | ツール                                                      | 役割                       | 設定ファイル                    |
 | :---------------------------------------------------------- | :------------------------- | :------------------------------ |
 | [CodeRabbit](https://github.com/apps/coderabbitai)          | AI コードレビュー          | `.coderabbit.yaml`              |
-| [PR-Agent (Qodo Merge)](https://github.com/apps/qodo-merge) | PR スコアリング / レビュー | `.pr_agent.toml`                |
 | Repomix                                                     | LLM 向けコンテキスト生成   | `.github/workflows/repomix.yml` |
 | SonarCloud                                                  | 静的解析                   | `sonar-project.properties`      |
 
@@ -59,12 +58,26 @@
 
 本リポジトリの CI/CD (GitHub Actions を含むすべての自動化ワークフロー) では、**公開 OSS リポジトリ向けに無料で利用可能なサービスのみ** を MUST 利用してください。詳細なポリシーは [`docs/AI_AUTOMATION.md` の「CI/CD で利用するサービスのポリシー」](docs/AI_AUTOMATION.md#cicd-で利用するサービスのポリシー) を必ず参照してください。
 
-### 4.1 (MUST) CI の自動化は決定的な実装を優先する
+### 4.1 (MUST) 採用前に確認すること — 「公開リポジトリなら無料」は根拠になりません
+
+GitHub Actions / GitHub App を採用する前に、以下を **MUST** 確認してください。ひとつでも確認できないものは採用できません。
+
+1. **公式の料金ページで「公開 OSS リポジトリでは課金が一切発生しない」ことを確認する**。「Free プランがある」「無料枠がある」は根拠として無効です。
+2. **OSS 無料枠に申請・審査・star 数などの条件がある場合、本リポジトリが現時点でその条件を満たしているかを確認する**。条件を満たしていないなら採用できません。将来満たす見込みがある、というのは理由になりません。
+3. **無料トライアルで動く状態を「無料で使えている」と判断しない**。トライアルは期限が来れば止まり、止まったあとは CI 時間を消費するだけの死んだジョブになります。
+4. **Action 本体が LLM の API キーを必須とするものでないことを、その Action の README / ドキュメントで確認する**。キーを与えなければ黙ってスキップする実装であっても、それは「無料で動いている」のではなく「動いていない」だけです。
+5. **PR 本文に、上記を確認した根拠 URL と確認結果を日本語で明記する**。
+
+導入済みのツールについても、**レビューやジョブが無言で何もしなくなっていないかを定期的に疑ってください**。実行ログが `success` でも、中身がスキップされているだけの場合があります。
+
+実例として Qodo Merge (旧 PR-Agent) は、「公開リポジトリなら無料」という前提で導入されていましたが、Qodo には恒久的な無料プランが存在せず (公式料金ページの FAQ に "We don't offer a permanent free tier" と明記)、無料トライアル終了とともに停止しました。2026-09 に撤去済みで、再導入は **MUST NOT** です。
+
+### 4.2 (MUST) CI の自動化は決定的な実装を優先する
 
 無料で提供されている外部の LLM 推論サービスは、提供終了とともに機能ごと失われます。実例として、本リポジトリの 7 本の AI ワークフローが依存していた GitHub Models の推論 API は 2026年7月30日付けで廃止され、すべて稼働不能になりました（#157 / #159）。この教訓から、以下を MUST 守ってください。
 
 - 正規表現・`gh` CLI・既存の無料 Action で実現できる処理は、LLM 推論に任せないでください。
-- AI によるコードレビューは、既に GitHub App として稼働している CodeRabbit と PR-Agent へ寄せてください。自前のワークフローで重複して実装しないでください。
+- AI によるコードレビューは、既に GitHub App として稼働している CodeRabbit へ寄せてください。自前のワークフローで重複して実装しないでください。
 - `continue-on-error: true` を付けたステップの後段を `steps.<id>.outcome == 'success'` で条件分岐する構成は、サイレント障害を生むため避けてください。ステップの `conclusion` は `success` になる一方で `outcome` は `failure` のままなので、後続ステップは `skipped` となり、ジョブ全体は `success` で終わります。失敗を許容するステップを置く場合は、`if: always()` でジョブサマリへ結果を出力するなど、失敗が可視化される手段を用意してください。
 
 ## 5. Constraints / 禁止事項 (MUST NOT — DO NOT submit such PRs)
@@ -146,7 +159,7 @@ jobs:
 
 ### 7.3 Bad Example (MUST NOT — 重複機能)
 
-既に CodeRabbit / PR-Agent が動作している中で、同じ「PR のコードレビュー」を別 Action で追加する PR は不要です。
+既に CodeRabbit が動作している中で、同じ「PR のコードレビュー」を別 Action で追加する PR は不要です。
 
 ```yaml
 # 重複機能を追加する PR は SHOULD NOT
@@ -184,7 +197,8 @@ claude code "リファクタリングを提案して"
 - [ ] 追加するサービスは **公開 OSS リポジトリで完全無料** で利用できる。
 - [ ] GitHub Secrets に **LLM プロバイダの API キー** を追加していない。
 - [ ] PR 説明文に「公開 OSS リポジトリで無料利用可能であること」「課金が発生しないこと」を明記し、**公式の料金プラン / ドキュメントの URL** を提示している。
-- [ ] 既存の AI ツール (CodeRabbit, PR-Agent 等) と機能が重複していない。
+- [ ] 既存の AI ツール (CodeRabbit 等) と機能が重複していない。
+- [ ] 追加するツールについて §4.1 の確認手順をすべて実施し、その結果と根拠 URL を PR 本文に記載している。
 - [ ] PR の本文は `.github/PULL_REQUEST_TEMPLATE.md` のテンプレートに沿って「なぜこの変更をしたか」を日本語で明確に記述している。
 - [ ] コミットメッセージは Conventional Commits (`feat:` / `fix:` / `docs:` / `chore:` 等) に準拠している。
 

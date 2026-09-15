@@ -31,7 +31,6 @@ ai:
               - ".windsurfrules"
               - ".github/copilot-instructions.md"
               - ".coderabbit.yaml"
-              - ".pr_agent.toml"
               - ".bloopignore"
 
 shell:

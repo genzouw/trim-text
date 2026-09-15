@@ -59,8 +59,8 @@ Copilot はすべての回答や提案において、以下のルールを厳守
 
 新たなワークフローを提案する際は、Dependabot、actions/labeler などの既存の自動化ツールとの競合を避け、さらに自動化を進める設定（例：自動マージ条件の最適化）を含めてください。
 
-### PR-Agent / CodeRabbit との連携について
+### CodeRabbit との連携について
 
-- 当リポジトリには PR-Agent および CodeRabbit の GitHub App が導入されており、プルリクエスト作成時に自動で AI レビューが行われます。
+- 当リポジトリには CodeRabbit の GitHub App が導入されており、プルリクエスト作成時に自動で AI レビューが行われます。
 - AI が解析しやすいよう、PR 作成時の概要や変更理由は明確に記述してください。
-- 注意: PR-Agent を機能させるには、事前に手動で「PR-Agent GitHub App」をリポジトリにインストールする必要があります（OSSリポジトリでは無料）。
+- PR-Agent / Qodo Merge は 2026-09 に撤去しました。公開リポジトリでも無料ではないためです（`docs/AI_AUTOMATION.md` の「PR-Agent / Qodo Merge (廃止 / 撤去済み)」を参照）。再導入しないでください。
