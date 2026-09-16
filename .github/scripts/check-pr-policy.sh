@@ -273,7 +273,7 @@ if [[ -n "${diff_file}" ]]; then
       "検出: $(echo "${added_keys}" | tr '\n' ' ' | sed 's/ $//')"
   fi
 
-  # 新規に追加されたワークフロー / composite action を抽出する。これらの追加は
+  # 新規に追加されたワークフロー / composite action ファイルを抽出する。これらの追加は
   # 「新規ツールの採用」のシグナルであり、本文の申告と突き合わせる。
   new_tool_files="$(awk '
     /^--- \/dev\/null$/ { pending = 1; next }
@@ -288,18 +288,48 @@ if [[ -n "${diff_file}" ]]; then
     { pending = 0 }
   ' "${diff_file}" | sort -u || true)"
 
+  # 既存のワークフロー / composite action ファイルへ `uses:` 行を1行追加するだけの
+  # 新規ツール採用 (新規ファイルを伴わない) も同じシグナルとして拾う。バージョン更新
+  # (同名アクションの `-`/`+` ペア) を誤検知しないよう、追加行にのみ現れるアクション名
+  # (`@` より前の部分) だけを新規採用として扱う。
+  added_uses_names="$(awk '
+    /^\+\+\+ / {
+      path = $2
+      sub(/^b\//, "", path)
+      in_target = (path ~ /^\.github\/(workflows|actions)\//)
+      next
+    }
+    in_target && /^\+[^+]/ { print }
+  ' "${diff_file}" |
+    grep -oE 'uses:[[:space:]]*[^[:space:]#]+' |
+    sed -E 's/^uses:[[:space:]]*//; s/@.*$//' | sort -u || true)"
+  removed_uses_names="$(awk '
+    /^\+\+\+ / {
+      path = $2
+      sub(/^b\//, "", path)
+      in_target = (path ~ /^\.github\/(workflows|actions)\//)
+      next
+    }
+    in_target && /^-[^-]/ { print }
+  ' "${diff_file}" |
+    grep -oE 'uses:[[:space:]]*[^[:space:]#]+' |
+    sed -E 's/^uses:[[:space:]]*//; s/@.*$//' | sort -u || true)"
+  new_uses_names="$(comm -23 <(printf '%s\n' "${added_uses_names}") <(printf '%s\n' "${removed_uses_names}") 2>/dev/null | sed '/^$/d' || true)"
+
+  new_tool_signals="$(printf '%s\n%s\n' "${new_tool_files}" "${new_uses_names}" | sed '/^$/d' | sort -u || true)"
+
   # 差分クロスチェック: 新規ツールを追加しているのに「新規に採用していない」と
   # 申告しただけの PR を通過させない。根拠 URL の検査はコスト方針セクション内の
   # `根拠 URL: https://...` 行に限定する。本文のどこかに https:// が 1 つでも
   # あれば通る従来の検査では、概要欄の Issue リンクだけで通過してしまうため。
   # 欠落は warn ではなく fail とする (AGENTS.md 4.1 は MUST)。
-  if [[ -n "${new_tool_files}" ]]; then
+  if [[ -n "${new_tool_signals}" ]]; then
     if [[ "${adoption_confirmed}" -eq 1 ]]; then
       record pass '新規ツールの採用に 4.1 の確認結果と根拠 URL が添えられている' \
-        "対象: $(echo "${new_tool_files}" | tr '\n' ' ' | sed 's/ $//')"
+        "対象: $(echo "${new_tool_signals}" | tr '\n' ' ' | sed 's/ $//')"
     else
       record fail '新規ツールの採用に 4.1 の確認結果と根拠 URL が添えられている' \
-        "新規追加: $(echo "${new_tool_files}" | tr '\n' ' ' | sed 's/ $//') — \`${cost_section}\` の 4.1 の 4 項目すべてに [x] を付け、\`根拠 URL:\` へ公式の料金ページ等の URL を記入してください。"
+        "新規追加: $(echo "${new_tool_signals}" | tr '\n' ' ' | sed 's/ $//') — \`${cost_section}\` の 4.1 の 4 項目すべてに [x] を付け、\`根拠 URL:\` へ公式の料金ページ等の URL を記入してください。"
     fi
   fi
 else
