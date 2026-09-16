@@ -1,9 +1,9 @@
 {
 	"models": [
 		{
-			"title": "Claude 3.5 Sonnet",
+			"title": "Claude Sonnet 4.6",
 			"provider": "anthropic",
-			"model": "claude-3-5-sonnet-latest"
+			"model": "claude-sonnet-4-6"
 		},
 		{
 			"title": "GPT-4o",
