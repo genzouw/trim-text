@@ -181,6 +181,20 @@ declare -a cost_required_patterns=(
   'リポジトリオーナーへ新規 Secret の登録を依頼していない'
   'AGENTS\.md.*のポリシーに違反していないことを確認した'
 )
+# AGENTS.md 4.1 の 4 項目と根拠 URL の記入欄に対応するパターン。cost_required_patterns と
+# 同じく、語尾の揺れを取り込まないよう項目を一意に識別できる最小限の範囲に留める。
+adoption_label='AGENTS.md 4.1 の採用前確認が記入済み'
+adoption_none_pattern='新規に採用していない'
+declare -a adoption_required_patterns=(
+  '公開 OSS リポジトリでは課金が一切発生しない'
+  '現時点でその条件を満たしている'
+  '無料トライアルではなく恒久的に無料'
+  'LLM の API キーを必須としない'
+)
+adoption_url_pattern='^[[:space:]]*-?[[:space:]]*根拠 URL[[:space:]]*[:：][[:space:]]*https?://[^[:space:]]'
+adoption_confirmed=0
+declare -a adoption_missing=()
+
 if section_has_content "${cost_section}"; then
   cost_lines="$(section_lines "${cost_section}")"
   missing=()
@@ -195,8 +209,32 @@ if section_has_content "${cost_section}"; then
     record fail "\`${cost_section}\` の全項目がチェック済み" \
       "未チェックまたは欠落している項目: $(printf '%s / ' "${missing[@]}" | sed 's/ \/ $//')"
   fi
+  # AGENTS.md 4.1「採用前に確認すること」の検査。全 PR に 4 項目のチェックを強制すると、
+  # 外部ツールを一切追加しないドキュメント修正やバグ修正の PR でも「公式料金ページを
+  # 確認した」にチェックを強要することになり、無条件にチェックを付けるだけの形骸化を招く。
+  # そこで「新規に採用していない」という申告か、4 項目 + 根拠 URL の記入か、どちらかを
+  # 満たすことを要求する。申告の虚偽・見落としは後段の差分クロスチェックで弾く。
+  for pattern in "${adoption_required_patterns[@]}"; do
+    if ! grep -qE "^[[:space:]]*- \[[xX]\].*${pattern}" <<<"${cost_lines}"; then
+      adoption_missing+=("${pattern}")
+    fi
+  done
+  # 記入欄 (`- 根拠 URL:`) を空のまま提出した場合を弾くため、URL 本体まで含めて照合する。
+  if [[ "${#adoption_missing[@]}" -eq 0 ]] && grep -qE "${adoption_url_pattern}" <<<"${cost_lines}"; then
+    adoption_confirmed=1
+  fi
+
+  if [[ "${adoption_confirmed}" -eq 1 ]]; then
+    record pass "${adoption_label}" '4.1 の確認結果と根拠 URL が記入されています。'
+  elif grep -qE "^[[:space:]]*- \[[xX]\].*${adoption_none_pattern}" <<<"${cost_lines}"; then
+    record pass "${adoption_label}" '新規ツールを採用しない PR として申告されています。'
+  else
+    record fail "${adoption_label}" \
+      "「${adoption_none_pattern}」にチェックを付けるか、4.1 の 4 項目すべてに [x] を付けて \`根拠 URL:\` へ公式の料金ページ等の URL を記入してください。未チェックまたは欠落: $(printf '%s / ' "${adoption_missing[@]:-（根拠 URL）}" | sed 's/ \/ $//')"
+  fi
 else
   record fail "\`${cost_section}\` の全項目がチェック済み" 'セクションごと欠落しています。テンプレートを利用してください。'
+  record fail "${adoption_label}" 'セクションごと欠落しています。テンプレートを利用してください。'
 fi
 
 # ---------------------------------------------------------------------------
@@ -235,11 +273,12 @@ if [[ -n "${diff_file}" ]]; then
       "検出: $(echo "${added_keys}" | tr '\n' ' ' | sed 's/ $//')"
   fi
 
-  # 新規に追加されたワークフローファイルを抽出する。
-  new_workflows="$(awk '
+  # 新規に追加されたワークフロー / composite action ファイルを抽出する。これらの追加は
+  # 「新規ツールの採用」のシグナルであり、本文の申告と突き合わせる。
+  new_tool_files="$(awk '
     /^--- \/dev\/null$/ { pending = 1; next }
     /^\+\+\+ b\// {
-      if (pending && $2 ~ /^b\/\.github\/workflows\/.*\.ya?ml$/) {
+      if (pending && $2 ~ /^b\/\.github\/(workflows|actions)\/.*\.ya?ml$/) {
         sub(/^b\//, "", $2)
         print $2
       }
@@ -249,13 +288,50 @@ if [[ -n "${diff_file}" ]]; then
     { pending = 0 }
   ' "${diff_file}" | sort -u || true)"
 
-  if [[ -n "${new_workflows}" ]]; then
-    if grep -qE 'https://' "${body_stripped}"; then
-      record pass '新規ワークフローに根拠 URL が添えられている' \
-        "対象: $(echo "${new_workflows}" | tr '\n' ' ' | sed 's/ $//')"
+  # 既存のワークフロー / composite action ファイルへ `uses:` 行を1行追加するだけの
+  # 新規ツール採用 (新規ファイルを伴わない) も同じシグナルとして拾う。バージョン更新
+  # (同名アクションの `-`/`+` ペア) を誤検知しないよう、追加行にのみ現れるアクション名
+  # (`@` より前の部分) だけを新規採用として扱う。`uses:` キーは単引用符・二重引用符
+  # 付き (`"uses":` / `'uses':`) も有効な YAML キーのため、キーの引用符の有無を問わず
+  # 検出できるようにする。
+  added_uses_names="$(awk '
+    /^\+\+\+ / {
+      path = $2
+      sub(/^b\//, "", path)
+      in_target = (path ~ /^\.github\/(workflows|actions)\//)
+      next
+    }
+    in_target && /^\+[^+]/ { print }
+  ' "${diff_file}" |
+    grep -oE "[\"']?uses[\"']?:[[:space:]]*[^[:space:]#]+" |
+    sed -E "s/^[\"']?uses[\"']?:[[:space:]]*//; s/@.*\$//" | sort -u || true)"
+  removed_uses_names="$(awk '
+    /^\+\+\+ / {
+      path = $2
+      sub(/^b\//, "", path)
+      in_target = (path ~ /^\.github\/(workflows|actions)\//)
+      next
+    }
+    in_target && /^-[^-]/ { print }
+  ' "${diff_file}" |
+    grep -oE "[\"']?uses[\"']?:[[:space:]]*[^[:space:]#]+" |
+    sed -E "s/^[\"']?uses[\"']?:[[:space:]]*//; s/@.*\$//" | sort -u || true)"
+  new_uses_names="$(comm -23 <(printf '%s\n' "${added_uses_names}") <(printf '%s\n' "${removed_uses_names}") 2>/dev/null | sed '/^$/d' || true)"
+
+  new_tool_signals="$(printf '%s\n%s\n' "${new_tool_files}" "${new_uses_names}" | sed '/^$/d' | sort -u || true)"
+
+  # 差分クロスチェック: 新規ツールを追加しているのに「新規に採用していない」と
+  # 申告しただけの PR を通過させない。根拠 URL の検査はコスト方針セクション内の
+  # `根拠 URL: https://...` 行に限定する。本文のどこかに https:// が 1 つでも
+  # あれば通る従来の検査では、概要欄の Issue リンクだけで通過してしまうため。
+  # 欠落は warn ではなく fail とする (AGENTS.md 4.1 は MUST)。
+  if [[ -n "${new_tool_signals}" ]]; then
+    if [[ "${adoption_confirmed}" -eq 1 ]]; then
+      record pass '新規ツールの採用に 4.1 の確認結果と根拠 URL が添えられている' \
+        "対象: $(echo "${new_tool_signals}" | tr '\n' ' ' | sed 's/ $//')"
     else
-      record warn '新規ワークフローに根拠 URL が添えられている' \
-        '公開 OSS で無料利用できる根拠 (料金プランや公式ドキュメントの URL) を本文に記載してください。'
+      record fail '新規ツールの採用に 4.1 の確認結果と根拠 URL が添えられている' \
+        "新規追加: $(echo "${new_tool_signals}" | tr '\n' ' ' | sed 's/ $//') — \`${cost_section}\` の 4.1 の 4 項目すべてに [x] を付け、\`根拠 URL:\` へ公式の料金ページ等の URL を記入してください。"
     fi
   fi
 else
