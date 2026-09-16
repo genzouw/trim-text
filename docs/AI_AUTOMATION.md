@@ -41,7 +41,7 @@ GitHub Models の推論 API は 2026年7月30日付けで完全に retired（廃
 | `issue-labeller.yml`                                                             | 削除しました。Issue のラベルは手動で付与します                                    |
 | `pr-policy-checker.yml`                                                          | LLM 推論を使わない決定的な実装へ置き換えました（後述の 23 を参照）                |
 
-AI によるコードレビューは、GitHub App として稼働している CodeRabbit と PR-Agent が引き続き担当します。
+AI によるコードレビューは、GitHub App として稼働している CodeRabbit が担当します。
 
 #### この事例から得た運用方針
 
@@ -61,14 +61,16 @@ AI によるコードレビューは、GitHub App として稼働している Co
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions（`textlint.yml`）で自動的に実行されます。
 
-### 1. PR-Agent (Qodo)
+### 1. PR-Agent / Qodo Merge (廃止 / 撤去済み)
 
-- **目的**: プルリクエスト作成時に、AI がコードの変更内容を自動でレビューし、改善提案、変更概要の生成、セキュリティチェックなどを行います。
-- **設定ファイル**: `.pr_agent.toml`
-- **特徴**: リブランディングされた Qodo の機能を活用しています。変更のスコアリング(`require_score_review = true`) やラベル提案などを通じて、自動マージ判定やレビュアーの負担軽減に貢献します。
-- **事前設定**:
-  1. GitHub App として [PR-Agent](https://github.com/apps/qodo-merge) (または Qodo Merge) をリポジトリにインストールしてください（公開リポジトリは無料）。
-  2. インストール後、リポジトリへのアクセス権限（Read & Write）を付与してください。
+- **状況**: **撤去しました。** `.pr_agent.toml` は 2026-09 に削除しています。
+- **理由**: 「公開リポジトリは無料」という前提で導入していましたが、これは誤りでした。Qodo には恒久的な無料プランがなく（[公式料金ページ](https://www.qodo.ai/pricing/) の FAQ に `We don't offer a permanent free tier` と明記）、無料で使えるのは 14 日間のトライアルか、審査制の [Qodo for Open Source](https://docs.qodo.ai/open-source-program) のみです。後者の条件は「公開 GitHub リポジトリであること」「star 200 以上、または Organization 内に star 200 以上の公開リポジトリが 1 つ以上あること」「継続的にメンテナンスされていること」「利用ポリシーの遵守」で、本リポジトリは star 数が条件に届いていません。
+- **実際に起きたこと**: トライアル終了後、`qodo-code-review` bot は PR に `Qodo reviews are paused because the subscription is no longer active` とだけ投稿する状態になりました。
+- **自己ホスト版も不可**: OSS 実装の [`The-PR-Agent/pr-agent`](https://github.com/The-PR-Agent/pr-agent) は Qodo のホスト型サービスとは別物です。README にも `It is not the Qodo offering for open-source projects.` と明記されています。採用できない理由は構成によって異なります。
+  - **ホスト型 LLM 構成（OpenAI / Anthropic / Gemini など）**: README のクイックスタートおよび GitHub Actions のサンプルは `OPENAI_KEY` を必須の環境変数として要求します。本リポジトリは従量課金 API キーの CI 組み込みを禁止しているため採用できません。
+  - **ローカル LLM 構成（Ollama など）**: LiteLLM 経由で `ollama/...` モデルを指定でき、この構成では LLM の API キーは不要です。ただし GitHub Actions のランナー上で Ollama サーバとモデルを毎回起動する必要があり、公開リポジトリの無料ランナーで現実的に運用できません。
+- **再導入を禁止する理由**: (1) Qodo のホスト型サービスに恒久的な無料プランがなく、本リポジトリは OSS 無料枠の条件（star 200 以上）を満たさない。(2) AI コードレビューという機能が CodeRabbit と重複しており、二重にレビューコメントが付く。(3) 従量課金 API キーを CI に組み込まない、というリポジトリ方針に反する。
+- **代替**: AI コードレビューは CodeRabbit に一本化します。
 
 ### 2. CodeRabbit
 
@@ -314,7 +316,7 @@ Dependabot によるマイナー・パッチバージョンの更新などは、
 ### 31. AI Issue Summarizer (廃止 / 削除済み)
 
 - **状況**: **削除しました。** `.github/workflows/ai-issue-summarizer.yml` は 2026-09 に削除しています。議論の要約を GitHub Models の推論 API に依存していたためです。
-- **代替**: `/summarize` コマンドは廃止します。Pull Request の変更内容の要約は CodeRabbit と PR-Agent が引き続き投稿します。
+- **代替**: `/summarize` コマンドは廃止します。Pull Request の変更内容の要約は CodeRabbit が投稿します。
 
 ### 32. AI Release Translator (廃止 / 削除済み)
 
@@ -355,7 +357,7 @@ Dependabot によるマイナー・パッチバージョンの更新などは、
 
 ### 37. Taplo (TOML Linter)
 
-- **目的**: プロジェクト内の `.toml` ファイル (例: `.pr_agent.toml`, `.typos.toml` など) の構文エラーを静的解析します。
+- **目的**: プロジェクト内の `.toml` ファイル (例: `.typos.toml` など) の構文エラーを静的解析します。
 - **設定ファイル**: `.github/workflows/lint.yml`, `.github/actions/setup-taplo/action.yml`
 - **特徴**: オープンソースで Rust 製の TOML ツールキットである [tamasfe/taplo](https://github.com/tamasfe/taplo) (MIT License) を利用します。外部の SaaS や API キーへの依存がなく、公開リポジトリで完全に無料で動作します。
 - **事前設定**:

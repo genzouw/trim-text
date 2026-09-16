@@ -69,7 +69,7 @@ Jules の管理画面に貼り付けてご利用ください。
 次のものは MAY (採用してよい) です。これらに該当することを PR 本文で明示してください。
 
 - GitHub Marketplace の **公開 OSS リポジトリ向け完全無料プラン** で提供される Action / App
-- GitHub App の **公開 OSS リポジトリ向け完全無料枠** (例: CodeRabbit / PR-Agent などの API キー不要型)
+- GitHub App の **公開 OSS リポジトリ向け完全無料枠** (例: CodeRabbit の OSS 無料枠のような API キー不要型)。ただし「公開リポジトリなら無料」と短絡せず、公式の料金ページで「公開 OSS では課金が一切発生しない」ことを確認し、審査や star 数の条件が付く場合は本リポジトリが現時点で満たしているかまで確認してください。無料トライアル中であることを「無料」と判断してはいけません
 - 完全無料で配布されている GitHub Action (Marketplace 登録の有無は問わない)
 - ローカル LLM (Ollama / llama.cpp 等) を GitHub-hosted runner 上で動作させる、Secrets 不要の自動化
 - リポジトリ内で完結する Shell スクリプト / Make ターゲット / Node スクリプト (外部 SaaS 連携を伴わないもの)
@@ -81,7 +81,6 @@ Jules の管理画面に貼り付けてご利用ください。
 | 種別                 | ツール                                                                 | 役割                                |
 | :------------------- | :--------------------------------------------------------------------- | :---------------------------------- |
 | AI コードレビュー    | [CodeRabbit](https://github.com/apps/coderabbitai)                     | プルリクエストの AI レビュー        |
-| AI コードレビュー    | [PR-Agent (Qodo Merge)](https://github.com/apps/qodo-merge)            | PR スコアリング / 自動要約          |
 | LLM コンテキスト生成 | Repomix (`.github/workflows/repomix.yml`)                              | `llms.txt` 規格の Markdown 自動生成 |
 | 静的解析             | Codacy / SonarCloud                                                    | 静的コード解析                      |
 | セキュリティスキャン | CodeQL / Gitleaks / Trivy / OSV-Scanner / zizmor / GitGuardian         | 脆弱性・秘密情報スキャン            |
