@@ -313,6 +313,51 @@ EOF
   [ "${status}" -eq 0 ]
 }
 
+@test "既存ワークフローへ二重引用符付き \"uses\" キーで新規アクションを追加すると 4.1 未記入で exit 1 になる" {
+  # uses キーは "uses": のように引用符付きでも有効な YAML キーのため検出できる必要がある。
+  write_valid_body
+  cat >"${DIFF}" <<'EOF'
+diff --git a/.github/workflows/lint.yml b/.github/workflows/lint.yml
+--- a/.github/workflows/lint.yml
++++ b/.github/workflows/lint.yml
+@@ -10,3 +10,4 @@
+       - uses: actions/checkout@v4
++      - "uses": some-org/new-tool-action@abcdef1
+EOF
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"新規追加: some-org/new-tool-action"* ]]
+}
+
+@test "既存ワークフローへ単引用符付き 'uses' キーで新規アクションを追加すると 4.1 未記入で exit 1 になる" {
+  write_valid_body
+  cat >"${DIFF}" <<'EOF'
+diff --git a/.github/workflows/lint.yml b/.github/workflows/lint.yml
+--- a/.github/workflows/lint.yml
++++ b/.github/workflows/lint.yml
+@@ -10,3 +10,4 @@
+       - uses: actions/checkout@v4
++      - 'uses': some-org/new-tool-action@abcdef1
+EOF
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"新規追加: some-org/new-tool-action"* ]]
+}
+
+@test "引用符付き uses キーでのバージョン更新は新規採用として検出しない" {
+  write_valid_body
+  cat >"${DIFF}" <<'EOF'
+diff --git a/.github/workflows/lint.yml b/.github/workflows/lint.yml
+--- a/.github/workflows/lint.yml
++++ b/.github/workflows/lint.yml
+@@ -10,3 +10,3 @@
+-      - "uses": actions/checkout@v3
++      - "uses": actions/checkout@v4
+EOF
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 0 ]
+}
+
 @test "新規ワークフロー追加でも 4.1 の確認と根拠 URL が揃っていれば通過する" {
   write_adoption_body
   write_new_workflow_diff

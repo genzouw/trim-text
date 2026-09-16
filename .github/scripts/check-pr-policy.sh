@@ -291,7 +291,9 @@ if [[ -n "${diff_file}" ]]; then
   # 既存のワークフロー / composite action ファイルへ `uses:` 行を1行追加するだけの
   # 新規ツール採用 (新規ファイルを伴わない) も同じシグナルとして拾う。バージョン更新
   # (同名アクションの `-`/`+` ペア) を誤検知しないよう、追加行にのみ現れるアクション名
-  # (`@` より前の部分) だけを新規採用として扱う。
+  # (`@` より前の部分) だけを新規採用として扱う。`uses:` キーは単引用符・二重引用符
+  # 付き (`"uses":` / `'uses':`) も有効な YAML キーのため、キーの引用符の有無を問わず
+  # 検出できるようにする。
   added_uses_names="$(awk '
     /^\+\+\+ / {
       path = $2
@@ -301,8 +303,8 @@ if [[ -n "${diff_file}" ]]; then
     }
     in_target && /^\+[^+]/ { print }
   ' "${diff_file}" |
-    grep -oE 'uses:[[:space:]]*[^[:space:]#]+' |
-    sed -E 's/^uses:[[:space:]]*//; s/@.*$//' | sort -u || true)"
+    grep -oE "[\"']?uses[\"']?:[[:space:]]*[^[:space:]#]+" |
+    sed -E "s/^[\"']?uses[\"']?:[[:space:]]*//; s/@.*\$//" | sort -u || true)"
   removed_uses_names="$(awk '
     /^\+\+\+ / {
       path = $2
@@ -312,8 +314,8 @@ if [[ -n "${diff_file}" ]]; then
     }
     in_target && /^-[^-]/ { print }
   ' "${diff_file}" |
-    grep -oE 'uses:[[:space:]]*[^[:space:]#]+' |
-    sed -E 's/^uses:[[:space:]]*//; s/@.*$//' | sort -u || true)"
+    grep -oE "[\"']?uses[\"']?:[[:space:]]*[^[:space:]#]+" |
+    sed -E "s/^[\"']?uses[\"']?:[[:space:]]*//; s/@.*\$//" | sort -u || true)"
   new_uses_names="$(comm -23 <(printf '%s\n' "${added_uses_names}") <(printf '%s\n' "${removed_uses_names}") 2>/dev/null | sed '/^$/d' || true)"
 
   new_tool_signals="$(printf '%s\n%s\n' "${new_tool_files}" "${new_uses_names}" | sed '/^$/d' | sort -u || true)"
