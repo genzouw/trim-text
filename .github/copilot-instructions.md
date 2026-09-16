@@ -61,6 +61,6 @@ Copilot はすべての回答や提案において、以下のルールを厳守
 
 ### CodeRabbit との連携について
 
-- 当リポジトリには CodeRabbit の GitHub App が導入されており、プルリクエスト作成時に自動で AI レビューが行われます。
+- 当リポジトリには CodeRabbit の GitHub App が導入されており、`main` 向けの非 Draft プルリクエスト作成時に自動で AI レビューが行われます（`.coderabbit.yaml` の `auto_review.drafts: false` / `auto_review.base_branches: [main]` による）。
 - AI が解析しやすいよう、PR 作成時の概要や変更理由は明確に記述してください。
 - PR-Agent / Qodo Merge は 2026-09 に撤去しました。公開リポジトリでも無料ではないためです（`docs/AI_AUTOMATION.md` の「PR-Agent / Qodo Merge (廃止 / 撤去済み)」を参照）。再導入しないでください。
