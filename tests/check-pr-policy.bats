@@ -42,6 +42,34 @@ write_valid_body() {
 - [x] 追加した SaaS / GitHub App / Action は公開 OSS リポジトリで完全無料であり、その根拠 URL を本文に記載した（外部サービスを追加していない場合はチェック可）
 - [x] リポジトリオーナーへ新規 Secret の登録を依頼していない
 - [x] `AGENTS.md` のポリシーに違反していないことを確認した
+
+### 新規ツールの採用 (AGENTS.md 4.1)
+
+- [x] 本 PR では GitHub Actions / GitHub App / SaaS を新規に採用していない
+EOF
+}
+
+# 新規ツールを採用する PR として 4.1 の確認結果と根拠 URL まで記入した本文を生成する。
+write_adoption_body() {
+  write_valid_body
+  cat >>"${BODY}" <<'EOF'
+- [x] 公式の料金ページで「公開 OSS リポジトリでは課金が一切発生しない」ことを確認した
+- [x] OSS 無料枠に申請・審査・star 数などの条件がある場合、本リポジトリが現時点でその条件を満たしていることを確認した
+- [x] 無料トライアルではなく恒久的に無料で利用できることを確認した
+- [x] Action 本体が LLM の API キーを必須としないことを README / ドキュメントで確認した
+- 根拠 URL: https://example.com/pricing
+EOF
+}
+
+# 新規ワークフローを 1 本追加する差分を生成する。
+write_new_workflow_diff() {
+  cat >"${DIFF}" <<'EOF'
+diff --git a/.github/workflows/new-tool.yml b/.github/workflows/new-tool.yml
+new file mode 100644
+--- /dev/null
++++ b/.github/workflows/new-tool.yml
+@@ -0,0 +1,2 @@
++name: New Tool
 EOF
 }
 
@@ -231,40 +259,110 @@ EOF
   [ "${status}" -eq 0 ]
 }
 
-@test "新規ワークフロー追加で根拠 URL がないと警告になる (失敗はしない)" {
+@test "新規ワークフロー追加で 4.1 の確認が未記入だと exit 1 になる" {
+  # 「新規に採用していない」と申告しただけでは通過させない (差分クロスチェック)。
   write_valid_body
-  # 本文から https:// を含む行を除く
-  grep -v 'https://' "${BODY}" >"${BODY}.tmp"
-  mv "${BODY}.tmp" "${BODY}"
+  write_new_workflow_diff
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"新規追加: .github/workflows/new-tool.yml"* ]]
+}
+
+@test "新規 composite action 追加で 4.1 の確認が未記入だと exit 1 になる" {
+  write_valid_body
   cat >"${DIFF}" <<'EOF'
-diff --git a/.github/workflows/new-tool.yml b/.github/workflows/new-tool.yml
+diff --git a/.github/actions/new-tool/action.yml b/.github/actions/new-tool/action.yml
 new file mode 100644
 --- /dev/null
-+++ b/.github/workflows/new-tool.yml
++++ b/.github/actions/new-tool/action.yml
 @@ -0,0 +1,2 @@
 +name: New Tool
 EOF
   run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"新規追加: .github/actions/new-tool/action.yml"* ]]
+}
+
+@test "新規ワークフロー追加でも 4.1 の確認と根拠 URL が揃っていれば通過する" {
+  write_adoption_body
+  write_new_workflow_diff
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
   [ "${status}" -eq 0 ]
-  [[ "${output}" == *"(警告 1 件)"* ]]
+  [[ "${output}" == *"(警告 0 件)"* ]]
+}
+
+# ---------- AGENTS.md 4.1 の採用前確認 ----------
+
+@test "4.1 の申告が一切ないと exit 1 になる" {
+  write_valid_body
+  grep -v '新規に採用していない' "${BODY}" >"${BODY}.tmp"
+  mv "${BODY}.tmp" "${BODY}"
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"AGENTS.md 4.1 の採用前確認が記入済み"* ]]
+}
+
+@test "4.1 の 4 項目はどれか 1 つでも欠けると採用申告として認められない" {
+  local patterns=(
+    '公開 OSS リポジトリでは課金が一切発生しない'
+    '現時点でその条件を満たしている'
+    '無料トライアルではなく恒久的に無料'
+    'LLM の API キーを必須としない'
+  )
+  local pattern
+  for pattern in "${patterns[@]}"; do
+    write_adoption_body
+    # 「採用していない」も消したうえで 1 項目だけ削ると、どちらの経路も満たさない
+    grep -v '新規に採用していない' "${BODY}" | grep -v "${pattern}" >"${BODY}.tmp"
+    mv "${BODY}.tmp" "${BODY}"
+    write_new_workflow_diff
+    run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+    [ "${status}" -eq 1 ]
+    [[ "${output}" == *"${pattern}"* ]]
+  done
+}
+
+@test "4.1 の 4 項目が未チェック (- [ ]) だと採用申告として認められない" {
+  write_adoption_body
+  perl -0777 -pi -e 's/^- \[x\] 公式の料金ページ/- [ ] 公式の料金ページ/m; s/^- \[x\] 本 PR では/- [ ] 本 PR では/m;' "${BODY}"
+  write_new_workflow_diff
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"公開 OSS リポジトリでは課金が一切発生しない"* ]]
+}
+
+@test "根拠 URL が記入欄のまま空だと採用申告として認められない" {
+  write_adoption_body
+  perl -0777 -pi -e 's{^- 根拠 URL: .*$}{- 根拠 URL:}m; s/^- \[x\] 本 PR では/- [ ] 本 PR では/m;' "${BODY}"
+  write_new_workflow_diff
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
   [[ "${output}" == *"根拠 URL"* ]]
 }
 
-@test "新規ワークフロー追加で根拠 URL があれば警告にならない" {
+@test "根拠 URL はコスト方針セクション内に無いと認められない" {
+  # 概要欄などに無関係な URL が 1 つあるだけで通過してはならない。
+  write_adoption_body
+  perl -0777 -pi -e 's{^- 根拠 URL: .*$}{- 根拠 URL:}m; s/^- \[x\] 本 PR では/- [ ] 本 PR では/m;' "${BODY}"
+  perl -0777 -pi -e 's{^(## 概要 \(Summary\))$}{$1\n\n参考: https://example.com/pricing}m' "${BODY}"
+  write_new_workflow_diff
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 1 ]
+  [[ "${output}" == *"根拠 URL"* ]]
+}
+
+@test "新規ツールを追加しない PR は 4.1 の 4 項目が未チェックでも通過する" {
+  # 形骸化を避けるため、採用しない PR には 4 項目のチェックを要求しない。
   write_valid_body
-  printf '\n料金プラン: https://example.com/pricing\n' >>"${BODY}"
-  cat >"${DIFF}" <<'EOF'
-diff --git a/.github/workflows/new-tool.yml b/.github/workflows/new-tool.yml
-new file mode 100644
---- /dev/null
-+++ b/.github/workflows/new-tool.yml
-@@ -0,0 +1,2 @@
-+name: New Tool
+  cat >>"${BODY}" <<'EOF'
+- [ ] 公式の料金ページで「公開 OSS リポジトリでは課金が一切発生しない」ことを確認した
+- [ ] OSS 無料枠に申請・審査・star 数などの条件がある場合、本リポジトリが現時点でその条件を満たしていることを確認した
+- [ ] 無料トライアルではなく恒久的に無料で利用できることを確認した
+- [ ] Action 本体が LLM の API キーを必須としないことを README / ドキュメントで確認した
+- 根拠 URL:
 EOF
   run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
   [ "${status}" -eq 0 ]
-  [[ "${output}" == *"新規ワークフローに根拠 URL が添えられている"* ]]
-  [[ "${output}" == *"(警告 0 件)"* ]]
 }
 
 # ---------- forbidden_keys と AGENTS.md 5.1 の同期 ----------
@@ -307,6 +405,26 @@ EOF
     s/^(## .*)$/$1\n\n記入済みの本文。/gm;
   ' "${template}" >"${BODY}"
 
+  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
+  [ "${status}" -eq 0 ]
+  [[ "${output}" == *"要件を満たしています"* ]]
+}
+
+# 「新規ツールを採用する」経路もテンプレートの文言で通過することを保証する。
+# 4.1 の 4 項目のパターンがテンプレートとずれると、採用 PR が永久に通らなくなる。
+@test "PULL_REQUEST_TEMPLATE.md の 4.1 を記入した本文が採用 PR として通過する" {
+  local template="${BATS_TEST_DIRNAME}/../.github/PULL_REQUEST_TEMPLATE.md"
+  [ -f "${template}" ]
+
+  perl -0777 -pe '
+    s/<!--.*?-->//gs;
+    s/^- \[ \]/- [x]/gm;
+    s/^- \[x\] 本 PR では/- [ ] 本 PR では/m;
+    s{^- 根拠 URL:.*$}{- 根拠 URL: https://example.com/pricing}m;
+    s/^(## .*)$/$1\n\n記入済みの本文。/gm;
+  ' "${template}" >"${BODY}"
+
+  write_new_workflow_diff
   run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
   [ "${status}" -eq 0 ]
   [[ "${output}" == *"要件を満たしています"* ]]
