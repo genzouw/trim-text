@@ -363,7 +363,7 @@ Dependabot によるマイナー・パッチバージョンの更新などは、
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/lint.yml` の `taplo` ジョブを通じて GitHub Actions 上で自動実行されます。
 
-### 38. Biome (JSON Linter & Formatter)
+### 38. Biome (JSON リンター／フォーマッター)
 
 - **目的**: プロジェクト内の `.json` および `.jsonc` ファイルの静的解析およびフォーマットを行います。
 - **設定ファイル**: `biome.json`, `.github/workflows/lint.yml`, `.github/actions/setup-biome/action.yml`
