@@ -52,3 +52,8 @@ repos:
     rev: v0.23.2
     hooks:
       - id: markdownlint-cli2
+
+  - repo: https://github.com/biomejs/pre-commit
+    rev: "v0.6.1"
+    hooks:
+      - id: biome-check

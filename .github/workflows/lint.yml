@@ -45,6 +45,7 @@ jobs:
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
       md: ${{ steps.filter.outputs.md }}
       toml: ${{ steps.filter.outputs.toml }}
+      json: ${{ steps.filter.outputs.json }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -87,6 +88,9 @@ jobs:
               - '.markdownlint-cli2.jsonc'
             toml:
               - '**/*.toml'
+            json:
+              - '**/*.json'
+              - '**/*.jsonc'
 
   shellcheck:
     needs: changes
@@ -577,3 +581,37 @@ jobs:
         run: |
           # taplo errors are printed directly to stdout/stderr in a human-readable format.
           "${RUNNER_TEMP}/taplo" lint
+
+  biome:
+    needs: changes
+    if: ${{ needs.changes.outputs.json == 'true' || needs.changes.outputs.gha == 'true' }}
+    name: Biome (JSON linter)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      BIOME_VERSION: 2.5.14
+      # biome v2.5.14 linux-x64 の公式 SHA256
+      BIOME_SHA256: 290c1c85deeaf01310d9187306060b53961574856a7e34f59d9662562e6f19fe
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup biome
+        uses: ./.github/actions/setup-biome
+        with:
+          version: ${{ env.BIOME_VERSION }}
+          sha256: ${{ env.BIOME_SHA256 }}
+
+      - name: Run biome
+        run: |
+          # Biome errors are printed directly to stdout/stderr in a human-readable format.
+          "${RUNNER_TEMP}/biome" ci
