@@ -52,7 +52,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup lychee
-        uses: ./.github/actions/setup-lychee
+        uses: ./.github/actions/setup-lychee # zizmor: ignore[self-repository]
         with:
           version: ${{ env.LYCHEE_VERSION }}
           sha256: ${{ env.LYCHEE_SHA256 }}

@@ -117,7 +117,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -161,7 +161,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup shfmt
-        uses: ./.github/actions/setup-shfmt
+        uses: ./.github/actions/setup-shfmt # zizmor: ignore[self-repository]
         with:
           version: ${{ env.SHFMT_VERSION }}
           sha256: ${{ env.SHFMT_SHA256 }}
@@ -197,12 +197,12 @@ jobs:
           persist-credentials: false
 
       - name: Setup hadolint
-        uses: ./.github/actions/setup-hadolint
+        uses: ./.github/actions/setup-hadolint # zizmor: ignore[self-repository]
         with:
           version: ${{ env.HADOLINT_VERSION }}
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -260,13 +260,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup actionlint
-        uses: ./.github/actions/setup-actionlint
+        uses: ./.github/actions/setup-actionlint # zizmor: ignore[self-repository]
         with:
           version: ${{ env.ACTIONLINT_VERSION }}
           sha256: ${{ env.ACTIONLINT_SHA256 }}
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -310,13 +310,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup editorconfig-checker
-        uses: ./.github/actions/setup-editorconfig-checker
+        uses: ./.github/actions/setup-editorconfig-checker # zizmor: ignore[self-repository]
         with:
           version: ${{ env.EC_VERSION }}
           sha256: ${{ env.EC_SHA256 }}
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -358,7 +358,7 @@ jobs:
             --require-hashes -r .github/yamllint/requirements.txt
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -393,13 +393,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup woke
-        uses: ./.github/actions/setup-woke
+        uses: ./.github/actions/setup-woke # zizmor: ignore[self-repository]
         with:
           version: ${{ env.WOKE_VERSION }}
           sha256: ${{ env.WOKE_SHA256 }}
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -446,7 +446,7 @@ jobs:
         run: npm ci
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -494,7 +494,7 @@ jobs:
         run: npm ci
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -527,13 +527,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup typos
-        uses: ./.github/actions/setup-typos
+        uses: ./.github/actions/setup-typos # zizmor: ignore[self-repository]
         with:
           version: ${{ env.TYPOS_VERSION }}
           sha256: ${{ env.TYPOS_SHA256 }}
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -572,7 +572,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup taplo
-        uses: ./.github/actions/setup-taplo
+        uses: ./.github/actions/setup-taplo # zizmor: ignore[self-repository]
         with:
           version: ${{ env.TAPLO_VERSION }}
           sha256: ${{ env.TAPLO_SHA256 }}
@@ -606,7 +606,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup biome
-        uses: ./.github/actions/setup-biome
+        uses: ./.github/actions/setup-biome # zizmor: ignore[self-repository]
         with:
           version: ${{ env.BIOME_VERSION }}
           sha256: ${{ env.BIOME_SHA256 }}

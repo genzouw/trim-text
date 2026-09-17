@@ -36,7 +36,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup bats
-        uses: ./.github/actions/setup-bats
+        uses: ./.github/actions/setup-bats # zizmor: ignore[self-repository]
         with:
           version: ${{ env.BATS_VERSION }}
           sha256: ${{ env.BATS_SHA256 }}

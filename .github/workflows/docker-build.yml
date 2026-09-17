@@ -72,7 +72,7 @@ jobs:
       # 起因のスモークテスト失敗のたびにスキャン結果が得られず、セキュリティ上の問題を
       # 見落とすため。
       - name: Setup Trivy
-        uses: ./.github/actions/setup-trivy
+        uses: ./.github/actions/setup-trivy # zizmor: ignore[self-repository]
         with:
           version: ${{ env.TRIVY_VERSION }}
 
@@ -86,7 +86,7 @@ jobs:
             trim-text:ci
 
       - name: Setup Dockle
-        uses: ./.github/actions/setup-dockle
+        uses: ./.github/actions/setup-dockle # zizmor: ignore[self-repository]
         with:
           version: ${{ env.DOCKLE_VERSION }}
           sha256: ${{ env.DOCKLE_SHA256 }}
