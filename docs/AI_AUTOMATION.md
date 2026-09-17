@@ -362,3 +362,11 @@ Dependabot によるマイナー・パッチバージョンの更新などは、
 - **特徴**: オープンソースで Rust 製の TOML ツールキットである [tamasfe/taplo](https://github.com/tamasfe/taplo) (MIT License) を利用します。外部の SaaS や API キーへの依存がなく、公開リポジトリで完全に無料で動作します。
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/lint.yml` の `taplo` ジョブを通じて GitHub Actions 上で自動実行されます。
+
+### 38. Biome (JSON リンター／フォーマッター)
+
+- **目的**: プロジェクト内の `.json` および `.jsonc` ファイルの静的解析およびフォーマットを行います。
+- **設定ファイル**: `biome.json`, `.github/workflows/lint.yml`, `.github/actions/setup-biome/action.yml`
+- **特徴**: Node.js や `package.json` への依存がなく、Rust 製の単一バイナリとして動作する [Biome](https://biomejs.dev/) (MIT License / Apache License 2.0) を利用します。Prettier や ESLint の代替として JSON を高速に処理し、外部の SaaS や API キーへの依存なく、公開リポジトリで完全に無料で動作します。
+- **事前設定**:
+  1. 特に追加の設定は不要です。`.github/workflows/lint.yml` の `biome` ジョブを通じて GitHub Actions 上で自動実行されます。

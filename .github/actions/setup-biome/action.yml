@@ -1,0 +1,49 @@
+name: "Setup Biome"
+description: "Downloads and installs Biome in the runner temp directory"
+inputs:
+  version:
+    description: "Biome version to install (e.g. 2.5.14)"
+    required: true
+  sha256:
+    description: "Expected SHA256 checksum for the Biome binary"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Cache Biome
+      id: cache-biome
+      uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
+      with:
+        path: ${{ runner.temp }}/biome
+        key: biome-${{ runner.os }}-${{ inputs.version }}-${{ inputs.sha256 }}
+
+    - name: Download and install Biome
+      if: steps.cache-biome.outputs.cache-hit != 'true'
+      shell: bash
+      env:
+        BIOME_VERSION: ${{ inputs.version }}
+        BIOME_SHA256: ${{ inputs.sha256 }}
+      run: |
+        set -euo pipefail
+        if ! [[ "${BIOME_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+          echo "::error::Invalid Biome version format"
+          exit 1
+        fi
+        if ! [[ "${BIOME_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
+          echo "::error::Invalid SHA256 format"
+          exit 1
+        fi
+
+        BIOME_URL="https://github.com/biomejs/biome/releases/download/@biomejs/biome@${BIOME_VERSION}/biome-linux-x64"
+        echo "Downloading Biome from ${BIOME_URL}"
+        curl --fail --silent --show-error --location \
+          --retry 3 --retry-all-errors --retry-delay 2 \
+          --connect-timeout 10 --max-time 120 \
+          -o "${RUNNER_TEMP}/biome" \
+          "${BIOME_URL}"
+
+        echo "Verifying checksum..."
+        echo "${BIOME_SHA256}  ${RUNNER_TEMP}/biome" > "${RUNNER_TEMP}/biome.sha256"
+        sha256sum -c "${RUNNER_TEMP}/biome.sha256"
+
+        chmod +x "${RUNNER_TEMP}/biome"
