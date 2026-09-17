@@ -45,6 +45,7 @@ jobs:
       yaml_files: ${{ steps.filter.outputs.yaml_files }}
       md: ${{ steps.filter.outputs.md }}
       toml: ${{ steps.filter.outputs.toml }}
+      json: ${{ steps.filter.outputs.json }}
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -87,6 +88,9 @@ jobs:
               - '.markdownlint-cli2.jsonc'
             toml:
               - '**/*.toml'
+            json:
+              - '**/*.json'
+              - '**/*.jsonc'
 
   shellcheck:
     needs: changes
@@ -113,7 +117,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -157,7 +161,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup shfmt
-        uses: ./.github/actions/setup-shfmt
+        uses: ./.github/actions/setup-shfmt # zizmor: ignore[self-repository]
         with:
           version: ${{ env.SHFMT_VERSION }}
           sha256: ${{ env.SHFMT_SHA256 }}
@@ -193,12 +197,12 @@ jobs:
           persist-credentials: false
 
       - name: Setup hadolint
-        uses: ./.github/actions/setup-hadolint
+        uses: ./.github/actions/setup-hadolint # zizmor: ignore[self-repository]
         with:
           version: ${{ env.HADOLINT_VERSION }}
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -256,13 +260,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup actionlint
-        uses: ./.github/actions/setup-actionlint
+        uses: ./.github/actions/setup-actionlint # zizmor: ignore[self-repository]
         with:
           version: ${{ env.ACTIONLINT_VERSION }}
           sha256: ${{ env.ACTIONLINT_SHA256 }}
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -306,13 +310,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup editorconfig-checker
-        uses: ./.github/actions/setup-editorconfig-checker
+        uses: ./.github/actions/setup-editorconfig-checker # zizmor: ignore[self-repository]
         with:
           version: ${{ env.EC_VERSION }}
           sha256: ${{ env.EC_SHA256 }}
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -354,7 +358,7 @@ jobs:
             --require-hashes -r .github/yamllint/requirements.txt
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -389,13 +393,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup woke
-        uses: ./.github/actions/setup-woke
+        uses: ./.github/actions/setup-woke # zizmor: ignore[self-repository]
         with:
           version: ${{ env.WOKE_VERSION }}
           sha256: ${{ env.WOKE_SHA256 }}
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -442,7 +446,7 @@ jobs:
         run: npm ci
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -490,7 +494,7 @@ jobs:
         run: npm ci
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -523,13 +527,13 @@ jobs:
           persist-credentials: false
 
       - name: Setup typos
-        uses: ./.github/actions/setup-typos
+        uses: ./.github/actions/setup-typos # zizmor: ignore[self-repository]
         with:
           version: ${{ env.TYPOS_VERSION }}
           sha256: ${{ env.TYPOS_SHA256 }}
 
       - name: Setup reviewdog
-        uses: ./.github/actions/setup-reviewdog
+        uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
         with:
           version: ${{ env.REVIEWDOG_VERSION }}
           sha256: ${{ env.REVIEWDOG_SHA256 }}
@@ -568,7 +572,7 @@ jobs:
           persist-credentials: false
 
       - name: Setup taplo
-        uses: ./.github/actions/setup-taplo
+        uses: ./.github/actions/setup-taplo # zizmor: ignore[self-repository]
         with:
           version: ${{ env.TAPLO_VERSION }}
           sha256: ${{ env.TAPLO_SHA256 }}
@@ -577,3 +581,37 @@ jobs:
         run: |
           # taplo errors are printed directly to stdout/stderr in a human-readable format.
           "${RUNNER_TEMP}/taplo" lint
+
+  biome:
+    needs: changes
+    if: ${{ needs.changes.outputs.json == 'true' || needs.changes.outputs.gha == 'true' }}
+    name: Biome (JSON linter)
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    env:
+      BIOME_VERSION: 2.5.14
+      # biome v2.5.14 linux-x64 の公式 SHA256
+      BIOME_SHA256: 290c1c85deeaf01310d9187306060b53961574856a7e34f59d9662562e6f19fe
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - name: Checkout repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Setup biome
+        uses: ./.github/actions/setup-biome # zizmor: ignore[self-repository]
+        with:
+          version: ${{ env.BIOME_VERSION }}
+          sha256: ${{ env.BIOME_SHA256 }}
+
+      - name: Run biome
+        run: |
+          # Biome errors are printed directly to stdout/stderr in a human-readable format.
+          "${RUNNER_TEMP}/biome" ci
