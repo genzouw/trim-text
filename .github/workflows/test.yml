@@ -15,7 +15,11 @@ concurrency:
 jobs:
   bats:
     name: bats (tt の境界値・ランダム入力テスト)
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest]
     timeout-minutes: 5
     permissions:
       contents: read
@@ -53,7 +57,7 @@ jobs:
       # 結果と event file を artifact として保存し、書き込み権限を持つ
       # test-results.yml (workflow_run トリガー) 側で公開する。
       - name: Upload event file
-        if: always()
+        if: always() && matrix.os == 'ubuntu-latest'
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
           name: Event File
@@ -63,5 +67,5 @@ jobs:
         if: always()
         uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
         with:
-          name: Test Results
+          name: Test Results (${{ matrix.os }})
           path: test-results/**/*.xml
