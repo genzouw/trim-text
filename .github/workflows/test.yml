@@ -27,12 +27,6 @@ jobs:
       BATS_VERSION: 1.11.0
       # bats-core v1.11.0 tar.gz の公式 SHA256
       BATS_SHA256: aeff09fdc8b0c88b3087c99de00cf549356d7a2f6a69e3fcec5e0e861d2f9063
-      # macOS ランナーのデフォルトロケールは UTF-8 非対応で、tests/*.bats の日本語
-      # テスト名が `bats: unknown test name` として失敗する（Ubuntu ランナーは
-      # UTF-8 ロケールが既定のため問題が顕在化しない）。両 OS で挙動を揃えるため
-      # 明示的に UTF-8 ロケールを指定する。
-      LANG: en_US.UTF-8
-      LC_ALL: en_US.UTF-8
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -54,8 +48,23 @@ jobs:
       - name: Run bats
         run: |
           mkdir -p test-results
+
+          # bats-core は自身のスクリプトを `#!/usr/bin/env bash` の shebang で解釈する。
+          # macOS ランナーの /bin/bash は GPLv3 回避のため bash 3.2 に固定されており、
+          # tests/check-pr-policy.bats の日本語テスト名を関数名に変換する内部処理が
+          # 壊れて `bats: unknown test name` で失敗する（Ubuntu ランナーの
+          # /bin/bash は bash 5 系のため問題が起きない）。macOS では Homebrew の
+          # bash（5系）を明示的に使って bats を起動することで両 OS の挙動を揃える。
+          if [ "${RUNNER_OS}" = "macOS" ]; then
+            brew install -q bash
+            BATS_BASH="$(brew --prefix bash)/bin/bash"
+          else
+            BATS_BASH="bash"
+          fi
+          "${BATS_BASH}" --version
+
           # --report-formatter junit is required to generate the report file correctly in the specified output directory.
-          bats --report-formatter junit --output test-results/ tests/
+          "${BATS_BASH}" "$(command -v bats)" --report-formatter junit --output test-results/ tests/
 
       # フォーク PR / Dependabot PR は読み取り専用の GITHUB_TOKEN しか持たず、
       # この job で直接 Publish Test Results を実行すると
