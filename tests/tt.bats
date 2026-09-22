@@ -91,9 +91,12 @@ setup() {
 # ---------- ランダム入力（クラッシュ検知の簡易ファジング）----------
 
 @test "random byte input does not crash with valid integer options" {
-  # /dev/urandom から少量の入力を流し、想定入力以外でも非ゼロ終了しないことを確認
+  # 少量のランダム入力を流し、想定入力以外でも非ゼロ終了しないことを確認する。
+  # /dev/urandom を直接パイプで細切れに読むと、GitHub Actions の macOS ランナーで
+  # 読み出しが極端に遅くなり無限にハングする既知の問題があるため、
+  # openssl rand でまとめて生成してから filter する。
   for _ in 1 2 3 4 5; do
-    run bash -c "LC_ALL=C tr -dc 'A-Za-z0-9\n' </dev/urandom | head -c 200 | '${TT}' -t1 -b1 -l1 -r1"
+    run bash -c "openssl rand -base64 300 | LC_ALL=C tr -dc 'A-Za-z0-9\n' | head -c 200 | '${TT}' -t1 -b1 -l1 -r1"
     [ "${status}" -eq 0 ]
   done
 }
