@@ -11,6 +11,16 @@ setup() {
   : >"${DIFF}"
 }
 
+# タイムアウト付きでコマンドを実行する。
+# timeout(1) は GNU coreutils のコマンドで macOS には存在しないため、
+# 両 OS に標準で入っている perl の alarm で代替する。alarm のタイマーは exec を
+# 越えて保持され、タイムアウト時は SIGALRM の既定動作でプロセスが終了するため、
+# 無限ループに陥ったケースも確実に打ち切れる。終了コードは exec したコマンドの
+# ものがそのまま返るため、タイムアウトしなかった場合の検証には影響しない。
+run_with_timeout() { # <秒> <コマンド...>
+  perl -e 'alarm shift @ARGV; exec @ARGV or die "exec failed: $!\n"' "$@"
+}
+
 # 必須項目をすべて満たす PR 本文を生成する。
 write_valid_body() {
   cat >"${BODY}" <<'EOF'
@@ -519,19 +529,19 @@ EOF
 }
 
 @test "--body の値が末尾で欠落していると exit 2 になる (無限ループしない)" {
-  run timeout 5 bash "${SCRIPT}" --body
+  run run_with_timeout 5 bash "${SCRIPT}" --body
   [ "${status}" -eq 2 ]
 }
 
 @test "--diff の値が末尾で欠落していると exit 2 になる (無限ループしない)" {
   write_valid_body
-  run timeout 5 bash "${SCRIPT}" --body "${BODY}" --diff
+  run run_with_timeout 5 bash "${SCRIPT}" --body "${BODY}" --diff
   [ "${status}" -eq 2 ]
 }
 
 @test "--report の値が末尾で欠落していると exit 2 になる (無限ループしない)" {
   write_valid_body
-  run timeout 5 bash "${SCRIPT}" --body "${BODY}" --report
+  run run_with_timeout 5 bash "${SCRIPT}" --body "${BODY}" --report
   [ "${status}" -eq 2 ]
 }
 
