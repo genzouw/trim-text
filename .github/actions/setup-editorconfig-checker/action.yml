@@ -38,7 +38,7 @@ runs:
           echo "::error::Unsupported runner architecture: ${{ runner.arch }}. This action only supports X64 (amd64) runners."
           exit 1
         fi
-        TARBALL="ec-linux-amd64.tar.gz"
+        TARBALL="editorconfig-checker-linux-amd64.tar.gz"
         curl --fail --silent --show-error --location \
           --retry 3 --retry-all-errors --retry-delay 2 \
           --connect-timeout 10 --max-time 120 \
@@ -51,7 +51,7 @@ runs:
         mkdir -p editorconfig-checker
         tar xzf "${TARBALL}" -C editorconfig-checker
 
-        BINARY_PATH="editorconfig-checker/bin/ec-linux-amd64"
+        BINARY_PATH="editorconfig-checker/editorconfig-checker"
         if [ ! -x "${BINARY_PATH}" ]; then
           echo "::error::Expected executable not found at ${BINARY_PATH} after extraction. The upstream archive layout may have changed."
           exit 1
