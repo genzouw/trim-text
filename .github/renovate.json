@@ -1,0 +1,117 @@
+{
+  "$schema": "https://docs.renovatebot.com/renovate-schema.json",
+  "extends": [
+    "config:recommended",
+    "helpers:pinGitHubActionDigests"
+  ],
+  "semanticCommits": "enabled",
+  "semanticCommitScope": "deps",
+  "timezone": "Asia/Tokyo",
+  "schedule": [
+    "* * * * 1"
+  ],
+  "minimumReleaseAge": "7 days",
+  "prConcurrentLimit": 5,
+  "labels": [
+    "dependencies"
+  ],
+  "ignorePaths": [
+    ".github/yamllint/**"
+  ],
+  "description": [
+    ".github/yamllint/requirements.txt は pip install --require-hashes で使うロックファイルで、各行に --hash=sha256:... が付く。Renovate の pip_requirements manager はバージョン文字列しか書き換えられずハッシュを再生成しないため、更新 PR を作らせると必ずハッシュ不一致で lint ジョブが落ちる (ローカル dry-run で ==1.35.0 -> ==1.38.0 の提案のみが行われることを確認済み)。更新は pip-compile --generate-hashes で手動実行する。"
+  ],
+  "reviewers": [
+    "genzouw"
+  ],
+  "vulnerabilityAlerts": {
+    "description": [
+      "脆弱性修正は minimumReleaseAge と schedule の対象外にして即時 PR にする。",
+      "Dependabot の cooldown が security updates に効かなかったのと同じ挙動を保つため。"
+    ],
+    "minimumReleaseAge": null,
+    "schedule": [],
+    "addLabels": [
+      "security"
+    ]
+  },
+  "packageRules": [
+    {
+      "description": [
+        "依存更新はすべて chore プレフィックスで出す。",
+        "config:recommended に含まれる :semanticPrefixFixDepsChoreOthers は本番依存を fix にするが、",
+        "fix は release 生成ツールがリリース対象として扱うため、Dependabot 時代と同じ chore に固定する。"
+      ],
+      "matchPackageNames": [
+        "*"
+      ],
+      "semanticCommitType": "chore"
+    },
+    {
+      "description": "GitHub Actions の更新のプレフィックスとラベル (Dependabot の commit-message.prefix と同じ)",
+      "matchManagers": [
+        "github-actions"
+      ],
+      "semanticCommitType": "ci",
+      "addLabels": [
+        "github-actions"
+      ]
+    },
+    {
+      "description": "Docker ベースイメージの更新には docker ラベルを付ける",
+      "matchManagers": [
+        "dockerfile",
+        "docker-compose"
+      ],
+      "addLabels": [
+        "docker"
+      ]
+    },
+    {
+      "description": [
+        "CI 専用の依存 (.github/textlint, .github/markdownlint) は ci プレフィックスで出す。",
+        "Dependabot でも該当ブロックに commit-message.prefix: ci を指定していた。"
+      ],
+      "matchFileNames": [
+        ".github/**"
+      ],
+      "semanticCommitType": "ci"
+    },
+    {
+      "description": [
+        "npm の overrides は推移的依存を親パッケージが受け入れる範囲へ固定するための指定で、",
+        "major を上げると定義上その制約から外れる。override 単体では検証もできないため major は止める。",
+        "セキュリティ修正の取り込みに必要な patch / minor は引き続き自動 PR で受け取る。"
+      ],
+      "matchFileNames": [
+        ".github/textlint/**",
+        ".github/markdownlint/**"
+      ],
+      "matchDepTypes": [
+        "overrides"
+      ],
+      "matchUpdateTypes": [
+        "major"
+      ],
+      "enabled": false
+    },
+    {
+      "description": [
+        "patch / minor / digest は自動マージする。",
+        "削除した .github/workflows/dependabot-automerge.yml が version-update:semver-patch と",
+        "semver-minor だけを gh pr merge --auto --squash していたのと同じ範囲。",
+        "リポジトリ設定が allow_merge_commit=false / required_linear_history=true のため squash を指定する。",
+        "CI が通るまでマージされない点も従来と同じ。"
+      ],
+      "matchUpdateTypes": [
+        "minor",
+        "patch",
+        "digest",
+        "pin"
+      ],
+      "automerge": true,
+      "platformAutomerge": true,
+      "automergeStrategy": "squash"
+    }
+  ]
+}
