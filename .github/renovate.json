@@ -70,7 +70,7 @@
 				"リポジトリ設定が allow_merge_commit=false / required_linear_history=true のため squash を指定する。",
 				"CI が通るまでマージされない点も従来と同じ。"
 			],
-			"matchUpdateTypes": ["minor", "patch", "digest", "pin"],
+			"matchUpdateTypes": ["minor", "patch", "digest"],
 			"automerge": true,
 			"platformAutomerge": true,
 			"automergeStrategy": "squash"
