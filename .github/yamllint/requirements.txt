@@ -8,8 +8,10 @@
 # 要求するため、直接依存 (yamllint) だけでなく推移的依存 (pathspec / PyYAML) も
 # ここに列挙する必要がある。
 #
-# 更新は dependabot (package-ecosystem: pip, directory: /.github/yamllint) が行う。
-# 手動更新する場合は次を実行する:
+# 更新は手動で行う。Renovate の pip_requirements manager はバージョン文字列しか
+# 書き換えられず --hash= 行を再生成しないため、このファイルは .github/renovate.json の
+# ignorePaths で更新対象から外している (更新させるとハッシュ不一致で lint が落ちる)。
+# 更新手順:
 #   pip install pip-tools && pip-compile --generate-hashes --upgrade requirements.in
 # もしくは PyPI の sha256 ダイジェストを直接転記する。
 #
