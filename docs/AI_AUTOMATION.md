@@ -86,7 +86,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 - **目的**: Issue の内容に基づき、AI がリポジトリ全体をコンテキストとして読み込み、自動でコードを修正し、Pull Request を作成する自律型エージェントです。
 - **設定ファイル**: `sweep.yaml`
 - **特徴**: 日本語でのやり取り、プロジェクト固有の Lint（shellcheck, shfmt, hadolint）の遵守、セキュリティ観点でのコード修正を自動で行います。
-- **注意**: Sweep AI は JetBrains IDE 向けのコーディングアシスタントへ方針転換したため、GitHub App としての提供は終了しています（インストールページ `github.com/apps/sweep-ai` は削除済み）。本リポジトリの `sweep.yaml` は設定として残っていますが、現在は機能しません。詳細は [sweep.dev](https://sweep.dev/) を参照してください。
+- **注意**: Sweep AI は JetBrains IDE 向けのコーディングアシスタントへ方針転換したため、GitHub App としての提供は終了しています（インストールページ `github.com/apps/sweep-ai` は削除済み）。本リポジトリの `sweep.yaml` は設定として残っていますが、現在は機能しません。公式サイト `sweep.dev` は名前解決できなくなっているため、リンクは張りません。
 - **事前設定**:
   1. 新規のインストールはできません。
 
