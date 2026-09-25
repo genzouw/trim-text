@@ -158,7 +158,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
   - タブ補完: Ollama の `starcoder2:3b`
 - **事前設定**:
   1. VS Code や Cursor などの拡張機能として [Continue](https://continue.dev/) をインストールしてください（Devcontainer では自動で導入されます）。
-  2. リポジトリの `.continuerc.json` が自動的に読み込まれ、ユーザー個人の Continue 設定へ統合されます（`mergeBehavior: merge`）。
+  2. リポジトリの `.continuerc.json` は Continue のワークスペース設定（Legacy 形式）で、`mergeBehavior: merge` によりユーザー個人の設定へ統合されます。`config.yaml` を使っている環境で適用されるかは Continue のバージョンや設定により異なります。反映されない場合は、同じモデルを `~/.continue/config.yaml` へ直接追加してください。
   3. Anthropic / OpenAI のモデルを使う場合は、各プロバイダの API キーを取得し、Continue の設定画面またはユーザー個人の Continue 設定ファイルで指定してください。使わないモデルの設定は不要です。
   4. Ollama の補完を使う場合は、[Ollama](https://ollama.com/) をインストールして起動したうえで、`ollama pull starcoder2:3b` でモデルを取得してください。
 - **注意**: API キーやその他の認証情報を `.continuerc.json` を含むリポジトリ内のファイルへ絶対に保存・コミットしないでください。この設定は開発者のローカル環境専用で、CI では実行されません。
