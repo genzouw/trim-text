@@ -151,11 +151,17 @@ AI によるコードレビューは、GitHub App として稼働している Co
 ### 11. Continue.dev (AI コーディングアシスタント)
 
 - **目的**: オープンソースの AI アシスタントである Continue を活用し、リポジトリ固有のコンテキストを考慮したコード生成や質問対応を行います。
-- **設定ファイル**: `.continue/config.json`
+- **設定ファイル**: `.continuerc.json`（リポジトリ直下。`.continue/config.json` は存在しません）
 - **特徴**: 開発者のエディタ内で、ローカルおよびクラウドのLLMを用いてコードの補完やチャットベースのサポートを提供します。
+- **使用モデル**:
+  - チャット: Anthropic の `claude-sonnet-4-6` と OpenAI の `gpt-4o`
+  - タブ補完: Ollama の `starcoder2:3b`
 - **事前設定**:
-  1. VS Code や Cursor などの拡張機能として [Continue](https://continue.dev/) をインストールしてください。
-  2. リポジトリの `.continue/config.json` が自動的に読み込まれ、プロジェクト固有のルール（`sweep.yaml` など）が適用されます。
+  1. VS Code や Cursor などの拡張機能として [Continue](https://continue.dev/) をインストールしてください（Devcontainer では自動で導入されます）。
+  2. リポジトリの `.continuerc.json` が自動的に読み込まれ、ユーザー個人の Continue 設定へ統合されます（`mergeBehavior: merge`）。
+  3. Anthropic / OpenAI のモデルを使う場合は、各プロバイダの API キーを取得し、Continue の設定画面またはユーザー個人の Continue 設定ファイルで指定してください。使わないモデルの設定は不要です。
+  4. Ollama の補完を使う場合は、[Ollama](https://ollama.com/) をインストールして起動したうえで、`ollama pull starcoder2:3b` でモデルを取得してください。
+- **注意**: API キーやその他の認証情報を `.continuerc.json` を含むリポジトリ内のファイルへ絶対に保存・コミットしないでください。この設定は開発者のローカル環境専用で、CI では実行されません。
 
 ### 12. StepSecurity Harden-Runner (CI/CD サプライチェーンセキュリティ)
 
