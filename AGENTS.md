@@ -1,39 +1,17 @@
 # AGENTS.md
 
-> Version: 1.1.0
-> Last Updated: 2026-09-13
 > Audience: AI coding agents (GitHub Copilot Agent / Jules / Codex / Claude Code
 > / Aider / Cursor / Cline / Windsurf / Continue.dev / Sweep / Devin
 > など) and human contributors.
 
-本ファイルは、本リポジトリ（`trim-text`）でコード変更や PR 作成をするすべての AI コーディングエージェントおよび人間のコントリビュータ向けの最上位ルールを定義します。対象者は作業開始前に必ず本ファイルを読み込んでください。すべての提案・実装・PR 作成において、本ファイルのルールを遵守してください。
+本ファイルは、本リポジトリ（`trim-text`）でコード変更や PR 作成をするすべての AI コーディングエージェントおよび人間のコントリビュータ向けの最上位ルールを定義します。すべての提案・実装・PR 作成において、本ファイルのルールを遵守してください。
 
 本ファイルの内容は、`README.md`・`docs/AI_AUTOMATION.md`・`.github/copilot-instructions.md` などほかのドキュメントよりも **優先** されます。本ファイルの内容と矛盾する提案・実装は行わないでください。
-
-## Glossary
-
-本ドキュメントで利用する用語の定義です。
-
-- **OSS** (Open Source Software): 公開されたソースコードを伴うソフトウェア。本リポジトリで「公開 OSS」と書いた場合、「公開 GitHub リポジトリで配布される Open Source Software」を指します。
-- **CI/CD**: Continuous Integration / Continuous Delivery (継続的インテグレーション / 継続的デリバリー)。
-- **LLM**: Large Language Model (大規模言語モデル)。
-- **MUST / SHOULD / MAY**: 指示の優先度 ([RFC 2119](https://www.rfc-editor.org/rfc/rfc2119) 準拠)。MUST は必須、SHOULD は強い推奨、MAY は許容。
 
 ## 1. 会話・成果物の言語 (MUST)
 
 - すべての応答・コードコメント・コミットメッセージ・PR タイトル・PR 本文・Issue コメントは **日本語** で記述してください。
 - 例外: コードそのもの（識別子・キーワード・ライブラリ呼び出し）と、外部固有名詞は原文のままで構いません。
-
-## 2. Identity / エージェントのペルソナ
-
-本リポジトリで作業する AI コーディングエージェントは、次のペルソナとして振る舞ってください。
-
-- **役割**: 公開 OSS リポジトリ `genzouw/trim-text` のコントリビュータ。
-- **トーン**: 簡潔・実務的。日本語を一次言語とし、技術用語は英語のまま保持する。
-- **判断基準**: コスト発生ゼロを最優先。次にリポジトリオーナー (@genzouw) の意図、最後にトレンド追従。
-- **不明時のふるまい**: 推測でコードを書かず、Issue で確認する。
-
-このペルソナは人間の貢献者にもそのまま適用されます。
 
 ## 3. Tools / 利用可能なツールと連携サービス
 
@@ -48,11 +26,7 @@
 
 ### 3.2 リポジトリに導入済みのツール (重複 PR を作らないこと)
 
-| ツール                                                      | 役割                       | 設定ファイル                    |
-| :---------------------------------------------------------- | :------------------------- | :------------------------------ |
-| [CodeRabbit](https://github.com/apps/coderabbitai)          | AI コードレビュー          | `.coderabbit.yaml`              |
-| Repomix                                                     | LLM 向けコンテキスト生成   | `.github/workflows/repomix.yml` |
-| SonarCloud                                                  | 静的解析                   | `sonar-project.properties`      |
+導入済みのツールは [`.github/workflows/`](.github/workflows/) と GitHub App の設定ファイル (`.coderabbit.yaml` 等) を参照してください。
 
 ## 4. 大原則 (MUST): CI/CD では「無料サービスのみ」を利用する
 
@@ -175,7 +149,7 @@ LLM の API キーには `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `CLAUDE_CODE_O
 ```bash
 # 良い例: ローカルシェルで export して claude / gh などから利用する
 export ANTHROPIC_API_KEY="sk-ant-..."   # ローカルのみ (MAY)
-claude code "リファクタリングを提案して"
+claude -p "リファクタリングを提案して"
 ```
 
 ## 9. 技術品質ルール (MUST)
