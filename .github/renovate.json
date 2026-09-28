@@ -53,9 +53,10 @@
 		},
 		{
 			"description": [
-				"npm の overrides は推移的依存を親パッケージが受け入れる範囲へ固定するための指定で、",
-				"major を上げると定義上その制約から外れる。override 単体では検証もできないため major は止める。",
-				"セキュリティ修正の取り込みに必要な patch / minor は引き続き自動 PR で受け取る。"
+				"npm の overrides は、親パッケージが固定している推移的依存のセキュリティ修正を先取りするための指定。",
+				"親が完全一致で固定している場合 (markdownlint-cli2 の smol-toml など) は、patch / minor でも親の宣言範囲の外へ出る。",
+				"この逸脱はセキュリティ修正の取り込みのために許容し、patch / minor は引き続き自動 PR で受け取る。",
+				"major は破壊的変更で親が動かなくなるおそれが大きく、override 単体では検証もできないため止める。"
 			],
 			"matchFileNames": [".github/textlint/**", ".github/markdownlint/**"],
 			"matchDepTypes": ["overrides"],
