@@ -8,11 +8,13 @@ on:
     branches: [main, master]
     paths:
       - '**/*.sh'
+      - '.github/actions/**'
       - '.github/workflows/shellcheck.yml'
   pull_request:
     branches: [main, master]
     paths:
       - '**/*.sh'
+      - '.github/actions/**'
       - '.github/workflows/shellcheck.yml'
 
 concurrency:
