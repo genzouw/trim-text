@@ -149,7 +149,7 @@ LLM の API キーには `ANTHROPIC_API_KEY` / `OPENAI_API_KEY` / `CLAUDE_CODE_O
 ```bash
 # 良い例: ローカルシェルで export して claude / gh などから利用する
 export ANTHROPIC_API_KEY="sk-ant-..."   # ローカルのみ (MAY)
-claude code "リファクタリングを提案して"
+claude -p "リファクタリングを提案して"
 ```
 
 ## 9. 技術品質ルール (MUST)
