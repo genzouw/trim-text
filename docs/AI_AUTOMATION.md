@@ -124,13 +124,14 @@ AI によるコードレビューは、GitHub App として稼働している Co
   1. GitHub App として [DeepSource](https://github.com/apps/deepsource-io) をインストールしてください（公開 OSS リポジトリは無料）。
   2. プロジェクトのダッシュボードからリポジトリを連携し、初期設定してください。
 
-### 8. Mend Renovate (非導入 / Dependabot に一本化)
+### 8. Mend Renovate (依存更新の自動化)
 
-- **状況**: **導入していません。** 設定ファイル `renovate.json` は配置されていましたが、GitHub App がインストールされておらず Renovate は一度も稼働していませんでした（Renovate 由来の PR・ブランチが 0 件）。設定と実態の乖離が保守の混乱を招くため、`renovate.json` を削除しています。
-- **代替**: 依存関係の自動更新は Dependabot (`.github/dependabot.yml`) に一本化しています。GitHub Actions / pip / npm / Docker の各エコシステムを週次で更新し、パッチ・マイナーは `.github/workflows/dependabot-automerge.yml` で自動マージします。
-- **再導入する場合**:
-  1. GitHub App として [Mend Renovate](https://github.com/apps/renovate) をインストールしてください（公開リポジトリは無料）。
-  2. Dependabot と併用すると同一の依存に対して重複した更新 PR が作られるため、どちらへ寄せるかを先に決めてください。
+- **目的**: GitHub Actions / npm / pip / Docker などの依存関係を検出し、更新 PR を自動作成します。パッチ・マイナー・digest の更新は CI 通過後に自動マージします。
+- **設定ファイル**: `.github/renovate.json`
+- **経緯**: 過去に稼働実績のない `renovate.json` を削除し、Dependabot (`.github/dependabot.yml`) に一本化していましたが（#199）、#222 で Dependabot から Renovate へ再度移行しました。`.github/dependabot.yml` は削除済みで、依存更新は現在 Renovate に一本化されています。
+- **特徴**: `minimumReleaseAge` により、公開直後のバージョンを一定期間取り込まないようにできます。`vulnerabilityAlerts` は待機期間の対象外とし、脆弱性修正は即時 PR にします。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub App [Mend Renovate](https://github.com/apps/renovate) は既にインストール済みです（公開リポジトリは無料）。
 
 ### 9. Release Please (リリース自動化)
 
@@ -222,7 +223,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 
 ## CI/CD との連携
 
-Dependabot によるマイナー・パッチバージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。
+Renovate によるマイナー・パッチ・digest バージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。
 さらに、pre-commit.ci によるコードの自動フォーマットや、Release Please によるリリースPRの自動作成など、CI/CD における様々な自動化が導入されています。
 
 ## プルリクエスト作成時の注意事項

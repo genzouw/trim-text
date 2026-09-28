@@ -4,8 +4,8 @@
 	"semanticCommits": "enabled",
 	"semanticCommitScope": "deps",
 	"timezone": "Asia/Tokyo",
-	"schedule": ["* * * * 1"],
-	"minimumReleaseAge": "7 days",
+	"minimumReleaseAge": "1 day",
+	"minimumReleaseAgeBehaviour": "timestamp-optional",
 	"prConcurrentLimit": 5,
 	"labels": ["dependencies"],
 	"ignorePaths": [".github/yamllint/**"],
@@ -74,17 +74,6 @@
 			"automerge": true,
 			"platformAutomerge": true,
 			"automergeStrategy": "squash"
-		},
-		{
-			"description": [
-				"release timestamp を提供しないデータソース (GHCR/Quay/ECR 等) からの digest 更新は、",
-				"既定の minimumReleaseAgeBehaviour=timestamp-required の下では minimumReleaseAge の",
-				"renovate/stability-days チェックを永久に通過できず保留され続ける。",
-				"73行目のルールで digest を automerge 対象に含めているため、その automerge が機能しなくなる。",
-				"digest 更新に限り timestamp-optional に緩和し、timestamp が無くても素通りできるようにする。"
-			],
-			"matchUpdateTypes": ["digest"],
-			"minimumReleaseAgeBehaviour": "timestamp-optional"
 		}
 	]
 }
