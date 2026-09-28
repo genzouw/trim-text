@@ -34,8 +34,8 @@ runs:
           echo "::error::Invalid SHA256 format"
           exit 1
         fi
-        if [ "${{ runner.arch }}" != "X64" ]; then
-          echo "::error::Unsupported runner architecture: ${{ runner.arch }}. This action only supports X64 (amd64) runners."
+        if [ "${RUNNER_ARCH}" != "X64" ]; then
+          echo "::error::Unsupported runner architecture: ${RUNNER_ARCH}. This action only supports X64 (amd64) runners."
           exit 1
         fi
         TARBALL="editorconfig-checker-linux-amd64.tar.gz"
