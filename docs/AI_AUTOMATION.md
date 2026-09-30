@@ -377,3 +377,11 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **特徴**: Node.js や `package.json` への依存がなく、Rust 製の単一バイナリとして動作する [Biome](https://biomejs.dev/) (MIT License / Apache License 2.0) を利用します。Prettier や ESLint の代替として JSON を高速に処理し、外部の SaaS や API キーへの依存なく、公開リポジトリで完全に無料で動作します。
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/lint.yml` の `biome` ジョブを通じて GitHub Actions 上で自動実行されます。
+
+### 39. Renovate Config Validator (Renovate 設定の検証)
+
+- **目的**: プロジェクト内の Mend Renovate の設定ファイル (`.github/renovate.json`) の構文やスキーマが正しいかを静的に検証します。
+- **設定ファイル**: `.github/workflows/renovate-config-validator.yml`
+- **特徴**: Renovate 公式の npm パッケージである `renovate` に同梱される `renovate-config-validator` CLI を利用し、不正な設定によって Renovate による自動更新が停止するのを未然に防ぎます。外部 API への通信は行わず、Node.js 上で完全に無料で動作します。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動実行されます。
