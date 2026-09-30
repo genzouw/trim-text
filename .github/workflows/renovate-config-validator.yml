@@ -42,6 +42,10 @@ jobs:
         with:
           node-version: 24
 
+      # Renovate のバージョンは意図的に固定しない。
+      # 本番の Renovate (Mend Renovate App) は常に最新版で動くため、最新版で検証しないと
+      # 「CI は通るが本番では不正な設定になる」という乖離が生じる。
+      # 検証ルールの変更で落ちた場合は、renovate.json ではなく Renovate 側の更新を疑うこと。
       - name: Run renovate-config-validator
         run: |
           npx --yes --package renovate -c 'renovate-config-validator --strict .github/renovate.json'
