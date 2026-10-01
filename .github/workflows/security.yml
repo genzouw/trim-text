@@ -23,8 +23,6 @@ jobs:
     name: Gitleaks (secrets scan)
     runs-on: ubuntu-latest
     timeout-minutes: 10
-    env:
-      GITLEAKS_VERSION: 8.21.2
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -39,14 +37,16 @@ jobs:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
 
+      # gitleaks の版は ci-workflows の composite action の既定値に委ねる。
+      # ここで版を直書きすると Renovate の更新対象から外れ、reusable workflow
+      # (.github/workflows/gitleaks.yml) と検出ルールがずれたまま気づけない (#252)。
+      # SHA は他の ci-workflows 参照と同じく Renovate (github-actions manager) が更新する。
       - name: Setup gitleaks
-        uses: ./.github/actions/setup-gitleaks # zizmor: ignore[self-repository]
-        with:
-          version: ${{ env.GITLEAKS_VERSION }}
+        uses: genzouw/ci-workflows/.github/actions/setup-gitleaks@1c657597cebfb13594ed202f43c14ffa4959fd8b # v1.4.4
 
       - name: Run gitleaks
         run: |
-          "${RUNNER_TEMP}/gitleaks" detect --no-banner --redact --verbose --source .
+          gitleaks detect --no-banner --redact --verbose --source .
 
   trivy-fs:
     name: Trivy (filesystem vulnerability scan)
