@@ -126,7 +126,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 
 ### 8. Mend Renovate (依存更新の自動化)
 
-- **目的**: GitHub Actions / npm / pip / Docker などの依存関係を検出し、更新 PR を自動作成します。パッチ・マイナー・digest の更新は CI 通過後に自動マージします。
+- **目的**: GitHub Actions / npm / pip / Docker / pre-commit のフックなどの依存関係を検出し、更新 PR を自動作成します。パッチ・マイナー・digest の更新は CI 通過後に自動マージします。pre-commit のフックは例外で、自動マージしません。CI が `.pre-commit-config.yaml` を実行せず、CI の成功が更新後のフックの動作確認にならないためです。
 - **設定ファイル**: `.github/renovate.json`
 - **経緯**: 過去に稼働実績のない `renovate.json` を削除し、Dependabot (`.github/dependabot.yml`) に一本化していましたが（#199）、#222 で Dependabot から Renovate へ再度移行しました。`.github/dependabot.yml` は削除済みで、依存更新は現在 Renovate に一本化されています。
 - **特徴**: `minimumReleaseAge` により、公開直後のバージョンを一定期間取り込まないようにできます。`vulnerabilityAlerts` は待機期間の対象外とし、脆弱性修正は即時 PR にします。
@@ -223,7 +223,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 
 ## CI/CD との連携
 
-Renovate によるマイナー・パッチ・digest バージョンの更新などは、自動でマージが行われるように設定されています。これにより、依存関係の更新プロセスが完全に自動化されています。
+Renovate によるマイナー・パッチ・digest バージョンの更新などは、自動でマージが行われるように設定されています。pre-commit のフックの更新だけは自動マージの対象外で、人がマージします。
 さらに、pre-commit.ci によるコードの自動フォーマットや、Release Please によるリリースPRの自動作成など、CI/CD における様々な自動化が導入されています。
 
 ## プルリクエスト作成時の注意事項

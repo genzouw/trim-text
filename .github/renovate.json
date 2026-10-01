@@ -13,6 +13,13 @@
 		".github/yamllint/requirements.txt は pip install --require-hashes で使うロックファイルで、各行に --hash=sha256:... が付く。Renovate の pip_requirements manager はバージョン文字列しか書き換えられずハッシュを再生成しないため、更新 PR を作らせると必ずハッシュ不一致で lint ジョブが落ちる (ローカル dry-run で ==1.35.0 -> ==1.38.0 の提案のみが行われることを確認済み)。更新は pip-compile --generate-hashes で手動実行する。"
 	],
 	"reviewers": ["genzouw"],
+	"pre-commit": {
+		"description": [
+			".pre-commit-config.yaml のフック (rev) を更新対象にする。Renovate の pre-commit manager は既定で無効のため明示的に有効化する。",
+			"無効のままだと、CI 側 (.github/markdownlint/package.json など) だけが更新され、ローカルのフックと版がずれる (#253)。"
+		],
+		"enabled": true
+	},
 	"vulnerabilityAlerts": {
 		"description": [
 			"脆弱性修正は minimumReleaseAge と schedule の対象外にして即時 PR にする。",
@@ -75,6 +82,48 @@
 			"automerge": true,
 			"platformAutomerge": true,
 			"automergeStrategy": "squash"
+		},
+		{
+			"description": [
+				"pre-commit のフックは自動マージしない。上の自動マージの規則より後ろに置いて上書きする。",
+				"フックは開発者のローカルでだけ動き、CI は .pre-commit-config.yaml を実行しない。",
+				"そのため CI が通っても、更新後のフックが動くことの確認にはならない。",
+				"手動マージ待ちの PR がフックの数だけ並ぶと prConcurrentLimit の枠を埋め、自動マージされるほかの更新の PR が作られなくなる。",
+				"そのため pre-commit の更新は 1 つの PR にまとめる。matchManagers で絞っているので、自動マージされる npm 側の更新とは混ざらない。major は separateMajorMinor の既定で別の PR になる。"
+			],
+			"matchManagers": ["pre-commit"],
+			"groupName": "pre-commit hooks",
+			"automerge": false
+		},
+		{
+			"description": [
+				"CI 側の版が手動固定のフック。CI の版は lint.yml / security.yml の *_VERSION と *_SHA256、yamllint は .github/yamllint/requirements.txt にあり、Renovate は更新できない。",
+				"hadolint / gitleaks は、hadolint.yml / gitleaks.yml が呼ぶ genzouw/ci-workflows の reusable workflow の中でも版が固定されている。別リポジトリなので、このリポジトリの PR だけでは揃わない。",
+				"フックだけを上げると、いま CI と一致している gitleaks / hadolint / typos の版がずれる。更新 PR をそのままマージしないよう、手順を PR 本文に出す。",
+				"対象から外す (enabled: false) 方法は採らない。actionlint / biome / yamllint / shfmt のフックは既に CI より古く、外すと更新の通知も無くなるため。"
+			],
+			"matchManagers": ["pre-commit"],
+			"matchPackageNames": [
+				"gitleaks/gitleaks",
+				"hadolint/hadolint",
+				"crate-ci/typos",
+				"rhysd/actionlint",
+				"biomejs/pre-commit",
+				"adrienverge/yamllint",
+				"scop/pre-commit-shfmt"
+			],
+			"prBodyNotes": [
+				":warning: この PR は、CI 側の版が手動固定のフック (gitleaks / hadolint / typos / actionlint / biome / yamllint / shfmt) を含みます。マージ前に、同じブランチで CI 側も同じ版へ上げてください。対象は `.github/workflows/lint.yml` と `.github/workflows/security.yml` の `*_VERSION` / `*_SHA256`、yamllint は `.github/yamllint/requirements.txt` (`pip-compile --generate-hashes`) です。hadolint / gitleaks は `genzouw/ci-workflows` の reusable workflow (`.github/workflows/hadolint.yml` / `gitleaks.yml` から呼び出し) の中でも版が固定されています。別リポジトリのためこのブランチでは上げられません。ci-workflows 側の版も確認し、古ければ先にそちらを上げてください。"
+			]
+		},
+		{
+			"description": [
+				"scop/pre-commit-shfmt のタグは v3.14.1-1 のように -N が付く。既定の versioning は -N をプレリリースとして扱い、更新を検出しない。",
+				"-N をビルド番号として読む regex versioning に差し替える。CI 側 (lint.yml の SHFMT_VERSION) は手動固定のため、上の規則の対象にも含めている。"
+			],
+			"matchManagers": ["pre-commit"],
+			"matchPackageNames": ["scop/pre-commit-shfmt"],
+			"versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<build>\\d+)$"
 		}
 	]
 }
