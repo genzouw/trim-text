@@ -33,7 +33,7 @@ rules:
 
 # self-repository はこの設定ファイルでは抑止しない。
 # zizmor は同一リポジトリ内の複合Action参照に self-repository 構文 ($/...) を
-# 求めるが、本リポジトリで pin している actionlint（v1.7.7 / 最新の v1.7.12 とも）
+# 求めるが、本リポジトリで pin している actionlint（v1.7.12）
 # が $/ を有効なローカルアクション参照として認識できない。
 #
 #   specifying action "$/.github/actions/setup-trivy" in invalid format
