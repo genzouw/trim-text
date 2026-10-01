@@ -87,9 +87,12 @@
 			"description": [
 				"pre-commit のフックは自動マージしない。上の自動マージの規則より後ろに置いて上書きする。",
 				"フックは開発者のローカルでだけ動き、CI は .pre-commit-config.yaml を実行しない。",
-				"そのため CI が通っても、更新後のフックが動くことの確認にはならない。"
+				"そのため CI が通っても、更新後のフックが動くことの確認にはならない。",
+				"手動マージ待ちの PR がフックの数だけ並ぶと prConcurrentLimit の枠を埋め、自動マージされるほかの更新の PR が作られなくなる。",
+				"そのため pre-commit の更新は 1 つの PR にまとめる。matchManagers で絞っているので、自動マージされる npm 側の更新とは混ざらない。major は separateMajorMinor の既定で別の PR になる。"
 			],
 			"matchManagers": ["pre-commit"],
+			"groupName": "pre-commit hooks",
 			"automerge": false
 		},
 		{
