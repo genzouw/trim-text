@@ -1,5 +1,8 @@
 name: Validate Renovate Config
 
+# 本ワークフローは genzouw/ci-workflows の reusable workflow を呼び出す薄いスタブ。
+# ロジックの実体・変更は ci-workflows 側で一元管理する (トリガー定義のみここで持つ)。
+# 参照 SHA の更新は Renovate (github-actions manager) が自動で PR を出す。
 on:
   push:
     branches:
@@ -22,30 +25,5 @@ permissions:
   contents: read
 
 jobs:
-  validate:
-    name: renovate-config-validator
-    runs-on: ubuntu-latest
-    timeout-minutes: 5
-    steps:
-      - name: Harden Runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
-        with:
-          egress-policy: audit
-
-      - name: Checkout repository
-        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
-        with:
-          persist-credentials: false
-
-      - name: Setup Node.js
-        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020 # v7.0.0
-        with:
-          node-version: 24
-
-      # Renovate のバージョンは意図的に固定しない。
-      # 本番の Renovate (Mend Renovate App) は常に最新版で動くため、最新版で検証しないと
-      # 「CI は通るが本番では不正な設定になる」という乖離が生じる。
-      # 検証ルールの変更で落ちた場合は、renovate.json ではなく Renovate 側の更新を疑うこと。
-      - name: Run renovate-config-validator
-        run: |
-          npx --yes --package renovate -c 'renovate-config-validator --strict .github/renovate.json'
+  renovate-config-validator:
+    uses: genzouw/ci-workflows/.github/workflows/renovate-config-validator.yml@1c657597cebfb13594ed202f43c14ffa4959fd8b # v1.4.4

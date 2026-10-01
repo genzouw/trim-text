@@ -381,7 +381,7 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 ### 39. Renovate Config Validator (Renovate 設定の検証)
 
 - **目的**: プロジェクト内の Mend Renovate の設定ファイル (`.github/renovate.json`) の構文やスキーマが正しいかを静的に検証します。
-- **設定ファイル**: `.github/workflows/renovate-config-validator.yml`
-- **特徴**: Renovate 公式の npm パッケージである `renovate` に同梱される `renovate-config-validator` CLI を利用し、不正な設定によって Renovate による自動更新が停止するのを未然に防ぎます。外部 API への通信は行わず、Node.js 上で完全に無料で動作します。
+- **設定ファイル**: `.github/workflows/renovate-config-validator.yml`（[`genzouw/ci-workflows`](https://github.com/genzouw/ci-workflows) の reusable workflow を呼び出すスタブ。検証ロジックと `renovate` のバージョンは ci-workflows 側で管理します）
+- **特徴**: Renovate 公式の npm パッケージである `renovate` に同梱される `renovate-config-validator` CLI を利用し、不正な設定によって Renovate による自動更新が停止するのを未然に防ぎます。本番の Mend Renovate App と同じ repo config として、`--strict --no-global` で検証します。外部 API への通信は行わず、Node.js 上で完全に無料で動作します。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動実行されます。
