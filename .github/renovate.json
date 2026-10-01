@@ -110,10 +110,11 @@
 				"rhysd/actionlint",
 				"biomejs/pre-commit",
 				"adrienverge/yamllint",
-				"scop/pre-commit-shfmt"
+				"scop/pre-commit-shfmt",
+				"koalaman/shellcheck-precommit"
 			],
 			"prBodyNotes": [
-				":warning: この PR は、CI 側の版が手動固定のフック (gitleaks / hadolint / typos / actionlint / biome / yamllint / shfmt) を含みます。マージ前に、同じブランチで CI 側も同じ版へ上げてください。対象は `.github/workflows/lint.yml` と `.github/workflows/security.yml` の `*_VERSION` / `*_SHA256`、yamllint は `.github/yamllint/requirements.txt` (`pip-compile --generate-hashes`) です。hadolint / gitleaks は `genzouw/ci-workflows` の reusable workflow (`.github/workflows/hadolint.yml` / `gitleaks.yml` から呼び出し) の中でも版が固定されています。別リポジトリのためこのブランチでは上げられません。ci-workflows 側の版も確認し、古ければ先にそちらを上げてください。"
+				":warning: この PR は、CI 側の版が手動固定のフック (gitleaks / hadolint / typos / actionlint / biome / yamllint / shfmt / shellcheck) を含みます。マージ前に、同じブランチで CI 側も同じ版へ上げてください。対象は `.github/workflows/lint.yml` と `.github/workflows/security.yml` の `*_VERSION` / `*_SHA256`、yamllint は `.github/yamllint/requirements.txt` (`pip-compile --generate-hashes`) です。hadolint / gitleaks / shellcheck は `genzouw/ci-workflows` の reusable workflow (`.github/workflows/hadolint.yml` / `gitleaks.yml` / `shellcheck.yml` から呼び出し) の中でも版が固定されています。別リポジトリのためこのブランチでは上げられません。ci-workflows 側の版も確認し、古ければ先にそちらを上げてください。"
 			]
 		},
 		{
