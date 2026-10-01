@@ -108,11 +108,21 @@
 				"crate-ci/typos",
 				"rhysd/actionlint",
 				"biomejs/pre-commit",
-				"adrienverge/yamllint"
+				"adrienverge/yamllint",
+				"scop/pre-commit-shfmt"
 			],
 			"prBodyNotes": [
-				":warning: この PR は、CI 側の版が手動固定のフック (gitleaks / hadolint / typos / actionlint / biome / yamllint) を含みます。マージ前に、同じブランチで CI 側も同じ版へ上げてください。対象は `.github/workflows/lint.yml` と `.github/workflows/security.yml` の `*_VERSION` / `*_SHA256`、yamllint は `.github/yamllint/requirements.txt` (`pip-compile --generate-hashes`) です。"
+				":warning: この PR は、CI 側の版が手動固定のフック (gitleaks / hadolint / typos / actionlint / biome / yamllint / shfmt) を含みます。マージ前に、同じブランチで CI 側も同じ版へ上げてください。対象は `.github/workflows/lint.yml` と `.github/workflows/security.yml` の `*_VERSION` / `*_SHA256`、yamllint は `.github/yamllint/requirements.txt` (`pip-compile --generate-hashes`) です。"
 			]
+		},
+		{
+			"description": [
+				"scop/pre-commit-shfmt のタグは v3.14.1-1 のように -N が付く。既定の versioning は -N をプレリリースとして扱い、更新を検出しない。",
+				"-N をビルド番号として読む regex versioning に差し替える。CI 側 (lint.yml の SHFMT_VERSION) は手動固定のため、上の規則の対象にも含めている。"
+			],
+			"matchManagers": ["pre-commit"],
+			"matchPackageNames": ["scop/pre-commit-shfmt"],
+			"versioning": "regex:^v(?<major>\\d+)\\.(?<minor>\\d+)\\.(?<patch>\\d+)-(?<build>\\d+)$"
 		}
 	]
 }
