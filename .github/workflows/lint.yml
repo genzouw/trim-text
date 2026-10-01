@@ -85,6 +85,7 @@ jobs:
               - '**/*.md'
               - '.textlintrc.json'
               - '.github/textlint/**'
+              - '.github/markdownlint/**'
               - '.markdownlint-cli2.jsonc'
             toml:
               - '**/*.toml'
