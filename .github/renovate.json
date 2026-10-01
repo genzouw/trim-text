@@ -13,6 +13,13 @@
 		".github/yamllint/requirements.txt は pip install --require-hashes で使うロックファイルで、各行に --hash=sha256:... が付く。Renovate の pip_requirements manager はバージョン文字列しか書き換えられずハッシュを再生成しないため、更新 PR を作らせると必ずハッシュ不一致で lint ジョブが落ちる (ローカル dry-run で ==1.35.0 -> ==1.38.0 の提案のみが行われることを確認済み)。更新は pip-compile --generate-hashes で手動実行する。"
 	],
 	"reviewers": ["genzouw"],
+	"pre-commit": {
+		"description": [
+			".pre-commit-config.yaml のフック (rev) を更新対象にする。Renovate の pre-commit manager は既定で無効のため明示的に有効化する。",
+			"無効のままだと、CI 側 (.github/markdownlint/package.json など) だけが更新され、ローカルのフックと版がずれる (#253)。"
+		],
+		"enabled": true
+	},
 	"vulnerabilityAlerts": {
 		"description": [
 			"脆弱性修正は minimumReleaseAge と schedule の対象外にして即時 PR にする。",
@@ -75,6 +82,15 @@
 			"automerge": true,
 			"platformAutomerge": true,
 			"automergeStrategy": "squash"
+		},
+		{
+			"description": [
+				"pre-commit のフックは自動マージしない。上の自動マージの規則より後ろに置いて上書きする。",
+				"フックは開発者のローカルでだけ動き、CI は .pre-commit-config.yaml を実行しない。",
+				"そのため CI が通っても、更新後のフックが動くことの確認にはならない。"
+			],
+			"matchManagers": ["pre-commit"],
+			"automerge": false
 		}
 	]
 }
