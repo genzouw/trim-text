@@ -14,7 +14,7 @@ permissions: {}
 jobs:
   check-policy:
     name: Check PR Policy Compliance
-    # Dependabot / release-please などの Bot が作成する PR は
+    # Renovate などの Bot が作成する PR は
     # PULL_REQUEST_TEMPLATE.md に沿わないため検査対象から除外する。
     if: github.event.pull_request.user.type != 'Bot'
     runs-on: ubuntu-latest
