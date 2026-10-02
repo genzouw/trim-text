@@ -105,6 +105,12 @@ jobs:
     permissions:
       contents: read
       pull-requests: write
+    env:
+      # pre-commit の shellcheck フック (.pre-commit-config.yaml の rev) と同じ版に揃える。
+      SHELLCHECK_VERSION: 0.11.0
+      # shellcheck v0.11.0 linux.x86_64 の SHA256 (公式リリースの tar.xz を取得して算出)
+      # https://github.com/koalaman/shellcheck/releases/tag/v0.11.0
+      SHELLCHECK_SHA256: 8c3be12b05d5c177a04c29e3c78ce89ac86f1595681cab149b65b97c4e227198
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -116,6 +122,12 @@ jobs:
         with:
           # トークンの永続化を無効化し、後続ステップへの認証情報残存リスクを低減する。
           persist-credentials: false
+
+      - name: Setup shellcheck
+        uses: ./.github/actions/setup-shellcheck # zizmor: ignore[self-repository]
+        with:
+          version: ${{ env.SHELLCHECK_VERSION }}
+          sha256: ${{ env.SHELLCHECK_SHA256 }}
 
       - name: Setup reviewdog
         uses: ./.github/actions/setup-reviewdog # zizmor: ignore[self-repository]
@@ -131,7 +143,7 @@ jobs:
           # このステップのみ git | xargs | shellcheck の二段パイプのため、
           # env -u は shellcheck の直前ではなく xargs に前置する
           # （git ls-files の前に置くと xargs が生成する子プロセスには効かない）。
-          git ls-files -z -- 'tt' '**/*.bats' '**/*.sh' | env -u REVIEWDOG_GITHUB_API_TOKEN xargs -0 shellcheck -f checkstyle | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="shellcheck" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
+          git ls-files -z -- 'tt' '**/*.bats' '**/*.sh' | env -u REVIEWDOG_GITHUB_API_TOKEN xargs -0 "${RUNNER_TEMP}/shellcheck" -f checkstyle | "${RUNNER_TEMP}/reviewdog" -f=checkstyle -name="shellcheck" -reporter="github-pr-review" -level="warning" -fail-on-error="true"
 
   shfmt:
     needs: changes
