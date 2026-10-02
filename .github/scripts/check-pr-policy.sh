@@ -243,6 +243,8 @@ fi
 # 課金が発生しうる Secret / API キーの参照は free-policy チェック
 # (.github/workflows/free-policy.yml) がリポジトリ全体を対象に検出するため、ここでは扱わない。
 # 本スクリプトが差分から見るのは、本文の申告との突き合わせが必要な「新規ツールの採用」だけ。
+# 項目名は pass / fail / warn で共有し、レポートの行を項目名で突き合わせられるようにする。
+adoption_diff_label='新規ツールの採用に 4.1 の確認結果と根拠 URL が添えられている'
 if [[ -n "${diff_file}" ]]; then
   # 新規に追加されたワークフロー / composite action ファイルを抽出する。これらの追加は
   # 「新規ツールの採用」のシグナルであり、本文の申告と突き合わせる。
@@ -298,15 +300,15 @@ if [[ -n "${diff_file}" ]]; then
   # 欠落は warn ではなく fail とする (AGENTS.md 4.1 は MUST)。
   if [[ -n "${new_tool_signals}" ]]; then
     if [[ "${adoption_confirmed}" -eq 1 ]]; then
-      record pass '新規ツールの採用に 4.1 の確認結果と根拠 URL が添えられている' \
+      record pass "${adoption_diff_label}" \
         "対象: $(echo "${new_tool_signals}" | tr '\n' ' ' | sed 's/ $//')"
     else
-      record fail '新規ツールの採用に 4.1 の確認結果と根拠 URL が添えられている' \
+      record fail "${adoption_diff_label}" \
         "新規追加: $(echo "${new_tool_signals}" | tr '\n' ' ' | sed 's/ $//') — \`${cost_section}\` の 4.1 の 4 項目すべてに [x] を付け、\`根拠 URL:\` へ公式の料金ページ等の URL を記入してください。"
     fi
   fi
 else
-  record warn '新規ツールの採用と本文の申告が一致している' '差分が指定されていないため検査をスキップしました。'
+  record warn "${adoption_diff_label}" '差分が指定されていないため検査をスキップしました。'
 fi
 
 # ---------------------------------------------------------------------------

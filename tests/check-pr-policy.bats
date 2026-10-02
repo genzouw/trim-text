@@ -410,6 +410,16 @@ EOF
   [ "${status}" -eq 2 ]
 }
 
+@test "--diff を省略すると差分の検査をスキップした警告を出して通過する" {
+  write_valid_body
+  run bash "${SCRIPT}" --body "${BODY}"
+  [ "${status}" -eq 0 ]
+  [[ "${output}" == *"(警告 1 件)"* ]]
+  # 項目名は差分を渡したときの pass / fail と同じものを使う。
+  [[ "${output}" == *"新規ツールの採用に 4.1 の確認結果と根拠 URL が添えられている"* ]]
+  [[ "${output}" == *"差分が指定されていないため検査をスキップしました。"* ]]
+}
+
 @test "--body の値が末尾で欠落していると exit 2 になる (無限ループしない)" {
   run run_with_timeout 5 bash "${SCRIPT}" --body
   [ "${status}" -eq 2 ]
