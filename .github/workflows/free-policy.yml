@@ -27,5 +27,3 @@ jobs:
       # 有料 SaaS の鍵はここへ足さない (#271)。
       allowed_secrets: | # pragma: allowlist secret
         REVIEWDOG_GITHUB_API_TOKEN
-        RELEASE_PLEASE_APP_ID
-        RELEASE_PLEASE_APP_PRIVATE_KEY

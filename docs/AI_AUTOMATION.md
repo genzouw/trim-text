@@ -131,13 +131,14 @@ AI によるコードレビューは、GitHub App として稼働している Co
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub App [Mend Renovate](https://github.com/apps/renovate) は既にインストール済みです（公開リポジトリは無料）。
 
-### 9. Release Please (リリース自動化)
+### 9. Release Please (廃止 / 撤去済み)
 
-- **目的**: Conventional Commits に基づいてリリース PR を自動生成し、セマンティックバージョニングによるタグ付けと CHANGELOG の生成をします。
-- **設定ファイル**: `.github/workflows/release-please.yml`
-- **特徴**: リリースの運用を完全に自動化・標準化します。
-- **事前設定**:
-  1. コミットメッセージでは Conventional Commits の形式（`feat:`, `fix:`, `chore:` 等）を厳密に守ってください。
+- **状況**: **撤去しました。** `.github/workflows/release-please.yml` は 2026-10 に削除しています。
+- **撤去の理由**: 一度も成功していませんでした。2026-05-29 の導入から 2026-10-03 までの 154 回の実行は、すべて失敗しています（#274）。2026-06-04 以降は GitHub App のトークンを使う構成でしたが、参照する Secret（`RELEASE_PLEASE_APP_ID` / `RELEASE_PLEASE_APP_PRIVATE_KEY`）が登録されていませんでした。指定していた `release-type: node` も、`package.json` を持たない本リポジトリには合っていません。この間、GitHub Release は 1 件も作られていません。
+- **再導入する場合**: 次の 2 点を満たしてください。
+  1. `release-type` を本リポジトリの構成（bash スクリプトと Dockerfile）に合うもの（`simple` など）にし、manifest で起点のバージョンを指定する。
+  2. リリース PR を作成できるトークンを用意する。`GITHUB_TOKEN` を使う場合は、リポジトリ設定で GitHub Actions による Pull Request の作成を許可する必要があります。GitHub App を使う場合は、Secret の登録を確認したうえで、スタブの `allowed_secrets` と 40 章の表へ名前を追記します。
+- **代替**: リリースが必要になった場合は、タグと GitHub Release を手動で作成します。
 
 ### 10. Devcontainer (開発環境のコード化)
 
@@ -222,7 +223,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 ## CI/CD との連携
 
 Renovate によるマイナー・パッチ・digest バージョンの更新などは、自動でマージが行われるように設定されています。pre-commit のフックの更新だけは自動マージの対象外で、人がマージします。
-さらに、Release Please によるリリースPRの自動作成など、CI/CD における様々な自動化が導入されています。
+リリース PR の自動作成（Release Please）は撤去しました（前述の 9 を参照）。
 
 ## プルリクエスト作成時の注意事項
 
@@ -238,7 +239,7 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 
 ### 20. Semantic Pull Request (Pull Request タイトル検証)
 
-- **目的**: Pull Request のタイトルが [Conventional Commits](https://www.conventionalcommits.org/) の形式になっているかをチェックし、Release Please による自動リリース運用を安定させます。
+- **目的**: Pull Request のタイトルが [Conventional Commits](https://www.conventionalcommits.org/) の形式になっているかをチェックし、コミット履歴の形式を揃えます（`AGENTS.md` 11 章）。
 - **設定ファイル**: `.github/workflows/semantic-pull-request.yml`
 - **特徴**: `amannn/action-semantic-pull-request` を使用して PR タイトルを検証します。公開 OSS リポジトリ向けの Action として無料で利用可能です。
 - **事前設定**:
@@ -327,7 +328,7 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 ### 32. AI Release Translator (廃止 / 削除済み)
 
 - **状況**: **削除しました。** `.github/workflows/ai-release-translator.yml` は 2026-09 に削除しています。リリースノートの翻訳を GitHub Models の推論 API に依存していたためです。
-- **代替**: リリースノートは Release Please が Conventional Commits から生成します。コミットメッセージを日本語で記述すれば、リリースノートも日本語になります。
+- **代替**: ありません。リリースノートを自動生成していた Release Please も撤去しました（前述の 9 を参照）。リリースノートは日本語で手書きします。
 
 ### 33. typos (高速スペルチェッカー)
 
@@ -396,13 +397,11 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
     3. 課金可能な LLM / 検索 API のホスト名（`api.openai.com` など）。
   - 走査対象は `.github/` 配下の YAML / JSON、ルート直下の Renovate 設定、composite action の定義（`action.yml`）です。README や `docs/` は対象外です。コメント行も走査するため、コメントに書いた参照例も検出されます。
   - 有料プランを要する SaaS かどうかのような意味的な判断は検出しません。そちらは `AGENTS.md` 4.1 の確認手順とレビューで担保します。
-- **許可リスト (`allowed_secrets`)**: 次の 3 つだけを許可しています。いずれも GitHub 自身の資格情報で、課金 API には繋がりません。
+- **許可リスト (`allowed_secrets`)**: 次の 1 つだけを許可しています。GitHub 自身の資格情報で、課金 API には繋がりません。
 
-  | 名前                             | 許可する根拠                                                                 |
-  | :------------------------------- | :--------------------------------------------------------------------------- |
-  | `REVIEWDOG_GITHUB_API_TOKEN`     | reviewdog が `GITHUB_TOKEN` を受け取る環境変数名です（`lint.yml`）。         |
-  | `RELEASE_PLEASE_APP_ID`          | release-please 用に用意した自前の GitHub App の ID です。                    |
-  | `RELEASE_PLEASE_APP_PRIVATE_KEY` | 同じ GitHub App の秘密鍵です。GitHub の外の課金 API には繋がりません。       |
+  | 名前                         | 許可する根拠                                                         |
+  | :--------------------------- | :------------------------------------------------------------------- |
+  | `REVIEWDOG_GITHUB_API_TOKEN` | reviewdog が `GITHUB_TOKEN` を受け取る環境変数名です（`lint.yml`）。 |
 
 - **検出されたときの対応**:
   1. まず、検出された参照そのものを取り除けないかを検討してください。有料 SaaS の鍵（`SONAR_TOKEN` など）や LLM プロバイダの鍵は、許可リストと行内マーカーのどちらにも足しません（#271）。検査を通すために例外を足すのではなく、該当のワークフローを撤去します。

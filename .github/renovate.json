@@ -35,7 +35,7 @@
 			"description": [
 				"依存更新はすべて chore プレフィックスで出す。",
 				"config:recommended に含まれる :semanticPrefixFixDepsChoreOthers は本番依存を fix にするが、",
-				"fix は release 生成ツールがリリース対象として扱うため、Dependabot 時代と同じ chore に固定する。"
+				"依存更新をコミット種別の上で機能変更・修正と区別するため、Dependabot 時代と同じ chore に固定する。"
 			],
 			"matchPackageNames": ["*"],
 			"semanticCommitType": "chore"
