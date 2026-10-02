@@ -82,7 +82,6 @@ Jules の管理画面に貼り付けてご利用ください。
 | :------------------- | :--------------------------------------------------------------------- | :---------------------------------- |
 | AI コードレビュー    | [CodeRabbit](https://github.com/apps/coderabbitai)                     | プルリクエストの AI レビュー        |
 | LLM コンテキスト生成 | Repomix (`.github/workflows/repomix.yml`)                              | `llms.txt` 規格の Markdown 自動生成 |
-| 静的解析             | Codacy                                                                 | 静的コード解析                      |
 | セキュリティスキャン | CodeQL / Gitleaks / Trivy / OSV-Scanner / zizmor / GitGuardian         | 脆弱性・秘密情報スキャン            |
 | Lint                 | actionlint / shellcheck / shfmt / hadolint / markdownlint-cli2 / typos | 静的な書式・規約チェック            |
 
