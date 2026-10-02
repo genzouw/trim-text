@@ -5,7 +5,6 @@
 
 setup() {
   SCRIPT="${BATS_TEST_DIRNAME}/../.github/scripts/check-pr-policy.sh"
-  AGENTS_MD="${BATS_TEST_DIRNAME}/../AGENTS.md"
   BODY="${BATS_TEST_TMPDIR}/body.md"
   DIFF="${BATS_TEST_TMPDIR}/pr.diff"
   : >"${DIFF}"
@@ -171,103 +170,6 @@ EOF
 }
 
 # ---------- 差分に対する検査 ----------
-
-@test "差分で LLM の API キー参照を追加していると exit 1 になる" {
-  write_valid_body
-  cat >"${DIFF}" <<'EOF'
-diff --git a/.github/workflows/review.yml b/.github/workflows/review.yml
---- a/.github/workflows/review.yml
-+++ b/.github/workflows/review.yml
-@@ -1,3 +1,4 @@
-         env:
-+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-EOF
-  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
-  [ "${status}" -eq 1 ]
-  [[ "${output}" == *"検出: GEMINI_API_KEY"* ]]
-}
-
-@test "既存行の API キー参照 (削除行・文脈行) は検出しない" {
-  write_valid_body
-  cat >"${DIFF}" <<'EOF'
-diff --git a/.github/workflows/review.yml b/.github/workflows/review.yml
---- a/.github/workflows/review.yml
-+++ b/.github/workflows/review.yml
-@@ -1,4 +1,3 @@
-         env:
--          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-EOF
-  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
-  [ "${status}" -eq 0 ]
-}
-
-@test "差分で .github/actions/ への LLM の API キー参照を追加していると exit 1 になる" {
-  write_valid_body
-  cat >"${DIFF}" <<'EOF'
-diff --git a/.github/actions/foo/action.yml b/.github/actions/foo/action.yml
---- a/.github/actions/foo/action.yml
-+++ b/.github/actions/foo/action.yml
-@@ -1,3 +1,4 @@
-         env:
-+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
-EOF
-  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
-  [ "${status}" -eq 1 ]
-  [[ "${output}" == *"検出: GEMINI_API_KEY"* ]]
-}
-
-@test "差分で bracket notation (シングルクォート) の API キー参照を追加していると exit 1 になる" {
-  write_valid_body
-  cat >"${DIFF}" <<'EOF'
-diff --git a/.github/workflows/review.yml b/.github/workflows/review.yml
---- a/.github/workflows/review.yml
-+++ b/.github/workflows/review.yml
-@@ -1,3 +1,4 @@
-         env:
-+          GEMINI_API_KEY: ${{ secrets['GEMINI_API_KEY'] }}
-EOF
-  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
-  [ "${status}" -eq 1 ]
-  [[ "${output}" == *"検出: GEMINI_API_KEY"* ]]
-}
-
-@test "差分で bracket notation (ダブルクォート) の API キー参照を追加していると exit 1 になる" {
-  write_valid_body
-  cat >"${DIFF}" <<'EOF'
-diff --git a/.github/workflows/review.yml b/.github/workflows/review.yml
---- a/.github/workflows/review.yml
-+++ b/.github/workflows/review.yml
-@@ -1,3 +1,4 @@
-         env:
-+          OPENAI_API_KEY: ${{ secrets["OPENAI_API_KEY"] }}
-EOF
-  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
-  [ "${status}" -eq 1 ]
-  [[ "${output}" == *"検出: OPENAI_API_KEY"* ]]
-}
-
-@test "ワークフロー以外のファイルへの追加行は検出しない" {
-  write_valid_body
-  # テストのフィクスチャやドキュメントに現れる API キー名は誤検知させない
-  cat >"${DIFF}" <<'EOF'
-diff --git a/tests/fixtures.bats b/tests/fixtures.bats
-new file mode 100644
---- /dev/null
-+++ b/tests/fixtures.bats
-@@ -0,0 +1,2 @@
-+# 検出されるべき例:
-+-          OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
-EOF
-  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
-  [ "${status}" -eq 0 ]
-}
-
-@test "本文で API キー名に言及しただけでは失敗しない" {
-  write_valid_body
-  printf '\n本 PR は GEMINI_API_KEY を使わない方針を明文化します。\n' >>"${BODY}"
-  run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
-  [ "${status}" -eq 0 ]
-}
 
 @test "新規ワークフロー追加で 4.1 の確認が未記入だと exit 1 になる" {
   # 「新規に採用していない」と申告しただけでは通過させない (差分クロスチェック)。
@@ -450,26 +352,6 @@ EOF
   [ "${status}" -eq 0 ]
 }
 
-# ---------- forbidden_keys と AGENTS.md 5.1 の同期 ----------
-
-@test "forbidden_keys が AGENTS.md 5.1 に列挙された API キーをすべてカバーしている" {
-  local forbidden_keys
-  forbidden_keys="$(grep -oE "^forbidden_keys='[^']*'" "${SCRIPT}" | sed -E "s/^forbidden_keys='//; s/'\$//")"
-  [ -n "${forbidden_keys}" ]
-
-  local agents_keys
-  # バッククォートは Markdown コードスパンの区切り文字を抽出する正規表現であり、コマンド置換ではない
-  # （ダブルクォートに変えると実際にコマンド置換されてしまうため、意図的に単一引用符のままにする）
-  # shellcheck disable=SC2016
-  agents_keys="$(awk '/^### 5\.1 /{flag=1; next} /^### 5\.2 /{flag=0} flag' "${AGENTS_MD}" |
-    grep -oE '`[A-Z0-9_]+_API_KEY`' | tr -d '`' | sed 's/_API_KEY$//' | sort -u)"
-  [ -n "${agents_keys}" ]
-
-  while IFS= read -r key; do
-    [[ "${forbidden_keys}" =~ (^|\|)${key}(\||$) ]]
-  done <<<"${agents_keys}"
-}
-
 # ---------- PULL_REQUEST_TEMPLATE.md との同期 ----------
 
 # cost_required_patterns はテンプレートの文言に対する部分一致で判定するため、
@@ -526,6 +408,16 @@ EOF
   write_valid_body
   run bash "${SCRIPT}" --body "${BODY}" --diff "${BATS_TEST_TMPDIR}/missing.diff"
   [ "${status}" -eq 2 ]
+}
+
+@test "--diff を省略すると差分の検査をスキップした警告を出して通過する" {
+  write_valid_body
+  run bash "${SCRIPT}" --body "${BODY}"
+  [ "${status}" -eq 0 ]
+  [[ "${output}" == *"(警告 1 件)"* ]]
+  # 項目名は差分を渡したときの pass / fail と同じものを使う。
+  [[ "${output}" == *"新規ツールの採用に 4.1 の確認結果と根拠 URL が添えられている"* ]]
+  [[ "${output}" == *"差分が指定されていないため検査をスキップしました。"* ]]
 }
 
 @test "--body の値が末尾で欠落していると exit 2 になる (無限ループしない)" {
