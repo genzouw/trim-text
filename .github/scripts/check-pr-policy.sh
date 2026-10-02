@@ -240,39 +240,10 @@ fi
 # ---------------------------------------------------------------------------
 # 差分に対する検査
 # ---------------------------------------------------------------------------
-# AGENTS.md 5.1 で禁止されている LLM プロバイダの API キー。
-# AGENTS.md 5.1 に列挙されている代表例をすべて含めること。5.1 の一覧を更新した
-# 場合はここも合わせて更新し、tests/check-pr-policy.bats のカバレッジ確認テストで
-# 追随漏れがないことを確認する。
-forbidden_keys='GEMINI|OPENAI|ANTHROPIC|CLAUDE|MISTRAL|COHERE|GROQ|DEEPSEEK|PERPLEXITY|TAVILY|HUGGINGFACE|REPLICATE'
-
+# 課金が発生しうる Secret / API キーの参照は free-policy チェック
+# (.github/workflows/free-policy.yml) がリポジトリ全体を対象に検出するため、ここでは扱わない。
+# 本スクリプトが差分から見るのは、本文の申告との突き合わせが必要な「新規ツールの採用」だけ。
 if [[ -n "${diff_file}" ]]; then
-  # 禁止されているのは CI へ組み込むこと (AGENTS.md 5.1) なので、検査対象は
-  # .github/workflows と .github/actions への追加行に限定する。テストの
-  # フィクスチャやドキュメント中の記述を誤検知させないための絞り込み。
-  # GitHub Actions の式では `secrets.KEY` (dot notation) と
-  # `secrets['KEY']` / `secrets["KEY"]` (bracket/index notation) の両方が
-  # 同じ Secret を参照できるため、両方の表記を検出する。
-  secrets_dot_pattern="secrets\\.(${forbidden_keys})[A-Z0-9_]*"
-  secrets_bracket_pattern="secrets\\[[\"'](${forbidden_keys})[A-Z0-9_]*[\"']\\]"
-  added_keys="$(awk '
-    /^\+\+\+ / {
-      path = $2
-      sub(/^b\//, "", path)
-      in_target = (path ~ /^\.github\/(workflows|actions)\//)
-      next
-    }
-    in_target && /^\+[^+]/ { print }
-  ' "${diff_file}" |
-    grep -oE "(${secrets_dot_pattern}|${secrets_bracket_pattern})" |
-    sed -E "s/^secrets\.//; s/^secrets\[[\"']//; s/[\"']\]\$//" | sort -u || true)"
-  if [[ -z "${added_keys}" ]]; then
-    record pass 'LLM プロバイダの API キー参照を追加していない' "-"
-  else
-    record fail 'LLM プロバイダの API キー参照を追加していない' \
-      "検出: $(echo "${added_keys}" | tr '\n' ' ' | sed 's/ $//')"
-  fi
-
   # 新規に追加されたワークフロー / composite action ファイルを抽出する。これらの追加は
   # 「新規ツールの採用」のシグナルであり、本文の申告と突き合わせる。
   new_tool_files="$(awk '
@@ -335,7 +306,7 @@ if [[ -n "${diff_file}" ]]; then
     fi
   fi
 else
-  record warn 'LLM プロバイダの API キー参照を追加していない' '差分が指定されていないため検査をスキップしました。'
+  record warn '新規ツールの採用と本文の申告が一致している' '差分が指定されていないため検査をスキップしました。'
 fi
 
 # ---------------------------------------------------------------------------
