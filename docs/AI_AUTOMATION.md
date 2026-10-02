@@ -385,3 +385,33 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **特徴**: Renovate 公式の npm パッケージである `renovate` に同梱される `renovate-config-validator` CLI を利用し、不正な設定によって Renovate による自動更新が停止するのを未然に防ぎます。本番の Mend Renovate App と同じ repo config として、`--strict --no-global` で検証します。検証ロジックと `renovate` のバージョンは ci-workflows 側で管理します。API キーや外部 SaaS への登録は不要で、npm レジストリから取得した CLI をランナー上で実行するため、完全に無料で動作します。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動実行されます。
+
+### 40. free-policy (コスト方針違反の検出)
+
+- **目的**: `AGENTS.md` 4 章・5.1 のコスト方針に反する CI 設定を、PR と `main` への push の両方で検出します。
+- **設定ファイル**: `.github/workflows/free-policy.yml`（[`genzouw/ci-workflows`](https://github.com/genzouw/ci-workflows) の reusable workflow を呼び出すスタブ）
+- **特徴**: 判定は `grep` と `awk` による決定的な処理で、LLM 推論を使いません。外部の SaaS にも接続せず、Secrets も不要なため、完全に無料で動作します。検出ロジックは ci-workflows 側で管理します。
+  - 検出するもの
+    1. 許可リストに無い `secrets.*` の参照と `secrets: inherit`。許可リストは `GITHUB_TOKEN` とスタブの `allowed_secrets` です。
+    2. 従量課金の API キーを示す変数名（`*_API_KEY` / `*_API_TOKEN` / `*_SECRET_KEY`、および LLM プロバイダ名の付いた鍵や URL）。
+    3. 課金可能な LLM / 検索 API のホスト名（`api.openai.com` など）。
+  - 走査対象は `.github/` 配下の YAML / JSON、ルート直下の Renovate 設定、composite action の定義（`action.yml`）です。README や `docs/` は対象外です。コメント行も走査するため、コメントに書いた参照例も検出されます。
+  - 有料プランを要する SaaS かどうかのような意味的な判断は検出しません。そちらは `AGENTS.md` 4.1 の確認手順とレビューで担保します。
+- **許可リスト (`allowed_secrets`)**: 次の 3 つだけを許可しています。いずれも GitHub 自身の資格情報で、課金 API には繋がりません。
+
+  | 名前                             | 許可する根拠                                                                 |
+  | :------------------------------- | :--------------------------------------------------------------------------- |
+  | `REVIEWDOG_GITHUB_API_TOKEN`     | reviewdog が `GITHUB_TOKEN` を受け取る環境変数名です（`lint.yml`）。         |
+  | `RELEASE_PLEASE_APP_ID`          | release-please 用に用意した自前の GitHub App の ID です。                    |
+  | `RELEASE_PLEASE_APP_PRIVATE_KEY` | 同じ GitHub App の秘密鍵です。GitHub の外の課金 API には繋がりません。       |
+
+- **検出されたときの対応**:
+  1. まず、検出された参照そのものを取り除けないかを検討してください。有料 SaaS の鍵（`SONAR_TOKEN` など）や LLM プロバイダの鍵は、許可リストと行内マーカーのどちらにも足しません（#271）。検査を通すために例外を足すのではなく、該当のワークフローを撤去します。
+  2. 課金を伴わない正当な参照が誤検知された場合に限り、該当行へ `free-policy: allow <理由>` を含むコメントを付けて除外します。
+  3. 同じ名前を複数箇所で参照する GitHub 自身の資格情報は、スタブの `allowed_secrets` へ追加します。追加するときは、上の表に名前と根拠を追記してください。
+- **注意**:
+  - まだ必須チェックに設定していません。失敗してもマージは止まらないため、PR の Checks で `free-policy / Free-only policy check` の結果を確認してください。
+  - 「23. PR Policy Checker」の `secrets` 参照の検査と、当面は検出範囲が重複します。`free-policy` が `main` で動くことを確認した後、別の PR で `free-policy` に寄せます。
+  - 失敗時のメッセージは「AGENTS.md 1 章 / 1.1」を案内しますが、これは ci-workflows 側の共通の文言です。本リポジトリでは `AGENTS.md` 4 章と 5.1 に読み替えてください。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動実行されます。

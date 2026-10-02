@@ -47,11 +47,12 @@ jobs:
         with:
           results_file: results.sarif
           results_format: sarif
-          # (Optional) "write" PAT token. Uncomment the `repo_token` line below if:
+          # (Optional) "write" PAT token. Set the `repo_token` input to a PAT stored in a repository secret if:
           # - you want to enable the Branch-Protection check on a *public* repository, or
           # - you are installing Scorecard on a *private* repository
           # To create the PAT, follow the steps in https://github.com/ossf/scorecard-action?tab=readme-ov-file#authentication-with-pat.
-          # repo_token: ${{ secrets.SCORECARD_TOKEN }}
+          # 本リポジトリでは PAT を使わない (free-policy が GITHUB_TOKEN 以外の Secret 参照を検出するため、
+          # 参照例をコメントにも残さない)。
 
           # Public repositories:
           #   - Publish results to OpenSSF REST API for easy access by consumers
