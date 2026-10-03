@@ -408,6 +408,6 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
   2. 課金を伴わない正当な参照が誤検知された場合に限り、該当行へ `free-policy: allow <理由>` を含むコメントを付けて除外します。
   3. 同じ名前を複数箇所で参照する GitHub 自身の資格情報は、スタブの `allowed_secrets` へ追加します。追加するときは、上の表に名前と根拠を追記してください。
 - **注意**:
-  - まだ必須チェックに設定していません。失敗してもマージは止まらないため、PR の Checks で `free-policy / Free-only policy check` の結果を確認してください。
+  - `free-policy / Free-only policy check` は `main` の必須チェックです。失敗している間はマージできません。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動実行されます。
