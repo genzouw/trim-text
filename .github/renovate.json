@@ -99,7 +99,7 @@
 		{
 			"description": [
 				"CI 側の版が手動固定のフック。CI の版は lint.yml / security.yml の *_VERSION と *_SHA256、yamllint は .github/yamllint/requirements.txt にあり、Renovate は更新できない。",
-				"hadolint / gitleaks は、hadolint.yml / gitleaks.yml が呼ぶ genzouw/ci-workflows の reusable workflow の中でも版が固定されている。別リポジトリなので、このリポジトリの PR だけでは揃わない。",
+				"hadolint / gitleaks / shellcheck は、hadolint.yml / gitleaks.yml / shellcheck.yml が呼ぶ genzouw/ci-workflows の reusable workflow の中でも版が固定されている。別リポジトリなので、このリポジトリの PR だけでは揃わない。",
 				"フックだけを上げると、いま CI と一致している gitleaks / hadolint / typos の版がずれる。更新 PR をそのままマージしないよう、手順を PR 本文に出す。",
 				"対象から外す (enabled: false) 方法は採らない。外すと更新の通知が無くなるため。"
 			],
