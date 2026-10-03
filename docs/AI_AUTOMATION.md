@@ -411,3 +411,19 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
   - まだ必須チェックに設定していません。失敗してもマージは止まらないため、PR の Checks で `free-policy / Free-only policy check` の結果を確認してください。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動実行されます。
+
+### 41. OSV-Scanner (依存パッケージの脆弱性スキャン)
+
+- **目的**: リポジトリ内の lockfile（`.github/markdownlint/package-lock.json` など CI 用ツールの依存を含む）を [OSV](https://osv.dev/) のデータベースと照合し、既知の脆弱性を検出します。
+- **設定ファイル**: `.github/workflows/osv-scanner.yml`、除外設定は各 lockfile と同じディレクトリの `osv-scanner.toml`
+- **特徴**: [google/osv-scanner](https://github.com/google/osv-scanner)（Apache License 2.0）は公開 OSS で、API キーや Secrets を必要とせず、課金も発生しません。`push` / `pull_request` に加えて週 1 回の定期実行があります。脆弱性情報はコードを変更しなくても増えるため、**何も変更していない PR や `main` で突然失敗することがあります**。
+- **検出されたときの対応**（上から順に検討します）:
+  1. 修正版があれば、依存を更新します。Renovate の PR を待たずに更新して構いません。
+  2. 間接依存で、直接依存の更新を待てない場合は、`package.json` の `overrides` で修正版へ固定します。
+  3. 修正版が無い場合に限り、影響を評価したうえで `osv-scanner.toml` の `[[IgnoredVulns]]` で除外します。除外は、その lockfile と同じディレクトリの `osv-scanner.toml` に書き、他の lockfile へ効かないようにします。
+- **除外のルール**（`.github/scripts/check-osv-ignores.sh` が CI で検査します）:
+  - `reason` は必須です。依存経路、修正版が無いと確認した日付、本リポジトリで悪用されたときの影響を書きます。
+  - `ignoreUntil` は必須で、183 日以内の日付にします。期限の無い除外は、修正版が出たあとも検知を止め続けるため禁止です。
+  - 期限を過ぎると CI が失敗します。修正版があれば更新して除外を削除し、無ければ影響を再評価して期限を延ばします。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動実行されます。

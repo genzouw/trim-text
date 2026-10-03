@@ -34,6 +34,12 @@ jobs:
         with:
           persist-credentials: false
 
+      # 修正版の無い脆弱性は osv-scanner.toml で除外するが、期限の無い除外は見直されないまま
+      # 残り、修正版が出たあとも検知を止め続ける。除外に理由と期限があることをここで検査する。
+      # 期限を過ぎた除外もここで落とし、対応手順をメッセージで示す。
+      - name: Check OSV-Scanner ignores
+        run: .github/scripts/check-osv-ignores.sh
+
       - name: Run OSV-Scanner
         uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
         with:
