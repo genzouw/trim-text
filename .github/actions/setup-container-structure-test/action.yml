@@ -1,0 +1,48 @@
+name: "Setup container-structure-test"
+description: "Downloads, validates, and caches container-structure-test"
+inputs:
+  version:
+    description: "The version of container-structure-test to install (e.g. 1.19.1)"
+    required: true
+  sha256:
+    description: "The expected SHA256 checksum of the container-structure-test binary"
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Cache container-structure-test
+      id: cache-container-structure-test
+      uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+      with:
+        path: ${{ runner.temp }}/container-structure-test
+        key: container-structure-test-${{ runner.os }}-${{ inputs.version }}-${{ inputs.sha256 }}
+
+    - name: Install container-structure-test
+      if: steps.cache-container-structure-test.outputs.cache-hit != 'true'
+      working-directory: ${{ runner.temp }}
+      shell: bash
+      env:
+        CST_VERSION: ${{ inputs.version }}
+        CST_SHA256: ${{ inputs.sha256 }}
+      run: |
+        set -euo pipefail
+        if ! [[ "${CST_VERSION}" =~ ^[0-9]+\.[0-9]+\.[0-9]+(-[a-zA-Z0-9.-]+)?$ ]]; then
+          echo "::error::Invalid container-structure-test version format"
+          exit 1
+        fi
+        if ! [[ "${CST_SHA256}" =~ ^[a-fA-F0-9]{64}$ ]]; then
+          echo "::error::Invalid SHA256 format"
+          exit 1
+        fi
+        curl --fail --silent --show-error --location \
+          --retry 3 --retry-all-errors --retry-delay 2 \
+          --connect-timeout 10 --max-time 120 \
+          -o container-structure-test \
+          "https://github.com/GoogleContainerTools/container-structure-test/releases/download/v${CST_VERSION}/container-structure-test-linux-amd64"
+        echo "${CST_SHA256}  container-structure-test" | sha256sum -c -
+        chmod +x container-structure-test
+
+    - name: Add container-structure-test to PATH
+      shell: bash
+      run: | # zizmor: ignore[github-env]
+        echo "${RUNNER_TEMP}" >> "$GITHUB_PATH"
