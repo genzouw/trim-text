@@ -40,6 +40,11 @@ jobs:
       # Dockle v0.4.15 Linux-64bit の公式 SHA256
       # https://github.com/goodwithtech/dockle/releases/tag/v0.4.15
       DOCKLE_SHA256: 8bfc9183d1d3d67800edb45bea4bb63ddf1d28bec5f89944075a07007d79caad
+      # container-structure-test のバージョンは再現性確保のため固定する。
+      CST_VERSION: 1.19.3
+      # container-structure-test v1.19.3 linux-amd64 の公式 SHA256
+      # https://github.com/GoogleContainerTools/container-structure-test/releases/tag/v1.19.3
+      CST_SHA256: fa0fa333bb6ba5c14065e7468d2904f5c82d021d7e1c763c9a45c5f2fbe9ff5f
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -94,6 +99,18 @@ jobs:
       - name: Run Dockle
         run: |
           "${RUNNER_TEMP}/dockle" --no-color --exit-code 1 --exit-level fatal trim-text:ci
+
+      - name: Setup container-structure-test
+        uses: ./.github/actions/setup-container-structure-test # zizmor: ignore[self-repository]
+        with:
+          version: ${{ env.CST_VERSION }}
+          sha256: ${{ env.CST_SHA256 }}
+
+      - name: Run container-structure-test
+        run: |
+          "${RUNNER_TEMP}/container-structure-test" test \
+            --image trim-text:ci \
+            --config tests/container-structure-test.yaml
 
       - name: Smoke test (trim 1 char from each side)
         run: |

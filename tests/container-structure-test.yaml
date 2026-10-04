@@ -1,0 +1,15 @@
+schemaVersion: 2.0.0
+metadataTest:
+  labels:
+    - key: "maintainer"
+      value: "genzouw <genzouw@gmail.com>"
+  entrypoint: ["/app/tt"]
+  workdir: "/app"
+
+fileExistenceTests:
+  - name: "tt script exists and is executable"
+    path: "/app/tt"
+    shouldExist: true
+    permissions: "-r-xr-xr-x"
+    uid: 0
+    gid: 0
