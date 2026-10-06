@@ -6,7 +6,7 @@
 		"markdownlint-cli2": "0.23.3"
 	},
 	"overrides": {
-		"katex": "0.18.2",
+		"katex": "^0.18.2",
 		"smol-toml": "1.9.0"
 	}
 }
