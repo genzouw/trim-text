@@ -422,6 +422,7 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
   1. 修正版があれば、依存を更新します。Renovate の PR を待たずに更新して構いません。
   2. 間接依存で、直接依存の更新を待てない場合は、`package.json` の `overrides` で修正版へ固定します。
   3. 修正版が無い場合に限り、影響を評価したうえで `osv-scanner.toml` の `[[IgnoredVulns]]` で除外します。除外は、その lockfile と同じディレクトリの `osv-scanner.toml` に書き、他の lockfile へ効かないようにします。
+- **`overrides` を外す条件**: `.github/markdownlint/package.json` の `katex`（`^0.18.2`）と `smol-toml` は、親パッケージの宣言範囲の外へ出す固定です。親が修正版を含む範囲を宣言したら、`overrides` を削除します。`katex` は `micromark-extension-math` が `^0.18.2` 以上を宣言した時点、`smol-toml` は `markdownlint-cli2` が修正版を含む範囲を宣言した時点が目安です。`katex` は `^` 指定のため、0.18 系の patch 修正は `lockFileMaintenance` で取り込まれます。0.19 以降へは自動で上がらないので、必要なら手動で更新します。
 - **除外のルール**（`.github/scripts/check-osv-ignores.sh` が CI で検査します）:
   - `reason` は必須です。依存経路、修正版が無いと確認した日付、本リポジトリで悪用されたときの影響を書きます。
   - `ignoreUntil` は必須で、183 日以内の日付にします。期限の無い除外は、修正版が出たあとも検知を止め続けるため禁止です。

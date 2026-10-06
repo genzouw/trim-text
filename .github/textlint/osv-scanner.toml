@@ -1,0 +1,15 @@
+# OSV-Scanner の除外設定 (この lockfile だけに効く)。
+# 除外の条件と手順は docs/AI_AUTOMATION.md の「OSV-Scanner」を参照。
+# reason と ignoreUntil は必須で、.github/scripts/check-osv-ignores.sh が CI で検査する。
+# ignoreUntil を過ぎると除外が効かなくなり、OSV-Scanner が再び失敗する。
+# そのときは上流の修正版の有無を確認し、あれば更新、無ければ影響を再評価して期限を延ばす。
+
+[[IgnoredVulns]]
+id = "GHSA-hp3w-g68c-fv3c"
+ignoreUntil = 2027-01-03
+reason = """
+sprintf-js 1.0.3 (textlint -> prh -> argparse 1.x -> sprintf-js) の、精度指定子の未検証による RangeError (DoS)。\
+2026-10-06 時点で修正版は無い (影響範囲は 1.1.3 以下で、sprintf-js の最新は 1.1.3。argparse 1.x も ~1.0.2 に固定している)。\
+本リポジトリでは lint.yml の textlint ジョブでしか使わず、sprintf-js に渡る書式文字列は prh と argparse の内部が組み立てたもので、外部から注入できない。\
+悪用されても lint ジョブが落ちるだけで、配布物 (Docker イメージ) には含まれない。\
+"""
