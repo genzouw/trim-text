@@ -416,7 +416,8 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 
 - **目的**: リポジトリ内の lockfile（`.github/markdownlint/package-lock.json` など CI 用ツールの依存を含む）を [OSV](https://osv.dev/) のデータベースと照合し、既知の脆弱性を検出します。
 - **設定ファイル**: `.github/workflows/osv-scanner.yml`、除外設定は各 lockfile と同じディレクトリの `osv-scanner.toml`
-- **特徴**: [google/osv-scanner](https://github.com/google/osv-scanner)（Apache License 2.0）は公開 OSS で、API キーや Secrets を必要とせず、課金も発生しません。`push` / `pull_request` に加えて週 1 回の定期実行があります。脆弱性情報はコードを変更しなくても増えるため、**何も変更していない PR や `main` で突然失敗することがあります**。
+- **特徴**: [google/osv-scanner](https://github.com/google/osv-scanner)（Apache License 2.0）は公開 OSS で、API キーや Secrets を必要とせず、課金も発生しません。`push` / `pull_request` に加えて週 1 回の定期実行があります。脆弱性情報はコードを変更しなくても増えるため、**何も変更していない `main` で突然失敗することがあります**。
+- **PR と `main` の検査範囲**: PR では、base と PR のスキャン結果を比べ、その PR が新しく持ち込んだ脆弱性だけで失敗させます（`google/osv-scanner-action` の再利用ワークフロー `osv-scanner-reusable-pr.yml`）。無関係な PR が、新しく公開された脆弱性で赤くならないようにするためです。既存の脆弱性は、`main` への push と週次スキャンが全件検査して拾います。除外の検査（`check-ignores` ジョブ）は PR でも実行します。
 - **検出されたときの対応**（上から順に検討します）:
   1. 修正版があれば、依存を更新します。Renovate の PR を待たずに更新して構いません。
   2. 間接依存で、直接依存の更新を待てない場合は、`package.json` の `overrides` で修正版へ固定します。

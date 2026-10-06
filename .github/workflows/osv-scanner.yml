@@ -18,8 +18,49 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  # 修正版の無い脆弱性は osv-scanner.toml で除外するが、期限の無い除外は見直されないまま
+  # 残り、修正版が出たあとも検知を止め続ける。除外に理由と期限があることをここで検査する。
+  # 期限を過ぎた除外もここで落とし、対応手順をメッセージで示す。
+  # スキャンの種類 (PR の差分 / 全件) に関わらず、すべてのイベントで実行する。
+  check-ignores:
+    name: Check OSV-Scanner ignores
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        with:
+          egress-policy: audit
+
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check OSV-Scanner ignores
+        run: .github/scripts/check-osv-ignores.sh
+
+  # PR では、base と PR のスキャン結果を比べ、その PR が新しく持ち込んだ脆弱性だけで失敗させる。
+  # 脆弱性情報はコードを変更しなくても増えるため、全件検査のままだと、公開のたびに
+  # 無関係な PR (Renovate の更新など) がすべて赤くなる。既存の脆弱性は、下の osv-scanner ジョブが
+  # main への push と週次スキャンで全件検査して拾う。
+  osv-scanner-pr:
+    name: Run OSV-Scanner (PR diff)
+    if: github.event_name == 'pull_request'
+    permissions:
+      actions: read
+      contents: read
+      security-events: write
+    uses: google/osv-scanner-action/.github/workflows/osv-scanner-reusable-pr.yml@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
+    with:
+      scan-args: |-
+        -r
+        .
+      fail-on-vuln: true
+
   osv-scanner:
     name: Run OSV-Scanner
+    if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -33,12 +74,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-
-      # 修正版の無い脆弱性は osv-scanner.toml で除外するが、期限の無い除外は見直されないまま
-      # 残り、修正版が出たあとも検知を止め続ける。除外に理由と期限があることをここで検査する。
-      # 期限を過ぎた除外もここで落とし、対応手順をメッセージで示す。
-      - name: Check OSV-Scanner ignores
-        run: .github/scripts/check-osv-ignores.sh
 
       - name: Run OSV-Scanner
         uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
