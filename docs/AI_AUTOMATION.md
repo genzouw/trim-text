@@ -429,3 +429,11 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
   - 期限を過ぎると CI が失敗します。修正版があれば更新して除外を削除し、無ければ影響を再評価して期限を延ばします。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動実行されます。
+
+### 42. Dive (Docker Image Analyzer)
+
+- **目的**: Docker イメージの各レイヤーの内容を分析し、イメージの効率性や不要なファイルの存在を検出してイメージサイズの最適化に役立てます。
+- **設定ファイル**: `.github/workflows/docker-build.yml`, `.github/actions/setup-dive/action.yml`
+- **特徴**: オープンソースで Go 製のツールである [wagoodman/dive](https://github.com/wagoodman/dive) (MIT License) を利用します。外部の SaaS や API キーへの依存がなく、公開リポジトリで完全に無料で動作します。CI 環境向けに `CI=true` を設定することで、分析結果に基づいた合否判定（例えば無駄なレイヤーが多い場合にビルドを失敗させるなど、将来的には `.dive-ci` ファイルで設定可能）を行えます。
+- **事前設定**:
+  1. 特に追加の設定は不要です。`.github/workflows/docker-build.yml` の `build` ジョブを通じて GitHub Actions 上で自動実行されます。
