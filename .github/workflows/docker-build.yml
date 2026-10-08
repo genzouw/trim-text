@@ -45,6 +45,10 @@ jobs:
       # container-structure-test v1.19.3 linux-amd64 の公式 SHA256
       # https://github.com/GoogleContainerTools/container-structure-test/releases/tag/v1.19.3
       CST_SHA256: fa0fa333bb6ba5c14065e7468d2904f5c82d021d7e1c763c9a45c5f2fbe9ff5f
+      # Dive のバージョンは再現性確保のため固定する。
+      DIVE_VERSION: 0.12.0
+      # Dive v0.12.0 linux_amd64.tar.gz の公式 SHA256
+      DIVE_SHA256: 20a7966523a0905f950c4fbf26471734420d6788cfffcd4a8c4bc972fded3e96
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
@@ -111,6 +115,16 @@ jobs:
           "${RUNNER_TEMP}/container-structure-test" test \
             --image trim-text:ci \
             --config tests/container-structure-test.yaml
+
+      - name: Setup Dive
+        uses: ./.github/actions/setup-dive # zizmor: ignore[self-repository]
+        with:
+          version: ${{ env.DIVE_VERSION }}
+          sha256: ${{ env.DIVE_SHA256 }}
+
+      - name: Run Dive image analysis
+        run: |
+          CI=true "${RUNNER_TEMP}/dive" trim-text:ci
 
       - name: Smoke test (trim 1 char from each side)
         run: |

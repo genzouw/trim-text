@@ -1,0 +1,13 @@
+# Dive (CI=true) の合否判定ルール。
+# 現状のイメージ (efficiency 62.97% / wastedBytes 約 12 MB / userWastedPercent 148.7%) は、
+# Dockerfile の `apk upgrade` がベースイメージの `/usr/lib/libcrypto.so.3` などを上書きして
+# 2 レイヤー分の重複を生むことが原因で、Dive の既定しきい値を満たさない。
+# 導入の目的は可視化なので、現状を許容しつつ悪化だけを検知する値から始める。
+rules:
+  # 現状 0.6297 に対し、これを下回る悪化を検知する
+  lowestEfficiency: 0.5
+  # 現状 約 12 MB に対し、16 MB (16000000 バイト) を超える悪化を検知する
+  highestWastedBytes: 16MB
+  # Dive は 0-1 の比率しか受け付けず、現状 1.4874 は上限 1.0 でも許容できないため判定から外す
+  # (範囲外の値は MISCONFIGURED となり CI が exit 1 で失敗する)
+  highestUserWastedPercent: disabled

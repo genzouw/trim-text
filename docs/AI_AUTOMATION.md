@@ -429,3 +429,12 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
   - 期限を過ぎると CI が失敗します。修正版があれば更新して除外を削除し、無ければ影響を再評価して期限を延ばします。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動実行されます。
+
+### 42. Dive (Docker Image Analyzer)
+
+- **目的**: Docker イメージの各レイヤーの内容を分析し、イメージの効率性や不要なファイルの存在を検出してイメージサイズの最適化に役立てます。
+- **設定ファイル**: `.github/workflows/docker-build.yml`, `.github/actions/setup-dive/action.yml`
+- **特徴**: オープンソースで Go 製のツールである [wagoodman/dive](https://github.com/wagoodman/dive) (MIT License) を利用します。外部の SaaS や API キーへの依存がなく、公開リポジトリで完全に無料で動作します。`CI=true` を付けて実行すると、リポジトリ直下の `.dive-ci` のルールで合否を判定します。`.dive-ci` が無い場合は Dive の既定しきい値（`lowestEfficiency: 0.9` / `highestUserWastedPercent: 0.1`）が適用されます。
+- **採用しているしきい値**: 現状のイメージは efficiency 62.97% / 無駄なバイト数 約 12 MB / userWastedPercent 148.7% で、既定値を満たしません。原因は `Dockerfile` の `apk upgrade` が `/usr/lib/libcrypto.so.3` などのベースイメージのファイルを上書きし、2 レイヤー分の重複が出ることです。構成を変えずに解消できないため、`.dive-ci` で `lowestEfficiency: 0.5` / `highestWastedBytes: 16MB` とし、現状を許容したうえで悪化だけを検知します。`highestUserWastedPercent` は Dive が 0〜1 の比率しか受け付けず、現状値 1.4874 は上限 1.0 でも許容できないため `disabled` にして判定から外します（範囲外の値は設定エラーとなり CI が失敗します）。ビルドの失敗を避けるための `continue-on-error` は、失敗が見えなくなるため使いません（AGENTS.md §4.2）。重複を解消できたら、`highestUserWastedPercent` を有効に戻し、しきい値を段階的に既定値へ近づけます。
+- **事前設定**:
+  1. 特に追加の設定は不要です。`.github/workflows/docker-build.yml` の `build` ジョブを通じて GitHub Actions 上で自動実行されます。
