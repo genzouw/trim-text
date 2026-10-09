@@ -4,6 +4,10 @@ on:
   pull_request_target:
     types: [opened, synchronize, reopened]
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 # 既定権限を最小限に絞り、ジョブごとに必要な権限のみ追加する。
 permissions: {}
 
