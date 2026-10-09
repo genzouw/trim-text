@@ -85,7 +85,7 @@ GitHub Actions / GitHub App を採用する前に、以下を **MUST** 確認し
 ### 5.6 (MUST NOT) ローカル LLM を CI の runner 上で動かす自動化の追加
 
 - Ollama / llama.cpp / LocalAI / vLLM 等を CI の runner 上で起動し、その推論結果を使う自動化が対象です。PR レビュー、Issue トリアージ、アクセシビリティ検査、ドキュメント生成、ハルシネーション検知など、用途を問いません。
-- API キーも課金も不要ですが、それは採用の理由になりません。runner の CPU で動かせる小型モデル (`qwen2.5-coder:0.5b` 等) は出力の質が低く、有害な修正提案を PR に投稿した実例があります ([genzouw/monopo#664](https://github.com/genzouw/monopo/issues/664))。
+- API キーや課金は不要ですが、それは採用の理由になりません。runner の CPU で動かせる小型モデル (`qwen2.5-coder:0.5b` 等) は出力の質が低く、有害な修正提案を PR に投稿した実例があります ([genzouw/monopo#664](https://github.com/genzouw/monopo/issues/664))。
 - 「完全無料・シークレットレスな AI 自動化」を掲げた [genzouw/toique#961](https://github.com/genzouw/toique/pull/961) は、同種の PR としてクローズ済みです。類似の PR を作成しないでください。
 - モデルや実行方法を差し替えても (別のモデル、別のランタイム、コンテナ実行、self-hosted runner) 同じく MUST NOT です。
 - 禁止しているのは CI/CD および自動化ワークフローへの組み込みです。開発者個人の端末で Ollama 等を動かすことは MAY です。
