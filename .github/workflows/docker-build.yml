@@ -51,7 +51,7 @@ jobs:
       DIVE_SHA256: 20a7966523a0905f950c4fbf26471734420d6788cfffcd4a8c4bc972fded3e96
     steps:
       - name: Harden Runner
-        uses: step-security/harden-runner@e14015d583714f6e62063499dc959a02595150a1 # v2.21.1
+        uses: step-security/harden-runner@351661ca32ac09a36dc5ee2d536e3128f2a3c8ed # v2.22.0
         with:
           egress-policy: audit
           # Uncomment and configure the following to block unauthorized traffic
