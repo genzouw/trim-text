@@ -31,7 +31,7 @@ on:
         default: ""
 
 concurrency:
-  group: ${{ github.workflow }}-${{ github.event.inputs.head_ref || github.run_id }}
+  group: ${{ github.workflow }}-${{ fromJSON(fromJSON(github.event.inputs.client_payload)).pullRequestNumber || github.run_id }}
   cancel-in-progress: true
 
 permissions:
