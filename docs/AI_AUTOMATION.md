@@ -68,7 +68,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 - **実際に起きたこと**: トライアル終了後、`qodo-code-review` bot は PR に `Qodo reviews are paused because the subscription is no longer active` とだけ投稿する状態になりました。
 - **自己ホスト版も不可**: OSS 実装の [`The-PR-Agent/pr-agent`](https://github.com/The-PR-Agent/pr-agent) は Qodo のホスト型サービスとは別物です。README にも `It is not the Qodo offering for open-source projects.` と明記されています。採用できない理由は構成によって異なります。
   - **ホスト型 LLM 構成（OpenAI / Anthropic / Gemini など）**: README のクイックスタートおよび GitHub Actions のサンプルは `OPENAI_KEY` を必須の環境変数として要求します。本リポジトリは従量課金 API キーの CI 組み込みを禁止しているため採用できません。
-  - **ローカル LLM 構成（Ollama など）**: LiteLLM 経由で `ollama/...` モデルを指定でき、この構成では LLM の API キーは不要です。ただし GitHub Actions のランナー上で Ollama サーバとモデルを毎回起動する必要があり、公開リポジトリの無料ランナーで現実的に運用できません。
+  - **ローカル LLM 構成（Ollama など）**: LiteLLM 経由で `ollama/...` モデルを指定でき、この構成では LLM の API キーは不要です。ただし GitHub Actions のランナー上で Ollama サーバとモデルを毎回起動する必要があり、公開リポジトリの無料ランナーで現実的に運用できません。運用できる場合でも、CI の runner 上で動かす構成は AGENTS.md の 5.6 で禁止しています。
 - **再導入を禁止する理由**: (1) Qodo のホスト型サービスに恒久的な無料プランがなく、本リポジトリは OSS 無料枠の条件（star 200 以上）を満たさない。(2) AI コードレビューという機能が CodeRabbit と重複しており、二重にレビューコメントが付く。(3) 従量課金 API キーを CI に組み込まない、というリポジトリ方針に反する。
 - **代替**: AI コードレビューは CodeRabbit に一本化します。
 
