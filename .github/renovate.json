@@ -36,14 +36,14 @@
 			"週 1 回 lockfile を作り直し、宣言範囲内で出ている修正版を取り込む。",
 			"月曜 4 時前 (Asia/Tokyo) は、OSV-Scanner の週次スキャン (月曜 06:00 JST) の直前にあたる。",
 			"対象は .github/markdownlint と .github/textlint の package-lock.json だけで、どちらも CI 専用のため ci プレフィックスで出す。",
-			"宣言範囲の外にある修正や、修正版が無い脆弱性は直らない。それらは osv-scanner.toml の除外か overrides で扱う。"
+			"宣言範囲の外にある修正や、修正版が無い脆弱性は直らない。それらは osv-scanner.toml の除外か overrides で扱う。",
+			"自動マージしない。lockFileMaintenance は minimumReleaseAge の対象外で、自動マージすると公開直後の版が冷却期間なしで入るため。",
+			"toique の lockFileMaintenance と同じ扱いにそろえた (genzouw/gpg#18)。"
 		],
 		"enabled": true,
 		"schedule": ["before 4am on monday"],
 		"semanticCommitType": "ci",
-		"automerge": true,
-		"platformAutomerge": true,
-		"automergeStrategy": "squash"
+		"automerge": false
 	},
 	"packageRules": [
 		{
