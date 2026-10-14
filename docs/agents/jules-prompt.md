@@ -149,6 +149,8 @@ Issue では「なぜ既存の無料サービスでは目的を達成できな�
 - PR タイトル、PR 説明文、コミットメッセージ、ソースコード内コメント、ドキュメントは **日本語** で記載してください。
 - 技術用語 (GitHub Actions / CI/CD / API キー / Marketplace 等) は原語のままで構いません。
 - コミットメッセージは [Conventional Commits](https://www.conventionalcommits.org/ja/v1.0.0/) に従ってください (例: `ci: <変更内容>`, `docs: <変更内容>`, `feat(ci): <変更内容>`)。
+- コミットメッセージの本文は **1 行を 100 文字以内** で改行してください。CI の commitlint (`@commitlint/config-conventional` の `body-max-line-length`) が 101 文字以上の行を含むコミットを失敗させます。1 文を 1 行に書き続けず、読点や句点の位置で折り返してください。
+- push 済みのコミットは書き換えられません (force push 不可)。最初のコミットで本文の行長を確認してから push してください。
 
 ### 判断に迷ったとき
 
