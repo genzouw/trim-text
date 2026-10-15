@@ -30,7 +30,6 @@ rules:
       # env 経由で受け渡し、run スクリプトへの直接埋め込みを避けているため、
       # PR 由来のコードを実行しない安全な構成のため抑止する。
       - first-interaction.yml
-      - test-results.yml
 
 # self-repository はこの設定ファイルでは抑止しない。
 # zizmor は同一リポジトリ内の複合Action参照に self-repository 構文 ($/...) を
