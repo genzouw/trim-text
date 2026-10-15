@@ -21,7 +21,7 @@ permissions:
 jobs:
   free-policy:
     # enforce は既定の true。AGENTS.md のコスト方針に反する設定を検出した PR は job が失敗する。
-    uses: genzouw/ci-workflows/.github/workflows/free-policy.yml@93014a5f3aeabb92bd992bd113bdb2a4c62a2aa6 # v1.5.13
+    uses: genzouw/ci-workflows/.github/workflows/free-policy.yml@e317e4f45869de3fe2eaa86a27f61060d31ff784 # v1.5.14
     with:
       # GitHub 自身の資格情報だけを許可する (課金 API には繋がらない)。
       # 有料 SaaS の鍵はここへ足さない (#271)。
