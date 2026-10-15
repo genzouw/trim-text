@@ -74,7 +74,7 @@ jobs:
 
       - name: Run scanner on existing code
         id: scan-old
-        uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
+        uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36 # v2.7.0
         # 脆弱性が見つかると非ゼロで終了するが、判定は後段の reporter が行う
         continue-on-error: true
         with:
@@ -90,7 +90,7 @@ jobs:
 
       - name: Run scanner on new code
         id: scan-new
-        uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
+        uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36 # v2.7.0
         continue-on-error: true
         with:
           scan-args: |-
@@ -116,7 +116,7 @@ jobs:
           exit "${status}"
 
       - name: Report new vulnerabilities
-        uses: google/osv-scanner-action/osv-reporter-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
+        uses: google/osv-scanner-action/osv-reporter-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36 # v2.7.0
         with:
           scan-args: |-
             --output=results.sarif
@@ -143,7 +143,7 @@ jobs:
           persist-credentials: false
 
       - name: Run OSV-Scanner
-        uses: google/osv-scanner-action/osv-scanner-action@a345acffa64b0eaede81a3d9aae6141214d9c8fc # v2.6.0
+        uses: google/osv-scanner-action/osv-scanner-action@b1d267aea5211fa648d9d442fa64b90dbdcbdd36 # v2.7.0
         with:
           scan-args: |-
             -r
