@@ -1,0 +1,83 @@
+name: AI Issue Translator
+
+on:
+  issues:
+    types: [opened]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.issue.number || github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  translate:
+    name: Translate Issue
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@ccd8616d44fd3846e67624a50d5aad6d37bf2d25 # v2.22.1
+        with:
+          egress-policy: audit
+
+      - name: Install Ollama
+        run: |
+          curl -fsSL https://ollama.com/install.sh | /bin/bash
+
+      - name: Start Ollama
+        run: |
+          ollama serve > ollama.log 2>&1 &
+          for i in {1..30}; do
+            if curl -s http://localhost:11434/api/tags > /dev/null; then
+              echo "Ollama is ready."
+              break
+            fi
+            sleep 1
+          done
+
+      - name: Pull Qwen model
+        run: ollama pull qwen2.5:0.5b
+
+      - name: Translate issue
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GH_REPO: ${{ github.repository }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+        run: |
+          set -e
+
+          # Prepare prompt
+          PROMPT="以下のIssueのタイトルと本文を日本語に翻訳してください。もしテキストが既に日本語であれば、「このIssueは既に日本語で書かれています。」とだけ出力してください。翻訳結果のみを出力してください。
+
+          タイトル: ${ISSUE_TITLE}
+
+          本文:
+          ${ISSUE_BODY}"
+
+          # Create JSON payload securely using jq
+          JSON_PAYLOAD=$(jq -n --arg p "$PROMPT" '{model: "qwen2.5:0.5b", prompt: $p, stream: false}')
+
+          # Generate translation
+          RESPONSE=$(curl -s -X POST http://localhost:11434/api/generate -d "$JSON_PAYLOAD")
+          TRANSLATION=$(echo "$RESPONSE" | jq -r '.response')
+
+          # If the response is valid and not just stating it's already Japanese
+          if [ -n "$TRANSLATION" ] && [ "$TRANSLATION" != "null" ]; then
+            if ! echo "$TRANSLATION" | grep -q "このIssueは既に日本語で書かれています"; then
+              COMMENT_BODY=$(cat <<MSG
+          <!-- ai-issue-translator -->
+          ### 🤖 AI 自動翻訳 / AI Translation (qwen2.5:0.5b)
+
+          ${TRANSLATION}
+          MSG
+              )
+              # Output to file to avoid quoting issues with gh CLI
+              printf "%s\n" "$COMMENT_BODY" > comment.md
+              gh issue comment "${ISSUE_NUMBER}" --body-file comment.md
+            fi
+          fi

@@ -280,10 +280,13 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **状況**: **削除しました。** `.github/workflows/ai-ci-failure-explainer.yml` は 2026-09 に削除しています。CI 失敗時のログ解析を GitHub Models の推論 API に依存していたためです。
 - **代替**: 失敗の原因は GitHub Actions のジョブログで確認してください。Lint の指摘は reviewdog が Pull Request へインラインコメントとして投稿します。
 
-### 25. AI Issue Translator (廃止 / 削除済み)
+### 25. AI Issue Translator
 
-- **状況**: **削除しました。** `.github/workflows/ai-issue-translator.yml` は 2026-09 に削除しています。翻訳を GitHub Models の推論 API に依存していたためです。
-- **代替**: 日本語以外で書かれた Issue は、各自の翻訳ツールで読んでください。
+- **目的**: 英語やその他の言語で作成された Issue を、ローカル LLM (Ollama) を用いて自動的に日本語へ翻訳し、メンテナーの負担を軽減します。
+- **設定ファイル**: `.github/workflows/ai-issue-translator.yml`
+- **特徴**: 以前は GitHub Models に依存していましたが、廃止に伴い撤去されていました。現在は GitHub-hosted runner 上に直接 `Ollama` をインストールし、小規模で高速なオープンソースモデル (`qwen2.5:0.5b`) を実行して翻訳します。外部の LLM API キーや有料 SaaS に依存しないため、公開 OSS リポジトリで完全に無料で動作します。
+- **事前設定**:
+  1. 特に追加の設定は不要です。`.github/workflows/ai-issue-translator.yml` を通じて GitHub Actions 上で自動実行されます。
 
 ### 26. AI PR Translator (廃止 / 削除済み)
 
