@@ -29,4 +29,4 @@ jobs:
     # shellcheck の版は ci-workflows 側の既定値 (0.11.0) に委ねる。v1.5.6 から、ランナー同梱版ではなく
     # SHA256 検証つきの固定版を使う (genzouw/ci-workflows#59)。
     # pre-commit のフック (.pre-commit-config.yaml の rev) および lint.yml の SHELLCHECK_VERSION と同じ版に揃える (#269)。
-    uses: genzouw/ci-workflows/.github/workflows/shellcheck.yml@be1cee5d97d043ead7ef16d27b5b9c74d285afca # v1.5.17
+    uses: genzouw/ci-workflows/.github/workflows/shellcheck.yml@197e09c1418fd2e660bb24684c076ecb3463e7ac # v1.5.18
