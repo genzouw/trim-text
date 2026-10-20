@@ -52,7 +52,10 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           GH_REPO: ${{ github.repository }}
         run: |
-          PROMPT=$(printf '以下の GitHub Issue を日本語に翻訳してください。翻訳結果のみを出力してください。\n\nTitle: %s\n\nBody: %s' "${ISSUE_TITLE}" "${ISSUE_BODY}")
+          # 入力長を制限する（Issue は誰でも開けるため、巨大な入力でランナーを占有させない）
+          TITLE=$(printf '%s' "${ISSUE_TITLE}" | head -c 500)
+          BODY=$(printf '%s' "${ISSUE_BODY}" | head -c 4000)
+          PROMPT=$(printf '以下の GitHub Issue を日本語に翻訳してください。翻訳結果のみを出力してください。\n\nTitle: %s\n\nBody: %s' "${TITLE}" "${BODY}")
           JSON_PAYLOAD=$(jq -n --arg prompt "$PROMPT" --arg model "qwen2.5:0.5b" '{model: $model, prompt: $prompt, stream: false}')
           RESPONSE=$(curl -s -X POST http://localhost:11434/api/generate -d "$JSON_PAYLOAD")
           TRANSLATION=$(echo "$RESPONSE" | jq -r '.response')
@@ -61,5 +64,8 @@ jobs:
             echo "翻訳結果が空だったため、コメントを投稿せずに終了しました。" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
+          # プロンプトインジェクションで @メンション を含む文面が投稿されても通知が飛ばないよう、
+          # @ の直後にゼロ幅スペース (U+200B) を挿入して無害化する
+          TRANSLATION=${TRANSLATION//@/@$'\u200b'}
           COMMENT_BODY=$(printf '### AI 自動翻訳 (Ollama - qwen2.5:0.5b)\n\n> 機械翻訳のため、不正確な場合があります。\n\n%s' "${TRANSLATION}")
           gh issue comment "${ISSUE_NUMBER}" -b "${COMMENT_BODY}" -R "${GH_REPO}"
