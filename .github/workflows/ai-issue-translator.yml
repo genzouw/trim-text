@@ -56,7 +56,5 @@ jobs:
             # abort execution gracefully
             bash -c "exit 0"
           fi
-          COMMENT_BODY="### AI 自動翻訳 (Ollama - qwen2.5:0.5b)
-
-${TRANSLATION}"
+          COMMENT_BODY=$(printf '### AI 自動翻訳 (Ollama - qwen2.5:0.5b)\n\n%s' "${TRANSLATION}")
           gh issue comment "${ISSUE_NUMBER}" -b "${COMMENT_BODY}" -R "${GH_REPO}"
