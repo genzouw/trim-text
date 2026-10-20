@@ -66,7 +66,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
         run: |
           # 日本語（ひらがな・カタカナ）を含む Issue は翻訳不要のため何もしない
-          if printf '%s%s' "${ISSUE_TITLE}" "${ISSUE_BODY}" | LC_ALL=C.UTF-8 grep -qP '[\x{3040}-\x{30FF}]'; then
+          if LC_ALL=C.UTF-8 grep -qP '[\x{3040}-\x{30FF}]' <<<"${ISSUE_TITLE}${ISSUE_BODY}"; then
             echo "日本語を含む Issue のため翻訳をスキップしました。" >> "$GITHUB_STEP_SUMMARY"
             exit 0
           fi
