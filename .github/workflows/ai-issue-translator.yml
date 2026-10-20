@@ -24,9 +24,14 @@ jobs:
           egress-policy: audit
 
       - name: Install Ollama
+        env:
+          OLLAMA_VERSION: v0.40.6
+          OLLAMA_SHA256: c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
         run: |
-          curl -fsSL https://ollama.com/install.sh -o install.sh
-          sh install.sh
+          # 公式リリースのバイナリをバージョン固定で取得し、SHA256 を検証してから展開する
+          curl -fsSL -o ollama.tar.zst "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst"
+          echo "${OLLAMA_SHA256}  ollama.tar.zst" | sha256sum -c -
+          sudo tar --zstd -C /usr/local -xf ollama.tar.zst
 
       - name: Start Ollama Server
         run: |
@@ -47,14 +52,14 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           GH_REPO: ${{ github.repository }}
         run: |
-          PROMPT="以下の GitHub Issue を日本語に翻訳してください。翻訳結果のみを出力してください。\n\nTitle: ${ISSUE_TITLE}\n\nBody: ${ISSUE_BODY}"
+          PROMPT=$(printf '以下の GitHub Issue を日本語に翻訳してください。翻訳結果のみを出力してください。\n\nTitle: %s\n\nBody: %s' "${ISSUE_TITLE}" "${ISSUE_BODY}")
           JSON_PAYLOAD=$(jq -n --arg prompt "$PROMPT" --arg model "qwen2.5:0.5b" '{model: $model, prompt: $prompt, stream: false}')
           RESPONSE=$(curl -s -X POST http://localhost:11434/api/generate -d "$JSON_PAYLOAD")
           TRANSLATION=$(echo "$RESPONSE" | jq -r '.response')
           if [ -z "$TRANSLATION" ] || [ "$TRANSLATION" = "null" ]; then
-            echo "Error: Translation failed or empty response."
-            # abort execution gracefully
-            bash -c "exit 0"
+            echo "::warning::Translation failed or empty response."
+            echo "翻訳結果が空だったため、コメントを投稿せずに終了しました。" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
           fi
-          COMMENT_BODY=$(printf '### AI 自動翻訳 (Ollama - qwen2.5:0.5b)\n\n%s' "${TRANSLATION}")
+          COMMENT_BODY=$(printf '### AI 自動翻訳 (Ollama - qwen2.5:0.5b)\n\n> 機械翻訳のため、不正確な場合があります。\n\n%s' "${TRANSLATION}")
           gh issue comment "${ISSUE_NUMBER}" -b "${COMMENT_BODY}" -R "${GH_REPO}"
