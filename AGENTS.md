@@ -21,7 +21,7 @@
 
 - `git` / `gh` CLI: バージョン管理と GitHub 操作。
 - `bash` / `zsh`: スクリプト実行。
-- ローカル LLM (Ollama, llama.cpp 等): 開発者個人の端末での利用に限り可。CI の runner 上で動かす自動化は、Secrets不要の完全無料な用途に限り MAY です (5.6)。
+- ローカル LLM (Ollama, llama.cpp 等): 開発者個人の端末での利用に限り可。CI の runner 上で動かす自動化は、Secrets 不要の Issue 翻訳・軽微なタグ付けに限り MAY です。コード・PR のレビューや修正提案への利用は MUST NOT です (5.6)。
 - エディタ統合 (Claude Code, Cursor, Continue.dev 等): ローカルの API キーで利用可。
 
 ### 3.2 リポジトリに導入済みのツール (重複 PR を作らないこと)
@@ -84,8 +84,8 @@ GitHub Actions / GitHub App を採用する前に、以下を **MUST** 確認し
 
 ### 5.6 (MAY) ローカル LLM を CI の runner 上で動かす自動化の追加
 
-- Ollama / llama.cpp / LocalAI / vLLM 等を CI の runner 上で起動し、その推論結果を使う自動化は、API キーや Secrets が不要である限り許可（MAY）されます。
-- 例えば、Issue の自動翻訳や軽微なタグ付けなど、品質の低さが致命的にならない用途での活用が歓迎されます。
+- Ollama / llama.cpp / LocalAI / vLLM 等を CI の runner 上で起動し、その推論結果を使う自動化は、API キーや Secrets が不要であり、かつ用途が Issue コメントへの翻訳・軽微なタグ付けに限られる場合に許可（MAY）されます。
+- コード・PR のレビュー、修正提案、ドキュメント生成など、出力の誤りが成果物に影響する用途への利用は引き続き **MUST NOT** です。runner の CPU で動かせる小型モデル (`qwen2.5-coder:0.5b` 等) は出力の質が低く、有害な修正提案を PR に投稿した実例があります ([genzouw/monopo#664](https://github.com/genzouw/monopo/issues/664))。「完全無料・シークレットレスな AI 自動化」を掲げた [genzouw/toique#961](https://github.com/genzouw/toique/pull/961) も、PR レビュー用途のためクローズ済みです。
 - 外部 SaaS に依存せず、公開 OSS リポジトリで完全に無料で実行できる点が評価されます。
 
 ## 6. Permissions / 許可されているもの (MAY)
