@@ -52,6 +52,11 @@ jobs:
           ISSUE_NUMBER: ${{ github.event.issue.number }}
           GH_REPO: ${{ github.repository }}
         run: |
+          # 日本語（ひらがな・カタカナ）を含む Issue は翻訳不要のため何もしない
+          if printf '%s%s' "${ISSUE_TITLE}" "${ISSUE_BODY}" | LC_ALL=C.UTF-8 grep -qP '[\x{3040}-\x{30FF}]'; then
+            echo "日本語を含む Issue のため翻訳をスキップしました。" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
           # 入力長を制限する（Issue は誰でも開けるため、巨大な入力でランナーを占有させない）
           TITLE=$(printf '%s' "${ISSUE_TITLE}" | head -c 500)
           BODY=$(printf '%s' "${ISSUE_BODY}" | head -c 4000)
