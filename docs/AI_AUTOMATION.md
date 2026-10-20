@@ -68,7 +68,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 - **実際に起きたこと**: トライアル終了後、`qodo-code-review` bot は PR に `Qodo reviews are paused because the subscription is no longer active` とだけ投稿する状態になりました。
 - **自己ホスト版も不可**: OSS 実装の [`The-PR-Agent/pr-agent`](https://github.com/The-PR-Agent/pr-agent) は Qodo のホスト型サービスとは別物です。README にも `It is not the Qodo offering for open-source projects.` と明記されています。採用できない理由は構成によって異なります。
   - **ホスト型 LLM 構成（OpenAI / Anthropic / Gemini など）**: README のクイックスタートおよび GitHub Actions のサンプルは `OPENAI_KEY` を必須の環境変数として要求します。本リポジトリは従量課金 API キーの CI 組み込みを禁止しているため採用できません。
-  - **ローカル LLM 構成（Ollama など）**: LiteLLM 経由で `ollama/...` モデルを指定でき、この構成では LLM の API キーは不要です。ただし GitHub Actions のランナー上で Ollama サーバとモデルを毎回起動する必要があり、公開リポジトリの無料ランナーで現実的に運用できません。運用できる場合でも、CI の runner 上で動かす構成は AGENTS.md の 5.6 で禁止しています。
+  - **ローカル LLM 構成（Ollama など）**: LiteLLM 経由で `ollama/...` モデルを指定でき、この構成では LLM の API キーは不要です。公開リポジトリの無料ランナー上で Ollama サーバとモデルを毎回起動して運用することが可能です。APIキーやSecretsが不要であるため、この構成は許可（MAY）されています（AGENTS.md 5.6）。
 - **再導入を禁止する理由**: (1) Qodo のホスト型サービスに恒久的な無料プランがなく、本リポジトリは OSS 無料枠の条件（star 200 以上）を満たさない。(2) AI コードレビューという機能が CodeRabbit と重複しており、二重にレビューコメントが付く。(3) 従量課金 API キーを CI に組み込まない、というリポジトリ方針に反する。
 - **代替**: AI コードレビューは CodeRabbit に一本化します。
 
@@ -440,3 +440,11 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **採用しているしきい値**: 現状のイメージは efficiency 62.97% / 無駄なバイト数 約 12 MB / userWastedPercent 148.7% で、既定値を満たしません。原因は `Dockerfile` の `apk upgrade` が `/usr/lib/libcrypto.so.3` などのベースイメージのファイルを上書きし、2 レイヤー分の重複が出ることです。構成を変えずに解消できないため、`.dive-ci` で `lowestEfficiency: 0.5` / `highestWastedBytes: 16MB` とし、現状を許容したうえで悪化だけを検知します。`highestUserWastedPercent` は Dive が 0〜1 の比率しか受け付けず、現状値 1.4874 は上限 1.0 でも許容できないため `disabled` にして判定から外します（範囲外の値は設定エラーとなり CI が失敗します）。ビルドの失敗を避けるための `continue-on-error` は、失敗が見えなくなるため使いません（AGENTS.md §4.2）。重複を解消できたら、`highestUserWastedPercent` を有効に戻し、しきい値を段階的に既定値へ近づけます。
 - **事前設定**:
   1. 特に追加の設定は不要です。`.github/workflows/docker-build.yml` の `build` ジョブを通じて GitHub Actions 上で自動実行されます。
+
+### 43. AI Issue Translator (Ollama)
+
+- **目的**: 新しく作成された Issue のタイトルと本文を、ローカル LLM を用いて日本語に自動翻訳し、コメントとして投稿します。
+- **設定ファイル**: `.github/workflows/ai-issue-translator.yml`
+- **特徴**: GitHub-hosted runner 上で直接 [Ollama](https://ollama.com/) を起動し、軽量モデル (`qwen2.5:0.5b`) を利用して推論を行います。外部の LLM プロバイダの API に依存せず、API キー（Secrets）も必要としないため、公開リポジトリで完全に無料で動作します。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
