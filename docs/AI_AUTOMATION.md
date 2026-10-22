@@ -32,14 +32,14 @@ GitHub Models の推論 API は 2026年7月30日付けで完全に retired（廃
 
 そのため LLM 推論を前提とした自前ワークフローからは撤退し、責務を次のとおり再配置しました（#157 / #159）。
 
-| ワークフロー                                                                     | 撤去後の扱い                                                                      |
-| :------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
-| `ai-issue-summarizer.yml`                                                        | 削除しました。`/summarize` コマンドは廃止します                                   |
-| `ai-issue-responder.yml`                                                         | 削除しました。初回コントリビュータへの応答は `first-interaction.yml` が担当します |
-| `ai-issue-translator.yml` / `ai-pr-translator.yml` / `ai-release-translator.yml` | 削除しました。翻訳は各自の翻訳ツールで代替します                                  |
-| `ai-ci-failure-explainer.yml`                                                    | 削除しました。CI ログと reviewdog のインラインコメントで代替します                |
-| `issue-labeller.yml`                                                             | 削除しました。Issue のラベルは手動で付与します                                    |
-| `pr-policy-checker.yml`                                                          | LLM 推論を使わない決定的な実装へ置き換えました（後述の 23 を参照）                |
+| ワークフロー                                            | 撤去後の扱い                                                                      |
+| :------------------------------------------------------ | :-------------------------------------------------------------------------------- |
+| `ai-issue-summarizer.yml`                               | 削除しました。`/summarize` コマンドは廃止します                                   |
+| `ai-issue-responder.yml`                                | 削除しました。初回コントリビュータへの応答は `first-interaction.yml` が担当します |
+| `ai-issue-translator.yml` / `ai-release-translator.yml` | 削除しました。翻訳は各自の翻訳ツールで代替します                                  |
+| `ai-ci-failure-explainer.yml`                           | 削除しました。CI ログと reviewdog のインラインコメントで代替します                |
+| `issue-labeller.yml`                                    | 削除しました。Issue のラベルは手動で付与します                                    |
+| `pr-policy-checker.yml`                                 | LLM 推論を使わない決定的な実装へ置き換えました（後述の 23 を参照）                |
 
 AI によるコードレビューは、GitHub App として稼働している CodeRabbit が担当します。
 
