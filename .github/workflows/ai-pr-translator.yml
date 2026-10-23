@@ -1,0 +1,91 @@
+name: AI PR Translator
+
+on:
+  pull_request_target:
+    types: [opened]
+
+concurrency:
+  group: ai-pr-translator-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  translate:
+    name: Translate PR
+    # Renovate などの Bot が作成した PR は翻訳対象外とする
+    if: github.event.pull_request.user.type != 'Bot'
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+
+      - name: Install Ollama
+        env:
+          OLLAMA_VERSION: v0.40.6
+          OLLAMA_SHA256: c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
+        run: |
+          # 公式リリースのバイナリをバージョン固定で取得し、SHA256 を検証してから展開する
+          curl -fsSL -o ollama.tar.zst "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst"
+          echo "${OLLAMA_SHA256}  ollama.tar.zst" | sha256sum -c -
+          sudo tar --zstd -C /usr/local -xf ollama.tar.zst
+
+      - name: Cache Ollama Models
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.ollama
+          key: ollama-models-qwen2.5-0.5b
+
+      - name: Start Ollama Server
+        run: |
+          ollama serve > ollama.log 2>&1 &
+          # 起動待ちは最大 60 秒。超えたら失敗として終了する
+          for _ in $(seq 1 60); do
+            if curl -sf --max-time 5 http://localhost:11434/api/tags > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Ollama server did not start within 60 seconds."
+          cat ollama.log
+          exit 1
+
+      - name: Pull Model
+        run: |
+          ollama pull qwen2.5:0.5b
+
+      - name: Translate PR
+        env:
+          PR_TITLE: ${{ github.event.pull_request.title }}
+          PR_BODY: ${{ github.event.pull_request.body }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # 日本語（ひらがな・カタカナ）を含む PR は翻訳不要のため何もしない
+          if LC_ALL=C.UTF-8 grep -qP '[\x{3040}-\x{30FF}]' <<<"${PR_TITLE}${PR_BODY}"; then
+            echo "日本語を含む PR のため翻訳をスキップしました。" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # 入力長を制限する（PR は誰でも開けるため、巨大な入力でランナーを占有させない）
+          TITLE=$(printf '%s' "${PR_TITLE}" | head -c 500)
+          BODY=$(printf '%s' "${PR_BODY}" | head -c 4000)
+          PROMPT=$(printf '以下の GitHub Pull Request を日本語に翻訳してください。翻訳結果のみを出力してください。\n\nTitle: %s\n\nBody: %s' "${TITLE}" "${BODY}")
+          JSON_PAYLOAD=$(jq -n --arg prompt "$PROMPT" --arg model "qwen2.5:0.5b" '{model: $model, prompt: $prompt, stream: false}')
+          RESPONSE=$(curl -sf --max-time 300 -X POST http://localhost:11434/api/generate -d "$JSON_PAYLOAD")
+          TRANSLATION=$(echo "$RESPONSE" | jq -r '.response')
+          if [ -z "$TRANSLATION" ] || [ "$TRANSLATION" = "null" ]; then
+            echo "::warning::Translation failed or empty response."
+            echo "翻訳結果が空だったため、コメントを投稿せずに終了しました。" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+          # プロンプトインジェクションで @メンション を含む文面が投稿されても通知が飛ばないよう、
+          # @ の直後にゼロ幅スペース (U+200B) を挿入して無害化する
+          TRANSLATION=${TRANSLATION//@/@$'\u200b'}
+          COMMENT_BODY=$(printf '### AI 自動翻訳 (Ollama - qwen2.5:0.5b)\n\n> 機械翻訳のため、不正確な場合があります。\n\n%s' "${TRANSLATION}")
+          gh pr comment "${PR_NUMBER}" -b "${COMMENT_BODY}" -R "${GH_REPO}"

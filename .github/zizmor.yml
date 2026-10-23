@@ -30,6 +30,12 @@ rules:
       # env 経由で受け渡し、run スクリプトへの直接埋め込みを避けているため、
       # PR 由来のコードを実行しない安全な構成のため抑止する。
       - first-interaction.yml
+      # ai-pr-translator.yml は新しく作成された PR を翻訳しコメントを投稿するため
+      # pull_request_target が必須（pull_request では GITHUB_TOKEN が読み取り専用に
+      # なり pull-requests への write 権限が付与されず、フォーク PR にコメントできない）。
+      # PR のタイトルや本文は env 経由で渡し、インラインスクリプトへの直接埋め込みを
+      # 避けているため、スクリプトインジェクションのリスクがない安全な構成のため抑止する。
+      - ai-pr-translator.yml
 
 # self-repository はこの設定ファイルでは抑止しない。
 # zizmor は同一リポジトリ内の複合Action参照に self-repository 構文 ($/...) を
