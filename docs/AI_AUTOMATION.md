@@ -32,14 +32,14 @@ GitHub Models の推論 API は 2026年7月30日付けで完全に retired（廃
 
 そのため LLM 推論を前提とした自前ワークフローからは撤退し、責務を次のとおり再配置しました（#157 / #159）。
 
-| ワークフロー                                            | 撤去後の扱い                                                                      |
-| :------------------------------------------------------ | :-------------------------------------------------------------------------------- |
-| `ai-issue-summarizer.yml`                               | 削除しました。`/summarize` コマンドは廃止します                                   |
-| `ai-issue-responder.yml`                                | 削除しました。初回コントリビュータへの応答は `first-interaction.yml` が担当します |
-| `ai-issue-translator.yml` / `ai-release-translator.yml` | 削除しました。翻訳は各自の翻訳ツールで代替します                                  |
-| `ai-ci-failure-explainer.yml`                           | 削除しました。CI ログと reviewdog のインラインコメントで代替します                |
-| `issue-labeller.yml`                                    | 削除しました。Issue のラベルは手動で付与します                                    |
-| `pr-policy-checker.yml`                                 | LLM 推論を使わない決定的な実装へ置き換えました（後述の 23 を参照）                |
+| ワークフロー                                                                     | 撤去後の扱い                                                                      |
+| :------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
+| `ai-issue-summarizer.yml`                                                        | 削除しました。`/summarize` コマンドは廃止します                                   |
+| `ai-issue-responder.yml`                                                         | 削除しました。初回コントリビュータへの応答は `first-interaction.yml` が担当します |
+| `ai-issue-translator.yml` / `ai-pr-translator.yml` / `ai-release-translator.yml` | 削除しました。翻訳は各自の翻訳ツールで代替します                                  |
+| `ai-ci-failure-explainer.yml`                                                    | 削除しました。CI ログと reviewdog のインラインコメントで代替します                |
+| `issue-labeller.yml`                                                             | 削除しました。Issue のラベルは手動で付与します                                    |
+| `pr-policy-checker.yml`                                                          | LLM 推論を使わない決定的な実装へ置き換えました（後述の 23 を参照）                |
 
 AI によるコードレビューは、GitHub App として稼働している CodeRabbit が担当します。
 
@@ -285,14 +285,10 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **状況**: **削除しました。** `.github/workflows/ai-issue-translator.yml` は 2026-09 に削除しています。翻訳を GitHub Models の推論 API に依存していたためです。
 - **代替**: 日本語以外で書かれた Issue は、各自の翻訳ツールで読んでください。
 
-### 26. AI PR Translator (Ollama)
+### 26. AI PR Translator (廃止 / 削除済み)
 
-- **目的**: 新しく作成された Pull Request のタイトルと本文を、ローカル LLM を用いて日本語に自動翻訳し、コメントとして投稿します。
-- **設定ファイル**: `.github/workflows/ai-pr-translator.yml`
-- **対象外**: Renovate などの Bot が作成した PR は翻訳しません（ジョブの `if` で `user.type != 'Bot'` を条件にしています）。
-- **特徴**: GitHub-hosted runner 上で直接 [Ollama](https://ollama.com/) を起動し、軽量モデル (`qwen2.5:0.5b`) を利用して推論します。外部の LLM プロバイダの API に依存せず、API キー（Secrets）も必要としないため、公開リポジトリで完全に無料で動作します。フォークからの PR にも対応するため `pull_request_target` イベントを使用しますが、コードのチェックアウトは行わず、入力を `env` 経由で受け渡し、スクリプトインジェクションを防ぐ安全な構成としています。
-- **事前設定**:
-  1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
+- **状況**: **削除しました。** `.github/workflows/ai-pr-translator.yml` は 2026-09 に削除しています。翻訳を GitHub Models の推論 API に依存していたためです。あわせて `.github/zizmor.yml` の `dangerous-triggers` 抑止エントリも削除しています。
+- **代替**: 日本語以外で書かれた Pull Request は、各自の翻訳ツールで読んでください。
 
 ### 27. Dockle (コンテナイメージ Linter)
 
