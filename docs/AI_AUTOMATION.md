@@ -36,7 +36,8 @@ GitHub Models の推論 API は 2026年7月30日付けで完全に retired（廃
 | :------------------------------------------------------------------------------- | :-------------------------------------------------------------------------------- |
 | `ai-issue-summarizer.yml`                                                        | 削除しました。`/summarize` コマンドは廃止します                                   |
 | `ai-issue-responder.yml`                                                         | 削除しました。初回コントリビュータへの応答は `first-interaction.yml` が担当します |
-| `ai-issue-translator.yml` / `ai-pr-translator.yml` / `ai-release-translator.yml` | 削除しました。翻訳は各自の翻訳ツールで代替します                                  |
+| `ai-release-translator.yml`                                                      | 削除しました。翻訳は各自の翻訳ツールで代替します                                  |
+| `ai-issue-translator.yml` / `ai-pr-translator.yml`                               | Ollama 構成で再導入しました（43・44 を参照）                                      |
 | `ai-ci-failure-explainer.yml`                                                    | 削除しました。CI ログと reviewdog のインラインコメントで代替します                |
 | `issue-labeller.yml`                                                             | 削除しました。Issue のラベルは手動で付与します                                    |
 | `pr-policy-checker.yml`                                                          | LLM 推論を使わない決定的な実装へ置き換えました（後述の 23 を参照）                |
@@ -68,7 +69,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 - **実際に起きたこと**: トライアル終了後、`qodo-code-review` bot は PR に `Qodo reviews are paused because the subscription is no longer active` とだけ投稿する状態になりました。
 - **自己ホスト版も不可**: OSS 実装の [`The-PR-Agent/pr-agent`](https://github.com/The-PR-Agent/pr-agent) は Qodo のホスト型サービスとは別物です。README にも `It is not the Qodo offering for open-source projects.` と明記されています。採用できない理由は構成によって異なります。
   - **ホスト型 LLM 構成（OpenAI / Anthropic / Gemini など）**: README のクイックスタートおよび GitHub Actions のサンプルは `OPENAI_KEY` を必須の環境変数として要求します。本リポジトリは従量課金 API キーの CI 組み込みを禁止しているため採用できません。
-  - **ローカル LLM 構成（Ollama など）**: LiteLLM 経由で `ollama/...` モデルを指定でき、この構成では LLM の API キーは不要です。技術的には公開リポジトリの無料ランナー上でも動かせます。ただし PR-Agent は PR のレビューや修正提案を行うため、CI の runner 上のローカル LLM を PR レビューに使うことは AGENTS.md の 5.6 で禁止（MUST NOT）しています。許可（MAY）されるのは Secrets 不要の Issue 翻訳・軽微なタグ付けに限ります。
+  - **ローカル LLM 構成（Ollama など）**: LiteLLM 経由で `ollama/...` モデルを指定でき、この構成では LLM の API キーは不要です。技術的には公開リポジトリの無料ランナー上でも動かせます。ただし PR-Agent は PR のレビューや修正提案を行うため、CI の runner 上のローカル LLM を PR レビューに使うことは AGENTS.md の 5.6 で禁止（MUST NOT）しています。許可（MAY）されるのは Secrets 不要の Issue 翻訳・軽微なタグ付け・PR のタイトルと本文の翻訳（2026-10-28 オーナー承認）に限ります。
 - **再導入を禁止する理由**: (1) Qodo のホスト型サービスに恒久的な無料プランがなく、本リポジトリは OSS 無料枠の条件（star 200 以上）を満たさない。(2) AI コードレビューという機能が CodeRabbit と重複しており、二重にレビューコメントが付く。(3) 従量課金 API キーを CI に組み込まない、というリポジトリ方針に反する。
 - **代替**: AI コードレビューは CodeRabbit に一本化します。
 
@@ -280,15 +281,13 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **状況**: **削除しました。** `.github/workflows/ai-ci-failure-explainer.yml` は 2026-09 に削除しています。CI 失敗時のログ解析を GitHub Models の推論 API に依存していたためです。
 - **代替**: 失敗の原因は GitHub Actions のジョブログで確認してください。Lint の指摘は reviewdog が Pull Request へインラインコメントとして投稿します。
 
-### 25. AI Issue Translator (廃止 / 削除済み)
+### 25. AI Issue Translator (GitHub Models 版は廃止 / Ollama 構成で再導入)
 
-- **状況**: **削除しました。** `.github/workflows/ai-issue-translator.yml` は 2026-09 に削除しています。翻訳を GitHub Models の推論 API に依存していたためです。
-- **代替**: 日本語以外で書かれた Issue は、各自の翻訳ツールで読んでください。
+- **状況**: GitHub Models 版の `.github/workflows/ai-issue-translator.yml` は 2026-09 に削除しました。翻訳を GitHub Models の推論 API に依存していたためです。その後、Ollama 構成で再導入しています（43 を参照）。
 
-### 26. AI PR Translator (廃止 / 削除済み)
+### 26. AI PR Translator (GitHub Models 版は廃止 / Ollama 構成で再導入)
 
-- **状況**: **削除しました。** `.github/workflows/ai-pr-translator.yml` は 2026-09 に削除しています。翻訳を GitHub Models の推論 API に依存していたためです。あわせて `.github/zizmor.yml` の `dangerous-triggers` 抑止エントリも削除しています。
-- **代替**: 日本語以外で書かれた Pull Request は、各自の翻訳ツールで読んでください。
+- **状況**: GitHub Models 版の `.github/workflows/ai-pr-translator.yml` は 2026-09 に削除しました。翻訳を GitHub Models の推論 API に依存していたためです。あわせて `.github/zizmor.yml` の `dangerous-triggers` 抑止エントリも削除しています。その後、Ollama 構成で再導入しています（44 を参照）。
 
 ### 27. Dockle (コンテナイメージ Linter)
 
