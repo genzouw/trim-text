@@ -448,3 +448,11 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **特徴**: GitHub-hosted runner 上で直接 [Ollama](https://ollama.com/) を起動し、軽量モデル (`qwen2.5:0.5b`) を利用して推論します。外部の LLM プロバイダの API に依存せず、API キー（Secrets）も必要としないため、公開リポジトリで完全に無料で動作します。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
+
+### 44. AI PR Translator (Ollama)
+
+- **目的**: 新しく作成された Pull Request のタイトルと本文を、ローカル LLM を用いて日本語に自動翻訳し、コメントとして投稿します。
+- **設定ファイル**: `.github/workflows/ai-pr-translator.yml`
+- **特徴**: GitHub-hosted runner 上で直接 [Ollama](https://ollama.com/) を起動し、軽量モデル (`qwen2.5:0.5b`) を利用して推論します。外部の LLM プロバイダの API に依存せず、API キー（Secrets）も必要としないため、公開リポジトリで完全に無料で動作します。フォークからの PR にも対応するため、`pull_request_target` をトリガーとして使用しています。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
