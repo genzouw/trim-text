@@ -68,10 +68,10 @@ jobs:
           # 入力長を制限する（Issue は誰でも開けるため、巨大な入力でランナーを占有させない）
           TITLE=$(printf '%s' "${ISSUE_TITLE}" | head -c 500)
           BODY=$(printf '%s' "${ISSUE_BODY}" | head -c 4000)
-          PROMPT=$(printf '以下の GitHub Issue のタイトルと本文を読み、最も適切なラベルを1つだけ選んでください。\n選択肢: bug, enhancement, question, documentation, duplicate, help wanted, invalid\n\n理由や説明は一切書かず、選択したラベルの名前のみを出力してください。\n\nTitle: %s\n\nBody: %s' "${TITLE}" "${BODY}")
+          PROMPT=$(printf '以下の GitHub Issue のタイトルと本文を読み、最も適切なラベルを1つだけ選んでください。\n選択肢: bug, enhancement, question, documentation\n\n理由や説明は一切書かず、選択したラベルの名前のみを出力してください。\n\nTitle: %s\n\nBody: %s' "${TITLE}" "${BODY}")
           JSON_PAYLOAD=$(jq -n --arg prompt "$PROMPT" --arg model "qwen2.5:0.5b" '{model: $model, prompt: $prompt, stream: false}')
           RESPONSE=$(curl -sf --max-time 300 -X POST http://localhost:11434/api/generate -d "$JSON_PAYLOAD")
-          LABEL=$(echo "$RESPONSE" | jq -r '.response' | tr -d '[:space:]' | tr 'A-Z' 'a-z')
+          LABEL=$(echo "$RESPONSE" | jq -r '.response' | tr '[:upper:]' '[:lower:]' | tr -cd 'a-z')
           if [ -z "$LABEL" ] || [ "$LABEL" = "null" ]; then
             echo "::warning::Label generation failed or empty response."
             echo "ラベルの判定に失敗したため、ラベル付けをスキップしました。" >> "$GITHUB_STEP_SUMMARY"
@@ -79,7 +79,8 @@ jobs:
           fi
 
           # ラベルのバリデーション
-          VALID_LABELS=("bug" "enhancement" "question" "documentation" "duplicate" "helpwanted" "invalid")
+          # duplicate / invalid は投稿者への拒否と受け取られ、0.5b モデルでは誤判定も多いため対象外とする
+          VALID_LABELS=("bug" "enhancement" "question" "documentation")
           IS_VALID=0
           for valid in "${VALID_LABELS[@]}"; do
             if [ "$LABEL" = "$valid" ]; then
@@ -87,10 +88,6 @@ jobs:
               break
             fi
           done
-
-          if [ "$LABEL" = "helpwanted" ]; then
-            LABEL="help wanted"
-          fi
 
           if [ "$IS_VALID" -eq 1 ]; then
             echo "付与するラベル: $LABEL"
