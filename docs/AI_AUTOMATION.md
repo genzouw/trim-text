@@ -193,7 +193,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 - **設定ファイル**: `.clinerules`, `.windsurfrules`
 - **特徴**: エディタ内でプロジェクトのコンテキストを理解し、ファイルの作成・編集、コマンドの実行を自律的に行います。
 - **事前設定**:
-  1. VS Code に [Roo Code](https://github.com/RooCodeInc/Roo-Code) 拡張機能をインストールするか、[Windsurf IDE（現 Devin Desktop）](https://devin.ai/desktop) をインストールしてください。
+  1. VS Code に [Roo Code](https://github.com/RooCodeInc/Roo-Code) 拡張機能（リポジトリはアーカイブ済みで、VS Code Marketplace からも取り下げられています）をインストールするか、[Windsurf IDE（現 Devin Desktop）](https://devin.ai/desktop) をインストールしてください。
   2. 各拡張機能・IDE 内の設定画面から、利用する LLM のプロバイダと API キーを設定してください。
 
 ### 16. gitStream (PR Pipeline Automation)
