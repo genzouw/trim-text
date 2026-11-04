@@ -193,7 +193,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 - **設定ファイル**: `.clinerules`, `.windsurfrules`
 - **特徴**: エディタ内でプロジェクトのコンテキストを理解し、ファイルの作成・編集、コマンドの実行を自律的に行います。
 - **事前設定**:
-  1. VS Code に [Roo Code](https://marketplace.visualstudio.com/items?itemName=RooVeterinaryInc.roo-cline) 拡張機能をインストールするか、[Windsurf IDE（現 Devin Desktop）](https://devin.ai/desktop) をインストールしてください。
+  1. VS Code に [Roo Code](https://github.com/RooCodeInc/Roo-Code) 拡張機能をインストールするか、[Windsurf IDE（現 Devin Desktop）](https://devin.ai/desktop) をインストールしてください。
   2. 各拡張機能・IDE 内の設定画面から、利用する LLM のプロバイダと API キーを設定してください。
 
 ### 16. gitStream (PR Pipeline Automation)
@@ -453,5 +453,13 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **目的**: 新しく作成された Pull Request のタイトルと本文を、ローカル LLM を用いて日本語に自動翻訳し、コメントとして投稿します。
 - **設定ファイル**: `.github/workflows/ai-pr-translator.yml`
 - **特徴**: GitHub-hosted runner 上で直接 [Ollama](https://ollama.com/) を起動し、軽量モデル (`qwen2.5:0.5b`) を利用して推論します。外部の LLM プロバイダの API に依存せず、API キー（Secrets）も必要としないため、公開リポジトリで完全に無料で動作します。フォークからの PR にも対応するため、`pull_request_target` をトリガーとして使用しています。
+- **事前設定**:
+  1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
+
+### 45. AI Issue Labeller (Ollama)
+
+- **目的**: 新しく作成された Issue のタイトルと本文を、ローカル LLM を用いて自動で分類し、適切なラベル (`bug` / `enhancement` / `question` / `documentation` のいずれか) を付与します。`duplicate` と `invalid` は誤判定が投稿者への拒否と受け取られるため、自動付与の対象外です。
+- **設定ファイル**: `.github/workflows/ai-issue-labeller.yml`
+- **特徴**: GitHub-hosted runner 上で直接 [Ollama](https://ollama.com/) を起動し、軽量モデル (`qwen2.5:0.5b`) を利用して推論します。外部の LLM プロバイダの API に依存せず、API キー（Secrets）も必要としないため、公開リポジトリで完全に無料で動作します。AGENTS.md の 5.6 で許可された「軽微なタグ付け」にあたるため、自動化が許可されています。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。

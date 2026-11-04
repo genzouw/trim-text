@@ -1,0 +1,99 @@
+name: AI Issue Labeller
+
+on:
+  issues:
+    types: [opened]
+
+concurrency:
+  group: ai-issue-labeller-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  label:
+    name: Label Issue
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Harden Runner
+        uses: step-security/harden-runner@dc2769abcc0fcfbadfc1df54081c1608579ef6b2 # v2.22.2
+        with:
+          egress-policy: audit
+
+      - name: Install Ollama
+        env:
+          OLLAMA_VERSION: v0.40.6
+          OLLAMA_SHA256: c164ab8b1b28e2a247c29719b8e404c423c5b83ae64c3ab4e59d50c7ff7fc5e0
+        run: |
+          # 公式リリースのバイナリをバージョン固定で取得し、SHA256 を検証してから展開する
+          curl -fsSL -o ollama.tar.zst "https://github.com/ollama/ollama/releases/download/${OLLAMA_VERSION}/ollama-linux-amd64.tar.zst"
+          echo "${OLLAMA_SHA256}  ollama.tar.zst" | sha256sum -c -
+          sudo tar --zstd -C /usr/local -xf ollama.tar.zst
+
+      - name: Cache Ollama Models
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: ~/.ollama
+          key: ollama-models-qwen2.5-0.5b
+
+      - name: Start Ollama Server
+        run: |
+          ollama serve > ollama.log 2>&1 &
+          # 起動待ちは最大 60 秒。超えたら失敗として終了する
+          for _ in $(seq 1 60); do
+            if curl -sf --max-time 5 http://localhost:11434/api/tags > /dev/null; then
+              exit 0
+            fi
+            sleep 1
+          done
+          echo "::error::Ollama server did not start within 60 seconds."
+          cat ollama.log
+          exit 1
+
+      - name: Pull Model
+        run: |
+          ollama pull qwen2.5:0.5b
+
+      - name: Label Issue
+        env:
+          ISSUE_TITLE: ${{ github.event.issue.title }}
+          ISSUE_BODY: ${{ github.event.issue.body }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          # 入力長を制限する（Issue は誰でも開けるため、巨大な入力でランナーを占有させない）
+          TITLE=$(printf '%s' "${ISSUE_TITLE}" | head -c 500)
+          BODY=$(printf '%s' "${ISSUE_BODY}" | head -c 4000)
+          PROMPT=$(printf '以下の GitHub Issue のタイトルと本文を読み、最も適切なラベルを1つだけ選んでください。\n選択肢: bug, enhancement, question, documentation\n\n理由や説明は一切書かず、選択したラベルの名前のみを出力してください。\n\nTitle: %s\n\nBody: %s' "${TITLE}" "${BODY}")
+          JSON_PAYLOAD=$(jq -n --arg prompt "$PROMPT" --arg model "qwen2.5:0.5b" '{model: $model, prompt: $prompt, stream: false}')
+          RESPONSE=$(curl -sf --max-time 300 -X POST http://localhost:11434/api/generate -d "$JSON_PAYLOAD")
+          LABEL=$(echo "$RESPONSE" | jq -r '.response' | tr '[:upper:]' '[:lower:]' | tr -cd '[:lower:]')
+          if [ -z "$LABEL" ] || [ "$LABEL" = "null" ]; then
+            echo "::warning::Label generation failed or empty response."
+            echo "ラベルの判定に失敗したため、ラベル付けをスキップしました。" >> "$GITHUB_STEP_SUMMARY"
+            exit 0
+          fi
+
+          # ラベルのバリデーション
+          # duplicate / invalid は投稿者への拒否と受け取られ、0.5b モデルでは誤判定も多いため対象外とする
+          VALID_LABELS=("bug" "enhancement" "question" "documentation")
+          IS_VALID=0
+          for valid in "${VALID_LABELS[@]}"; do
+            if [ "$LABEL" = "$valid" ]; then
+              IS_VALID=1
+              break
+            fi
+          done
+
+          if [ "$IS_VALID" -eq 1 ]; then
+            echo "付与するラベル: $LABEL"
+            gh issue edit "${ISSUE_NUMBER}" --add-label "${LABEL}" -R "${GH_REPO}"
+            echo "Issue に \`${LABEL}\` ラベルを自動付与しました。" >> "$GITHUB_STEP_SUMMARY"
+          else
+            echo "::warning::Invalid label generated: $LABEL"
+            echo "不正なラベル(\`${LABEL}\`)が生成されたため、ラベル付けをスキップしました。" >> "$GITHUB_STEP_SUMMARY"
+          fi
