@@ -203,7 +203,7 @@ diff --git a/.github/workflows/lint.yml b/.github/workflows/lint.yml
 --- a/.github/workflows/lint.yml
 +++ b/.github/workflows/lint.yml
 @@ -10,3 +10,4 @@
-      - uses: actions/checkout@v4
+       - uses: actions/checkout@v4
 +      - uses: some-org/new-tool-action@abcdef1
 EOF
   run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
@@ -233,7 +233,7 @@ diff --git a/.github/workflows/lint.yml b/.github/workflows/lint.yml
 --- a/.github/workflows/lint.yml
 +++ b/.github/workflows/lint.yml
 @@ -10,3 +10,4 @@
-      - uses: actions/checkout@v4
+       - uses: actions/checkout@v4
 +      - "uses": some-org/new-tool-action@abcdef1
 EOF
   run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
@@ -248,7 +248,7 @@ diff --git a/.github/workflows/lint.yml b/.github/workflows/lint.yml
 --- a/.github/workflows/lint.yml
 +++ b/.github/workflows/lint.yml
 @@ -10,3 +10,4 @@
-      - uses: actions/checkout@v4
+       - uses: actions/checkout@v4
 +      - 'uses': some-org/new-tool-action@abcdef1
 EOF
   run bash "${SCRIPT}" --body "${BODY}" --diff "${DIFF}"
