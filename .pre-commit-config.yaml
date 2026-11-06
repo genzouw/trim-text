@@ -53,3 +53,8 @@ repos:
     rev: "v2.6.4"
     hooks:
       - id: biome-check
+
+  - repo: https://github.com/editorconfig-checker/editorconfig-checker.python
+    rev: 3.11.1
+    hooks:
+      - id: editorconfig-checker
