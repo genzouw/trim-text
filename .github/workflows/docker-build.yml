@@ -76,7 +76,7 @@ jobs:
         # (OCI 形式) を読めず "could not find 'blobs/sha256/...'" で失敗するため、別形式で渡す。
         run: |
           for i in 1 2 3; do
-            docker buildx build --load \
+            docker buildx build --output type=docker \
               --provenance=false --sbom=false \
               --output "type=docker,dest=${RUNNER_TEMP}/trim-text-ci.tar,compression=uncompressed,force-compression=true" \
               --cache-to type=gha,mode=max --cache-from type=gha -t trim-text:ci . && break
