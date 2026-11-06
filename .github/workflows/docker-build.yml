@@ -123,8 +123,15 @@ jobs:
           sha256: ${{ env.DIVE_SHA256 }}
 
       - name: Run Dive image analysis
+        # Dive 0.12.0 は containerd イメージストアの `docker save` が出力する
+        # 圧縮済みレイヤー (OCI 形式) を読めず "could not find 'blobs/sha256/...'" で失敗する。
+        # 無圧縮の docker-archive をキャッシュから書き出して渡す。
         run: |
-          CI=true "${RUNNER_TEMP}/dive" trim-text:ci
+          docker buildx build --cache-from type=gha \
+            --provenance=false --sbom=false \
+            --output "type=docker,dest=${RUNNER_TEMP}/trim-text-ci.tar,compression=uncompressed,force-compression=true" \
+            -t trim-text:ci .
+          CI=true "${RUNNER_TEMP}/dive" "docker-archive://${RUNNER_TEMP}/trim-text-ci.tar"
 
       - name: Smoke test (trim 1 char from each side)
         run: |
