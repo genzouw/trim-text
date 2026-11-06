@@ -71,9 +71,15 @@ jobs:
       - name: Build image
         # docker buildx と gha キャッシュを利用し、同一 PR の後続ジョブや再実行でのビルドを高速化。
         # レジストリ側の一時的な失敗に備えてリトライする。
+        # Dive 用の無圧縮 docker-archive も同じビルドで書き出し、1 ジョブ 1 ビルドを保つ。
+        # Dive 0.12.0 は containerd イメージストアの `docker save` が出力する圧縮済みレイヤー
+        # (OCI 形式) を読めず "could not find 'blobs/sha256/...'" で失敗するため、別形式で渡す。
         run: |
           for i in 1 2 3; do
-            docker buildx build --load --cache-to type=gha,mode=max --cache-from type=gha -t trim-text:ci . && break
+            docker buildx build --load \
+              --provenance=false --sbom=false \
+              --output "type=docker,dest=${RUNNER_TEMP}/trim-text-ci.tar,compression=uncompressed,force-compression=true" \
+              --cache-to type=gha,mode=max --cache-from type=gha -t trim-text:ci . && break
             [ $i -lt 3 ] && sleep $((i * 15))
           done
 
@@ -123,14 +129,8 @@ jobs:
           sha256: ${{ env.DIVE_SHA256 }}
 
       - name: Run Dive image analysis
-        # Dive 0.12.0 は containerd イメージストアの `docker save` が出力する
-        # 圧縮済みレイヤー (OCI 形式) を読めず "could not find 'blobs/sha256/...'" で失敗する。
-        # 無圧縮の docker-archive をキャッシュから書き出して渡す。
+        # Build image ステップで書き出した、検査対象と同一ビルドの無圧縮 docker-archive を渡す。
         run: |
-          docker buildx build --cache-from type=gha \
-            --provenance=false --sbom=false \
-            --output "type=docker,dest=${RUNNER_TEMP}/trim-text-ci.tar,compression=uncompressed,force-compression=true" \
-            -t trim-text:ci .
           CI=true "${RUNNER_TEMP}/dive" "docker-archive://${RUNNER_TEMP}/trim-text-ci.tar"
 
       - name: Smoke test (trim 1 char from each side)
