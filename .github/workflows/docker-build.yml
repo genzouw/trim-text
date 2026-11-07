@@ -46,9 +46,13 @@ jobs:
       # https://github.com/GoogleContainerTools/container-structure-test/releases/tag/v1.19.3
       CST_SHA256: fa0fa333bb6ba5c14065e7468d2904f5c82d021d7e1c763c9a45c5f2fbe9ff5f
       # Dive のバージョンは再現性確保のため固定する。
-      DIVE_VERSION: 0.12.0
-      # Dive v0.12.0 linux_amd64.tar.gz の公式 SHA256
-      DIVE_SHA256: 20a7966523a0905f950c4fbf26471734420d6788cfffcd4a8c4bc972fded3e96
+      # v0.12.0 は containerd image store（ubuntu-26.04 ランナーの Docker 29 の既定）の
+      # イメージを解析できないため、対応済みの v0.13.0 以降を使う。
+      # https://github.com/wagoodman/dive/issues/507
+      DIVE_VERSION: 0.13.1
+      # Dive v0.13.1 linux_amd64.tar.gz の公式 SHA256
+      # https://github.com/wagoodman/dive/releases/download/v0.13.1/dive_0.13.1_checksums.txt
+      DIVE_SHA256: 0970549eb4a306f8825a84145a2534153badb4d7dcf3febd1967c706367c3d0e
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
