@@ -604,9 +604,9 @@ jobs:
     permissions:
       contents: read
     env:
-      BIOME_VERSION: 2.6.5
-      # biome v2.6.5 linux-x64 の公式 SHA256
-      BIOME_SHA256: 0653fd798e50565efac8b1958c9a2786fada55cc6c362b7da4f16efff8dd30d8
+      BIOME_VERSION: 2.6.6
+      # biome v2.6.6 linux-x64 の公式 SHA256
+      BIOME_SHA256: 69ca8e9ff548091b2bfbd178d6f73142b483a5257b07854de702c68fb7f8c06b
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
