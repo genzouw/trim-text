@@ -469,7 +469,7 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **設定ファイル**: `.github/workflows/release-please.yml`
 - **特徴**: Google がオープンソース (Apache-2.0) で提供している `googleapis/release-please-action` を利用します。リポジトリの履歴を解析し、セマンティックバージョニングに則ったタグとリリースノートを自動生成します。外部の SaaS や有料機能、API キーへの依存がなく、GitHub Actions の組み込み `GITHUB_TOKEN` ( `contents: write`, `pull-requests: write` 権限 ) のみを使用するため、公開リポジトリで完全に無料で動作します。
 - **事前設定**:
-  1. **必須**: リポジトリの Settings > Actions > General > Workflow permissions で "Allow GitHub Actions to create and approve pull requests" を有効にします（`gh api repos/genzouw/trim-text/actions/permissions/workflow` の `can_approve_pull_request_reviews` が `true` になること）。無効のままでは、リリース PR の作成が `GitHub Actions is not permitted to create or approve pull requests` で失敗します。ジョブ自体が失敗するため、設定漏れは Actions の実行結果で気づけます。
+  1. **必須**: リポジトリの Settings > Actions > General > Workflow permissions で "Allow GitHub Actions to create and approve pull requests" を有効にします。設定後は `gh api repos/genzouw/trim-text/actions/permissions/workflow` の `can_approve_pull_request_reviews` が `true` になることを確認します。無効のままでは、リリース PR の作成が `GitHub Actions is not permitted to create or approve pull requests` で失敗します。ジョブ自体が失敗するため、設定漏れは Actions の実行結果で気づけます。
   2. `main` ブランチへの Push 時に GitHub Actions 上で自動実行され、リリース PR を作成します。リリース PR をマージすると、タグ付けと GitHub Release の公開が自動で行われます。
 - **トークン方式の方針**: 組み込みの `GITHUB_TOKEN` を使います。PAT や GitHub App トークンは Secret の登録が必要で、過去に Secret 未登録で 154 回失敗した経緯（前述の 9）があるため採用しません。
 - **運用上の注意**: `GITHUB_TOKEN` で作成した PR は、他のワークフローを起動しません。`main` のブランチ保護には必須ステータスチェックがあるため、リリース PR のチェックは待ち状態のままになります。次のいずれかで対応します。
