@@ -136,8 +136,8 @@ AI によるコードレビューは、GitHub App として稼働している Co
 
 - **状況**: 旧構成は **撤去しました。** `.github/workflows/release-please.yml` は 2026-10 に削除しています。`GITHUB_TOKEN` 構成で再導入しました（46 を参照）。
 - **撤去の理由**: 一度も成功していませんでした。2026-05-29 の導入から 2026-10-03 までの 154 回の実行は、すべて失敗しています（#274）。2026-06-04 以降は GitHub App のトークンを使う構成でしたが、参照する Secret（`RELEASE_PLEASE_APP_ID` / `RELEASE_PLEASE_APP_PRIVATE_KEY`）が登録されていませんでした。指定していた `release-type: node` も、`package.json` を持たない本リポジトリには合っていません。この間、GitHub Release は 1 件も作られていません。
-- **再導入の条件**（46 で満たしています）: 次の 2 点を満たしてください。
-  1. `release-type` を本リポジトリの構成（bash スクリプトと Dockerfile）に合うもの（`simple` など）にし、manifest で起点のバージョンを指定する。
+- **再導入の条件**（46 の構成と事前設定の完了で満たします）: 次の 2 点を満たしてください。
+  1. `release-type` を本リポジトリの構成（bash スクリプトと Dockerfile）に合うもの（`simple` など）にする。起点のバージョンは manifest を置かず、`simple` の既定動作に任せています（46 を参照）。
   2. リリース PR を作成できるトークンを用意する。`GITHUB_TOKEN` を使う場合は、リポジトリ設定で GitHub Actions による Pull Request の作成を許可する必要があります。GitHub App を使う場合は、Secret の登録を確認したうえで、スタブの `allowed_secrets` と 40 章の表へ名前を追記します。
 
 ### 10. Devcontainer (開発環境のコード化)
