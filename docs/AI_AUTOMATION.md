@@ -463,3 +463,12 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **特徴**: GitHub-hosted runner 上で直接 [Ollama](https://ollama.com/) を起動し、軽量モデル (`qwen2.5:0.5b`) を利用して推論します。外部の LLM プロバイダの API に依存せず、API キー（Secrets）も必要としないため、公開リポジトリで完全に無料で動作します。AGENTS.md の 5.6 で許可された「軽微なタグ付け」にあたるため、自動化が許可されています。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
+
+### 46. Release Please (リリースとCHANGELOG生成の自動化)
+
+- **目的**: Conventional Commits (コミットメッセージの規約) に基づいて、新しいバージョン番号の決定、CHANGELOG の生成、リリース PR の作成、およびマージ時の GitHub Release の作成を完全に自動化します。
+- **設定ファイル**: `.github/workflows/release-please.yml`
+- **特徴**: Google がオープンソース (Apache-2.0) で提供している `googleapis/release-please-action` を利用します。リポジトリの履歴を解析し、セマンティックバージョニングに則ったタグとリリースノートを自動生成します。外部の SaaS や有料機能、API キーへの依存がなく、GitHub Actions の組み込み `GITHUB_TOKEN` ( `contents: write`, `pull-requests: write` 権限 ) のみを使用するため、公開リポジトリで完全に無料で動作します。
+- **事前設定**:
+  1. 特に追加の設定は不要です。`main` ブランチへの Push 時に GitHub Actions 上で自動実行され、リリース PR を作成します。
+  2. リリース PR をマージすると、タグ付けと GitHub Release の公開が自動で行われます。
