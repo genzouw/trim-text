@@ -132,14 +132,13 @@ AI によるコードレビューは、GitHub App として稼働している Co
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub App [Mend Renovate](https://github.com/apps/renovate) は既にインストール済みです（公開リポジトリは無料）。
 
-### 9. Release Please (廃止 / 撤去済み)
+### 9. Release Please (旧構成の廃止経緯。現行構成は 46)
 
-- **状況**: **撤去しました。** `.github/workflows/release-please.yml` は 2026-10 に削除しています。
+- **状況**: 旧構成は **撤去しました。** `.github/workflows/release-please.yml` は 2026-10 に削除しています。`GITHUB_TOKEN` 構成で再導入しました（46 を参照）。
 - **撤去の理由**: 一度も成功していませんでした。2026-05-29 の導入から 2026-10-03 までの 154 回の実行は、すべて失敗しています（#274）。2026-06-04 以降は GitHub App のトークンを使う構成でしたが、参照する Secret（`RELEASE_PLEASE_APP_ID` / `RELEASE_PLEASE_APP_PRIVATE_KEY`）が登録されていませんでした。指定していた `release-type: node` も、`package.json` を持たない本リポジトリには合っていません。この間、GitHub Release は 1 件も作られていません。
-- **再導入する場合**: 次の 2 点を満たしてください。
-  1. `release-type` を本リポジトリの構成（bash スクリプトと Dockerfile）に合うもの（`simple` など）にし、manifest で起点のバージョンを指定する。
+- **再導入の条件**（46 の構成と事前設定の完了で満たします）: 次の 2 点を満たしてください。
+  1. `release-type` を本リポジトリの構成（bash スクリプトと Dockerfile）に合うもの（`simple` など）にする。起点のバージョンは manifest を置かず、`simple` の既定動作に任せています（46 を参照）。
   2. リリース PR を作成できるトークンを用意する。`GITHUB_TOKEN` を使う場合は、リポジトリ設定で GitHub Actions による Pull Request の作成を許可する必要があります。GitHub App を使う場合は、Secret の登録を確認したうえで、スタブの `allowed_secrets` と 40 章の表へ名前を追記します。
-- **代替**: リリースが必要になった場合は、タグと GitHub Release を手動で作成します。
 
 ### 10. Devcontainer (開発環境のコード化)
 
@@ -224,7 +223,7 @@ AI によるコードレビューは、GitHub App として稼働している Co
 ## CI/CD との連携
 
 Renovate によるマイナー・パッチ・digest バージョンの更新などは、自動でマージが行われるように設定されています。pre-commit のフックの更新だけは自動マージの対象外で、人がマージします。
-リリース PR の自動作成（Release Please）は撤去しました（前述の 9 を参照）。
+リリース PR の自動作成（Release Please）は `GITHUB_TOKEN` 構成で再導入しました（46 を参照）。
 
 ## プルリクエスト作成時の注意事項
 
@@ -327,7 +326,7 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 ### 32. AI Release Translator (廃止 / 削除済み)
 
 - **状況**: **削除しました。** `.github/workflows/ai-release-translator.yml` は 2026-09 に削除しています。リリースノートの翻訳を GitHub Models の推論 API に依存していたためです。
-- **代替**: ありません。リリースノートを自動生成していた Release Please も撤去しました（前述の 9 を参照）。リリースノートは日本語で手書きします。
+- **代替**: ありません。リリースノートは Release Please（46 を参照）が自動生成します。翻訳は行わないため、必要なら日本語で手書きします。
 
 ### 33. typos (高速スペルチェッカー)
 
@@ -463,3 +462,16 @@ Renovate によるマイナー・パッチ・digest バージョンの更新な�
 - **特徴**: GitHub-hosted runner 上で直接 [Ollama](https://ollama.com/) を起動し、軽量モデル (`qwen2.5:0.5b`) を利用して推論します。外部の LLM プロバイダの API に依存せず、API キー（Secrets）も必要としないため、公開リポジトリで完全に無料で動作します。AGENTS.md の 5.6 で許可された「軽微なタグ付け」にあたるため、自動化が許可されています。
 - **事前設定**:
   1. 特に追加の設定は不要です。GitHub Actions 上で自動的に実行されます。
+
+### 46. Release Please (リリースとCHANGELOG生成の自動化)
+
+- **目的**: Conventional Commits (コミットメッセージの規約) に基づいて、新しいバージョン番号の決定、CHANGELOG の生成、リリース PR の作成、およびマージ時の GitHub Release の作成を完全に自動化します。
+- **設定ファイル**: `.github/workflows/release-please.yml`
+- **特徴**: Google がオープンソース (Apache-2.0) で提供している `googleapis/release-please-action` を利用します。リポジトリの履歴を解析し、セマンティックバージョニングに則ったタグとリリースノートを自動生成します。外部の SaaS や有料機能、API キーへの依存がなく、GitHub Actions の組み込み `GITHUB_TOKEN` ( `contents: write`, `pull-requests: write` 権限 ) のみを使用するため、公開リポジトリで完全に無料で動作します。
+- **事前設定**:
+  1. **必須**: リポジトリの Settings > Actions > General > Workflow permissions で "Allow GitHub Actions to create and approve pull requests" を有効にします。設定後は `gh api repos/genzouw/trim-text/actions/permissions/workflow` の `can_approve_pull_request_reviews` が `true` になることを確認します。無効のままでは、リリース PR の作成が `GitHub Actions is not permitted to create or approve pull requests` で失敗します。ジョブ自体が失敗するため、設定漏れは Actions の実行結果で気づけます。
+  2. `main` ブランチへの Push 時に GitHub Actions 上で自動実行され、リリース PR を作成します。リリース PR をマージすると、タグ付けと GitHub Release の公開が自動で行われます。
+- **トークン方式の方針**: 組み込みの `GITHUB_TOKEN` を使います。PAT や GitHub App トークンは Secret の登録が必要で、過去に Secret 未登録で 154 回失敗した経緯（前述の 9）があるため採用しません。
+- **運用上の注意**: `GITHUB_TOKEN` で作成した PR は、他のワークフローを起動しません。`main` のブランチ保護には必須ステータスチェックがあるため、リリース PR のチェックは待ち状態のままになります。次のいずれかで対応します。
+  - リリース PR のブランチ（`release-please--branches--main`）へ、人が空コミットを push してチェックを再実行する（人の push はワークフローを起動します）。
+  - 管理者権限（`enforce_admins` は無効）でマージする。
