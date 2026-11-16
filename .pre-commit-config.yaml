@@ -45,12 +45,12 @@ repos:
       - id: gitleaks
 
   - repo: https://github.com/DavidAnson/markdownlint-cli2
-    rev: v0.24.0
+    rev: v0.24.1
     hooks:
       - id: markdownlint-cli2
 
   - repo: https://github.com/biomejs/pre-commit
-    rev: "v2.6.6"
+    rev: "v2.6.7"
     hooks:
       - id: biome-check
 
