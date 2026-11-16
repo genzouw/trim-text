@@ -526,8 +526,8 @@ jobs:
       contents: read
       pull-requests: write
     env:
-      TYPOS_VERSION: "1.52.1"
-      TYPOS_SHA256: "c034dbec8797cfa0c4548b3726c1eebbafcf703b8a17f15a961b037788eebcdd"
+      TYPOS_VERSION: "1.52.2"
+      TYPOS_SHA256: "3b13d1291281d39d01822e54035636487a7a0f228e70097899b1e33aeb0e7e93"
     steps:
       - name: Harden Runner
         uses: step-security/harden-runner@1d88384fd173af6ecb012dfd0264a306b711241a # v2.22.4
