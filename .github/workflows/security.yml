@@ -42,7 +42,7 @@ jobs:
       # (.github/workflows/gitleaks.yml) と検出ルールがずれたまま気づけない (#252)。
       # SHA は他の ci-workflows 参照と同じく Renovate (github-actions manager) が更新する。
       - name: Setup gitleaks
-        uses: genzouw/ci-workflows/.github/actions/setup-gitleaks@e8b0679782a7c1700ab4cddc15f88bc4445b4c8f # v1.5.70
+        uses: genzouw/ci-workflows/.github/actions/setup-gitleaks@ec4b20fa56a90fad5902e97076ab53c6e4a89f83 # v1.5.71
 
       - name: Run gitleaks
         run: |
